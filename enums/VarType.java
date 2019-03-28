@@ -1,8 +1,18 @@
 package enums;
 
 public enum VarType {
-	INT,
-    FLOAT,
-    VARCHAR,
-    TIMESTAMP;
+	INT("int"),
+    FLOAT("float"),
+    VARCHAR("varchar"),
+    TIMESTAMP("timestamp");
+	
+	String toString;
+	
+	private VarType(String toString) {
+		this.toString = toString;
+	}
+	
+	public String toString() {
+		return toString; 
+	}
 }
