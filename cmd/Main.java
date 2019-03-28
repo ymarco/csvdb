@@ -20,7 +20,6 @@ public class Main {
 		try {
 			while (runCommand());
 		}
-		/*if we want, we can to add special exceptions*/
 		catch (Exception e) {
 			System.err.println("ERROR:\n");
 			System.out.println(e.getLocalizedMessage());
