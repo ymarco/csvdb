@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import commands.Create;
+import commands.Drop;
+import enums.VarType;
+import schema.Column;
+
 public class Main {
 	public static String rootdir = "";
 	public static boolean verbose;
@@ -15,8 +20,11 @@ public class Main {
 		try {
 			while (runCommand());
 		}
-		//if we want, we can to add special exceptions
-		catch (Exception e) {}
+		/*if we want, we can to add special exceptions*/
+		catch (Exception e) {
+			System.err.println("ERROR:\n");
+			System.out.println(e.getLocalizedMessage());
+		}
 		codeReader.close();
 	}
 
@@ -66,17 +74,31 @@ public class Main {
 			int note = line.indexOf("--");
 			if (note != -1)
 				line = line.substring(0, note);
-			code += line + " ";
+			code += line;
 			if (line.endsWith(";"))
 				break;
+			code += " "; // i don't want to add ' ' after ';'
 		}
 		if (code.equals("exit();") || code.equals("exit;"))
 			return false;
+		if (code.equals("test;")) {
+			test();
+			return false;
+		}
 		parseAndRun(code);
 		return cmd || codeReader.hasNext();
 	}
 	
 	static void parseAndRun(String code) {
 		
+	}
+	
+	static void test() {
+		Column[] columns = {new Column(VarType.INT, "te"), new Column(VarType.FLOAT, "st")};
+		Create.run("testtest", false, columns);
+		Drop.run("testtest", false);
+//		Create.run("testtest", false, columns);
+		Drop.run("testtest", true);
+		System.out.println("end test");
 	}
 }

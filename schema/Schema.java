@@ -3,7 +3,7 @@ package schema;
 import java.util.Hashtable;
 
 public class Schema {
-	private static Hashtable<String, Schema> schemas;
+	private static Hashtable<String, Schema> schemas = new Hashtable<String, Schema>();
 	
 	String tableName;
 	Column[] columns;

@@ -13,15 +13,22 @@ import schema.Schema;
 
 public class Create {
 	//ine: if not exists
-	public static void execute(String tableName, boolean ine, Column[] columns) {
-		createSchema(tableName, ine, columns);
-		createJson(tableName, columns);
+	public static void run(String tableName, boolean ine, Column[] columns) {
+		if (createSchema(tableName, ine, columns))
+			createJson(tableName, columns);
 	}
 	
-	private static void createSchema(String tableName, boolean ine, Column[] columns) {
-		if (Schema.HaveSchema(tableName) && !ine)
-			throw new RuntimeException("you tried to create an existing table without the IF NOT EXIST");
+	/**
+	 * @return if success
+	 */
+	private static boolean createSchema(String tableName, boolean ine, Column[] columns) {
+		if (Schema.HaveSchema(tableName)) {
+			if (!ine)
+				throw new RuntimeException("you tried to create an existing table without the IF NOT EXISTS");
+			return false;
+		}
 		Schema.AddSchema(tableName, columns);
+		return true;
 	}
 	
 	private static void createJson(String tableName, Column[] columns) {
@@ -36,13 +43,15 @@ public class Create {
 		JSONObject all = new JSONObject();
 		all.put("schema", schema);
 		
-		String path = Main.rootdir + "/" + tableName + "/table.json";
-		new File(path).mkdir();
-		try (FileWriter file = new FileWriter("f:\\test.json")) {
+		new File(Main.rootdir + "\\" + tableName).mkdir();
+		String path = Main.rootdir + "\\" + tableName + "\\table.json";
+		try (FileWriter file = new FileWriter(path)) {
 
             file.write(all.toJSONString());
             file.flush();
 
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
 	}
 }
