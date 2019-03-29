@@ -57,9 +57,13 @@ public class Select implements Command {
 
 	private void fillTable() {
 		try {
+			//init
 			Schema fromSchema = Schema.GetSchema(fromTableName);
 			Schema schema = Schema.GetSchema(tableName);
-
+			int whereInd = -1;
+			if (where != null)
+				whereInd = fromSchema.getColumnIndex(expressions[schema.getColumnIndex(where.fieldName)].fieldName);
+			
 			//open
 			BufferedReader[] inFiles = new BufferedReader[fromSchema.getColumnsCount()];
 			DataInputStream[] inFilesBin = new DataInputStream[fromSchema.getColumnsCount()];
@@ -79,7 +83,7 @@ public class Select implements Command {
 				else
 					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
 			}
-
+			
 			//fill
 			int lineCount = 0;
 			for (int i = 0; i < fromSchema.getLinesCount(); i++) {
@@ -101,6 +105,11 @@ public class Select implements Command {
 						break;
 					}
 				}
+				
+				//check where
+				if (where != null && !where.isTrue(line[whereInd]))
+					continue;
+				
 				//write
 				for (int j = 0; j < expressions.length; j++) {
 					Expression expression = expressions[j];
@@ -126,7 +135,7 @@ public class Select implements Command {
 							break;
 						}
 					} catch (Exception e) {
-						closeAll(schema, inFiles, inFilesBin, outFiles, outFilesBin);
+						closeAll(schema, fromSchema, inFiles, inFilesBin, outFiles, outFilesBin);
 						throw new RuntimeException("^^^Select Exeption^^^");
 					}
 					lineCount++;
@@ -138,16 +147,16 @@ public class Select implements Command {
 
 				
 			}
-			closeAll(schema, inFiles, inFilesBin, outFiles, outFilesBin);
+			closeAll(schema, fromSchema, inFiles, inFilesBin, outFiles, outFilesBin);
 		} catch (IOException e) {
 			throw new RuntimeException("^^^Select Exeption^^^");
 		}
 	}
 
-	private void closeAll(Schema schema, BufferedReader[] inFiles, DataInputStream[] inFilesBin,
+	private void closeAll(Schema schema, Schema fromSchema, BufferedReader[] inFiles, DataInputStream[] inFilesBin,
 			BufferedWriter[] outFiles, DataOutputStream[] outFilesBin) throws IOException {
 		for (int i = 0; i < outFiles.length; i++) {
-			if (schema.getColumnType(i) == VarType.VARCHAR)
+			if (fromSchema.getColumnType(i) == VarType.VARCHAR)
 				inFiles[i].close();
 			else
 				inFilesBin[i].close();
@@ -174,13 +183,14 @@ public class Select implements Command {
 			this.op = op;
 			this.constant = constant;
 		}
-
-		public boolean isTrue(long field) { // so the constant is long
-			return op.isTrue(field, (long) constant);
-		}
-
-		public boolean isTrue(float field) { // so the constant is float
-			return op.isTrue(field, (float) constant);
+		
+		// dont work on Strings
+		public boolean isTrue(Object field) {
+			if (field instanceof Long)
+				return op.isTrue((long) field, (long) constant);
+			if (field instanceof Float)
+				return op.isTrue((float) field, (float) constant);
+			return false;
 		}
 	}
 

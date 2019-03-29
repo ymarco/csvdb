@@ -102,8 +102,8 @@ public class Main {
 							new Column(VarType.VARCHAR, "c3"),  new Column(VarType.INT, "c4")};
 		new Create("testtest", false, columns).run();
 		new Load("C:\\Users\\flash_000\\Desktop\\testCsv.csv", "testtest", 0).run();
-		Expression[] expressions = {new Expression("c1"), new Expression("c3", "c5"), new Expression("c2", "c")};
-		new Select("aaa", "testtest", expressions, null, null, null).run();;
+		Expression[] expressions = {new Expression("c1"), new Expression("c3", "c5"), new Expression("c4", "c")};
+		new Select("aaa", "testtest", expressions, new Select.Condition("c", Select.Operator.big, 25L), null, null).run();;
 		System.out.println("end test");
 	}
 }
