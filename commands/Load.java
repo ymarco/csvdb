@@ -33,9 +33,9 @@ public class Load {
 			DataOutputStream[] outFilesBin = new DataOutputStream[schema.getColumnsCount()];
 			for (int i = 0; i < outFiles.length; i++) {
 				if (schema.getColumnType(i) == VarType.VARCHAR)
-					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i)));
+					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
 				else
-					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i)));
+					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
 			}
 			
 			// put in other files
@@ -57,7 +57,10 @@ public class Load {
 						outFilesBin[i].writeFloat(Float.parseFloat(fields[i]));
 						break;
 					case VARCHAR:
-						outFiles[i].write(fields[i] + "\n");
+						String item = fields[i];
+						item = item.replace("\\", "\\\\");
+						item = item.replace("\r\n", "\\n");
+						outFiles[i].write(item + "\n");
 						break;
 					}
 				}
