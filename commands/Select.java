@@ -80,27 +80,46 @@ public class Select implements Command {
 			//fill
 			int lineCount = 0;
 			for (int i = 0; i < fromSchema.getLinesCount(); i++) {
-				for (Expression expression : expressions) {
-					
-					int columnInd = schema.getColumnIndex(expression.asName);
-					int fromColumnInd = fromSchema.getColumnIndex(expression.fieldName);
+				//read (to line)
+				Object[] line = new Object[fromSchema.getColumnsCount()];
+				for (int j = 0; j < line.length; j++) {
+					switch (schema.getColumnType(j)) {
+					case INT:
+						line[j] = inFilesBin[j].readLong();
+						break;
+					case TIMESTAMP:
+						line[j] = inFilesBin[j].readLong();
+						break;
+					case FLOAT:
+						line[j] = inFilesBin[j].readFloat();
+						break;
+					case VARCHAR:
+						line[j] = inFiles[j].readLine();
+						break;
+					}
+				}
+				//write
+				for (int j = 0; j < expressions.length; j++) {
+					Expression expression = expressions[j];
+					int fromFieldIndex = fromSchema.getColumnIndex(expression.fieldName);
+					int fieldIndex = schema.getColumnIndex(expression.asName);
 					try {
-						switch (schema.getColumnType(i)) {
+						switch (schema.getColumnType(j)) {
 						case INT:
-							outFilesBin[columnInd].writeLong(inFilesBin[fromColumnInd].readLong());
-							outFilesBin[columnInd].flush();
+							outFilesBin[fieldIndex].writeLong((long) line[fromFieldIndex]);
+							outFilesBin[fieldIndex].flush();
 							break;
 						case TIMESTAMP:
-							outFilesBin[columnInd].writeLong(inFilesBin[fromColumnInd].readLong());
-							outFilesBin[columnInd].flush();
+							outFilesBin[fieldIndex].writeLong((long) line[fromFieldIndex]);
+							outFilesBin[fieldIndex].flush();
 							break;
 						case FLOAT:
-							outFilesBin[columnInd].writeFloat(inFilesBin[fromColumnInd].readFloat());
-							outFilesBin[columnInd].flush();
+							outFilesBin[fieldIndex].writeFloat((float) line[fromFieldIndex]);
+							outFilesBin[fieldIndex].flush();
 							break;
 						case VARCHAR:
-							outFiles[columnInd].write(inFiles[fromColumnInd].readLine() + "\n");
-							outFiles[columnInd].flush();
+							outFiles[fieldIndex].write((String) line[fromFieldIndex] + "\n");
+							outFiles[fieldIndex].flush();
 							break;
 						}
 					} catch (Exception e) {
@@ -108,6 +127,7 @@ public class Select implements Command {
 						e.printStackTrace();
 						throw new RuntimeException("^^^Select Exeption^^^");
 					}
+					lineCount++;
 				}
 
 				schema.setLineCount(lineCount);
@@ -138,59 +158,59 @@ public class Select implements Command {
 				outFilesBin[i].close();
 		}
 	}
-	
-	
-	
+
+
+
 	//classes
 	public static class Condition {
 		public String fieldName;
 		public Operator op;
 		public Object constant;
-		
+
 		public Condition(String fieldName, Operator op, Object constant) {
 			this.fieldName = fieldName;
 			this.op = op;
 			this.constant = constant;
 		}
-		
+
 		public boolean isTrue(long field) { // so the constant is long
 			return op.isTrue(field, (long) constant);
 		}
-		
+
 		public boolean isTrue(float field) { // so the constant is float
 			return op.isTrue(field, (float) constant);
 		}
 	}
-	
+
 	public static class Expression {
 		public String fieldName;
 		public String asName;
-		
+
 		public Expression(String fieldName, String asName) {
 			this.fieldName = fieldName;
 			this.asName = asName;
 		}
-		
+
 		public Expression(String fieldName) {
 			this(fieldName, fieldName);
 		}
 	}
-	
+
 	public static class GroupBy {
 		public String[] fieldsName;
 		public Condition having;
-		
+
 		public GroupBy(String[] fieldsName, Condition having) {
 			this.fieldsName = fieldsName;
 			this.having = having;
 		}
 	}
-	
+
 	public static class OrderBy {
 
 	}
-	
-	
+
+
 	public static enum Operator {
 		lit,
 		litEq,
@@ -217,7 +237,7 @@ public class Select implements Command {
 				return null;
 			}
 		}
-		
+
 		public boolean isTrue(float a, float b) {
 			switch (this) {
 			case lit:
