@@ -46,23 +46,28 @@ public class Load {
 				String[] fields = l.getFields();
 				//write
 				for (int i = 0; i < fields.length; i++) {
-					switch (schema.getColumnType(i)) {
-					case INT:
-						outFilesBin[i].writeLong(Long.parseLong(fields[i]));
-						break;
-					case TIMESTAMP:
-						outFilesBin[i].writeLong(Long.parseUnsignedLong(fields[i]));
-						break;
-					case FLOAT:
-						outFilesBin[i].writeFloat(Float.parseFloat(fields[i]));
-						break;
-					case VARCHAR:
-						String item = fields[i];
-						item = item.replace("\\", "\\\\");
-						item = item.replace("\r\n", "\\n");
-						outFiles[i].write(item + "\n");
-						break;
+					try {
+						switch (schema.getColumnType(i)) {
+						case INT:
+							outFilesBin[i].writeLong(Long.parseLong(fields[i]));
+							break;
+						case TIMESTAMP:
+							outFilesBin[i].writeLong(Long.parseUnsignedLong(fields[i]));
+							break;
+						case FLOAT:
+							outFilesBin[i].writeFloat(Float.parseFloat(fields[i]));
+							break;
+						case VARCHAR:
+							String item = fields[i];
+							item = item.replace("\\", "\\\\");
+							item = item.replace("\r\n", "\\n");
+							outFiles[i].write(item + "\n");
+							break;
+						}
+					} catch (Exception e) {
+						throw new RuntimeException("");
 					}
+					
 				}
 				lineCount++;
 			}
