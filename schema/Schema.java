@@ -3,7 +3,6 @@ package schema;
 import java.util.Hashtable;
 
 import cmd.Main;
-import enums.VarType;
 
 public class Schema {
 	private static Hashtable<String, Schema> schemas = new Hashtable<String, Schema>();

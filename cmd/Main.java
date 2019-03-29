@@ -7,8 +7,8 @@ import java.util.Scanner;
 import commands.Create;
 import commands.Drop;
 import commands.Load;
-import enums.VarType;
 import schema.Column;
+import schema.VarType;
 
 public class Main {
 	public static String rootdir = "";

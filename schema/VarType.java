@@ -1,4 +1,4 @@
-package enums;
+package schema;
 
 public enum VarType {
 	INT("int"),
