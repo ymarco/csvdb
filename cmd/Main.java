@@ -63,8 +63,9 @@ public class Main {
 	
 	/**
 	 * @return if continue to run
-	 * 
-	 * need to fix:
+	 */ 
+	/*
+	 * TODO:
 	 * if the ';' is in quotes or escaped or before some other text it doesn't work
 	 */
 	static boolean runCommand() {
