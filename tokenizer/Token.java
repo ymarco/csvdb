@@ -16,7 +16,7 @@ public class Token {
 	public String toString() {
 		if (type == TokenType.EOF)
 			return "Token[EOF]";
-		return "Token[" + type.name() + "," + val + "]";
+		return "Token[" + type.name() + ", " + val + "]";
 	}
 
 	public static final Set<String> keywords = new HashSet<>(
