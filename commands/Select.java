@@ -184,13 +184,15 @@ public class Select implements Command {
 			this.constant = constant;
 		}
 		
-		// dont work on Strings
+		// don't work on Strings
 		public boolean isTrue(Object field) {
 			if (field instanceof Long)
 				return op.isTrue((long) field, (long) constant);
 			if (field instanceof Float)
 				return op.isTrue((float) field, (float) constant);
-			return false;
+			if (constant == "NULL")
+				return op.isTrueBNull((String) field);
+			return op.isTrue((String) field, (String) constant);
 		}
 	}
 
@@ -264,6 +266,28 @@ public class Select implements Command {
 				return a > b;
 			case notEq:
 				return a != b;
+			default:
+				return false;
+			}
+		}
+		
+		public boolean isTrue(String a, String b) {
+			switch (this) {
+			case eq:
+				return a.equals(b);
+			case notEq:
+				return !a.equals(b);
+			default:
+				return false;
+			}
+		}
+		
+		public boolean isTrueBNull(String a) {
+			switch (this) {
+			case eq:
+				return a == null;
+			case notEq:
+				return a != null;
 			default:
 				return false;
 			}
