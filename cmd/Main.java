@@ -20,18 +20,22 @@ public class Main {
 	public static void main(String[] args) {
 		applyArgs(args);
 		try {
-			String code = readCommand();
+			while (true) {
 
-			if (code.equals("exit();") || code.equals("exit;"))
-				System.exit(0);
-			if (code.equals("test;")) {
-				test();
-				System.exit(0);
+
+				String code = readCommand();
+
+				if (code.equals("exit();") || code.equals("exit;"))
+					System.exit(0);
+				if (code.equals("test();") || code.equals("test;")) {
+					test();
+					System.exit(0);
+				}
+
+				Parser parser = new Parser(code);
+				Command cmd = parser.parse();
+				cmd.run();
 			}
-
-			Parser parser = new Parser(code);
-			Command cmd = parser.parse();
-			cmd.run();
 		} catch (Exception e) {
 			System.err.println("ERROR:\n");
 			System.out.println(e.getLocalizedMessage());
@@ -46,25 +50,25 @@ public class Main {
 		try {
 			for (int i = 0; i < args.length; i++) {
 				switch (args[i]) {
-					case "--rootdir":
-						rootdir = args[i + 1];
-						new File(rootdir).mkdirs(); // result of mkdirs() is ignored - why?
-						i++;
-						break;
-					case "--run":
-						if (codeReader == null)
-							throw new Exception();
-						codeReader = new Scanner(new File(args[i + 1]));
-						useCommandLine = false;
-						i++;
-						break;
-					case "--verbose":
-						verbose = true;
-						break;
-					default:
-						System.out.println("Usage: " +
-								"csvdb [--verbose] [--run file] [--rootdir dir]");
-						System.exit(1);
+				case "--rootdir":
+					rootdir = args[i + 1];
+					new File(rootdir).mkdirs(); // result of mkdirs() is ignored - why?
+					i++;
+					break;
+				case "--run":
+					if (codeReader == null)
+						throw new Exception();
+					codeReader = new Scanner(new File(args[i + 1]));
+					useCommandLine = false;
+					i++;
+					break;
+				case "--verbose":
+					verbose = true;
+					break;
+				default:
+					System.out.println("Usage: " +
+							"csvdb [--verbose] [--run file] [--rootdir dir]");
+					System.exit(1);
 
 				}
 			}
