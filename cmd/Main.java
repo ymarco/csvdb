@@ -65,7 +65,7 @@ public class Main {
 	 * @return if continue to run
 	 * 
 	 * need to fix:
-	 * if the ';' is in "" or before some other text he don't work
+	 * if the ';' is in quotes or escaped or before some other text it doesn't work
 	 */
 	static boolean runCommand() {
 		if (cmd)
