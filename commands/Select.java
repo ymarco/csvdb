@@ -22,9 +22,10 @@ public class Select implements Command {
 	private GroupBy groupBy; //don't work now
 	private OrderBy orderBy; //don't work now
 
-	public Select(String tableName, Expression[] expression, Condition where, GroupBy groupBy, OrderBy orderBy) {
+	public Select(String tableName, String fromTableName, Expression[] expressions, Condition where, GroupBy groupBy, OrderBy orderBy) {
 		this.tableName = tableName;
-		this.expressions = expression;
+		this.fromTableName = fromTableName;
+		this.expressions = expressions;
 		this.where = where;
 		this.groupBy = groupBy;
 		this.orderBy = orderBy;
@@ -47,8 +48,10 @@ public class Select implements Command {
 		}
 
 		Column[] columns = new Column[expressions.length];
-		for (int i = 0; i < columns.length; i++)
-			columns[i] = fromSchema.getColumn(expressions[i].fieldName);
+		for (int i = 0; i < columns.length; i++) {
+			Column column = fromSchema.getColumn(expressions[i].fieldName); 
+			columns[i] = new Column(column.getType(), expressions[i].asName);
+		}
 		new Create(tableName, false, columns).run();
 	}
 
@@ -63,11 +66,11 @@ public class Select implements Command {
 			BufferedWriter[] outFiles = new BufferedWriter[schema.getColumnsCount()];
 			DataOutputStream[] outFilesBin = new DataOutputStream[schema.getColumnsCount()];
 
-			for (int i = 0; i < outFiles.length; i++) {
-				if (schema.getColumnType(i) == VarType.VARCHAR)
-					inFiles[i] = new BufferedReader(new FileReader(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
+			for (int i = 0; i < inFiles.length; i++) {
+				if (fromSchema.getColumnType(i) == VarType.VARCHAR)
+					inFiles[i] = new BufferedReader(new FileReader(fromSchema.getTablePath() + "\\" + fromSchema.getColumnName(i) + ".onym"));
 				else
-					inFilesBin[i] = new DataInputStream(new FileInputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
+					inFilesBin[i] = new DataInputStream(new FileInputStream(fromSchema.getTablePath() + "\\" + fromSchema.getColumnName(i) + ".onym"));
 			}
 
 			for (int i = 0; i < outFiles.length; i++) {
@@ -83,7 +86,7 @@ public class Select implements Command {
 				//read (to line)
 				Object[] line = new Object[fromSchema.getColumnsCount()];
 				for (int j = 0; j < line.length; j++) {
-					switch (schema.getColumnType(j)) {
+					switch (fromSchema.getColumnType(j)) {
 					case INT:
 						line[j] = inFilesBin[j].readLong();
 						break;
@@ -124,7 +127,6 @@ public class Select implements Command {
 						}
 					} catch (Exception e) {
 						closeAll(schema, inFiles, inFilesBin, outFiles, outFilesBin);
-						e.printStackTrace();
 						throw new RuntimeException("^^^Select Exeption^^^");
 					}
 					lineCount++;
@@ -134,10 +136,10 @@ public class Select implements Command {
 
 
 
-				closeAll(schema, inFiles, inFilesBin, outFiles, outFilesBin);
+				
 			}
+			closeAll(schema, inFiles, inFilesBin, outFiles, outFilesBin);
 		} catch (IOException e) {
-			e.printStackTrace();
 			throw new RuntimeException("^^^Select Exeption^^^");
 		}
 	}

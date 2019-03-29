@@ -6,6 +6,8 @@ import java.util.Scanner;
 
 import commands.Create;
 import commands.Load;
+import commands.Select;
+import commands.Select.Expression;
 import schema.Column;
 import schema.VarType;
 
@@ -35,6 +37,7 @@ public class Main {
 			for (int i = 0; i < args.length; i++) {
 				if (args[i].equals("--rootdir")) {
 					rootdir = args[i + 1];
+					new File(rootdir).mkdirs();
 					i++;
 				}
 				else if (args[i].equals("--run")) {
@@ -99,6 +102,8 @@ public class Main {
 							new Column(VarType.VARCHAR, "c3"),  new Column(VarType.INT, "c4")};
 		new Create("testtest", false, columns).run();
 		new Load("C:\\Users\\flash_000\\Desktop\\testCsv.csv", "testtest", 0).run();
+		Expression[] expressions = {new Expression("c1"), new Expression("c3", "c5"), new Expression("c2", "c")};
+		new Select("aaa", "testtest", expressions, null, null, null).run();;
 		System.out.println("end test");
 	}
 }
