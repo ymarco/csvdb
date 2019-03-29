@@ -15,38 +15,40 @@ public class Main {
 	public static String rootdir = "";
 	private static boolean verbose;
 	private static boolean useCommandLine = true;
-	private static Scanner codeReader;
+	private static Scanner codeReader = null;
 
 	public static void main(String[] args) {
 		applyArgs(args);
-		try {
-			while (true) {
 
+		while (true) {
+			try {
 
 				String code = readCommand();
 
 				if (code.equals("exit();") || code.equals("exit;"))
-					System.exit(0);
+					break;
 				if (code.equals("test();") || code.equals("test;")) {
 					test();
-					System.exit(0);
+					break;
 				}
 
 				Parser parser = new Parser(code);
 				Command cmd = parser.parse();
 				cmd.run();
+			} catch (Exception e) {
+				System.err.println("ERROR:\n");
+				System.out.println(e.getLocalizedMessage());
+				if (verbose)
+					e.printStackTrace();
+				if (!useCommandLine)
+					break;
 			}
-		} catch (Exception e) {
-			System.err.println("ERROR:\n");
-			System.out.println(e.getLocalizedMessage());
-
-			e.printStackTrace();
 		}
+
 		codeReader.close();
 	}
 
 	private static void applyArgs(String[] args) {
-		codeReader = null;
 		try {
 			for (int i = 0; i < args.length; i++) {
 				switch (args[i]) {
