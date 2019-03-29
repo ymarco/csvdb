@@ -35,8 +35,8 @@ public class Create {
 		JSONArray schema = new JSONArray();
 		for (int i = 0; i < columns.length; i++) {
 			JSONObject col = new JSONObject();
-			col.put("field", columns[i].getName());
-			col.put("type", columns[i].getType().toString());
+			col.put("field", columns[i].name);
+			col.put("type", columns[i].type.toString());
 			schema.add(col);
 		}
 		
