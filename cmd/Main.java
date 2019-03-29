@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import commands.Create;
 import commands.Drop;
+import commands.Load;
 import enums.VarType;
 import schema.Column;
 
@@ -23,6 +24,8 @@ public class Main {
 		catch (Exception e) {
 			System.err.println("ERROR:\n");
 			System.out.println(e.getLocalizedMessage());
+			
+			e.printStackTrace();
 		}
 		codeReader.close();
 	}
@@ -93,11 +96,10 @@ public class Main {
 	}
 	
 	static void test() {
-		Column[] columns = {new Column(VarType.INT, "te"), new Column(VarType.FLOAT, "st")};
+		Column[] columns = {new Column(VarType.VARCHAR, "c1"), new Column(VarType.VARCHAR, "c2"),
+							new Column(VarType.VARCHAR, "c3"),  new Column(VarType.INT, "c4")};
 		Create.run("testtest", false, columns);
-		Drop.run("testtest", false);
-//		Create.run("testtest", false, columns);
-		Drop.run("testtest", true);
+		Load.run("C:\\Users\\flash_000\\Desktop\\testCsv.csv", "testtest", 0);;
 		System.out.println("end test");
 	}
 }
