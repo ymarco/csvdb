@@ -65,6 +65,7 @@ public class Load {
 			}
 			schema.setLineCount(lineCount);
 			//close
+			file.close();
 			for (int i = 0; i < outFiles.length; i++) {
 				if (schema.getColumnType(i) == VarType.VARCHAR)
 					outFiles[i].close();
