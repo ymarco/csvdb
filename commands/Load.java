@@ -10,8 +10,11 @@ import java.io.IOException;
 import de.siegmar.fastcsv.reader.RowReader;
 import schema.Schema;
 import schema.VarType;
+import utils.FilesUtils;
 
 public class Load implements Command {
+	private static final int FlUSH_EVERY = 20;
+	
 	private String fileName;
 	private String tableName;
 	private int ignoreLines;
@@ -84,17 +87,22 @@ public class Load implements Command {
 					
 				}
 				lineCount++;
+				if (lineCount % FlUSH_EVERY == 0) {
+					FilesUtils.flushAll(outFiles);
+					FilesUtils.flushAll(outFilesBin);
+				}
+					
 			}
 			
+			FilesUtils.flushAll(outFiles);
+			FilesUtils.flushAll(outFilesBin);
+			
 			schema.setLineCount(lineCount);
+			
 			//close
 			file.close();
-			for (int i = 0; i < outFiles.length; i++) {
-				if (schema.getColumnType(i) == VarType.VARCHAR)
-					outFiles[i].close();
-				else
-					outFilesBin[i].close();
-			}
+			FilesUtils.closeAll(outFiles);
+			FilesUtils.closeAll(outFilesBin);
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException("^^Error in LOAD^^");

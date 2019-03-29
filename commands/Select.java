@@ -13,8 +13,10 @@ import java.io.IOException;
 import schema.Column;
 import schema.Schema;
 import schema.VarType;
+import utils.FilesUtils;
 
 public class Select implements Command {
+	private static final int FlUSH_EVERY = 20;
 	private String tableName;
 	private String fromTableName;
 	private Expression[] expressions;
@@ -22,8 +24,7 @@ public class Select implements Command {
 	private GroupBy groupBy; //don't work now
 	private OrderBy orderBy; //don't work now
 
-	public Select(String tableName, String fromTableName, Expression[] expressions, Condition where, GroupBy groupBy, OrderBy orderBy) {
-		this.tableName = tableName;
+	public Select(String tableName, String fromTableName, Expression[] expressions, Condition where, GroupBy groupBy, OrderBy orderBy) {this.tableName = tableName;
 		this.fromTableName = fromTableName;
 		this.expressions = expressions;
 		this.where = where;
@@ -135,43 +136,36 @@ public class Select implements Command {
 							break;
 						}
 					} catch (Exception e) {
-						closeAll(schema, fromSchema, inFiles, inFilesBin, outFiles, outFilesBin);
-						throw new RuntimeException("^^^Select Exeption^^^");
+						FilesUtils.closeAll(inFiles);
+						FilesUtils.closeAll(inFilesBin);
+						FilesUtils.closeAll(outFiles);
+						FilesUtils.closeAll(outFilesBin);
+						throw new RuntimeException("you tried to select file to invalid table");
 					}
 					lineCount++;
+					
+					if (lineCount % FlUSH_EVERY == 0) {
+						FilesUtils.flushAll(outFiles);
+						FilesUtils.flushAll(outFilesBin);
+					}
 				}
 
 				schema.setLineCount(lineCount);
-
-
-
 				
+				FilesUtils.flushAll(outFiles);
+				FilesUtils.flushAll(outFilesBin);
 			}
-			closeAll(schema, fromSchema, inFiles, inFilesBin, outFiles, outFilesBin);
+			FilesUtils.closeAll(inFiles);
+			FilesUtils.closeAll(inFilesBin);
+			FilesUtils.closeAll(outFiles);
+			FilesUtils.closeAll(outFilesBin);
 		} catch (IOException e) {
 			throw new RuntimeException("^^^Select Exeption^^^");
 		}
 	}
-
-	private void closeAll(Schema schema, Schema fromSchema, BufferedReader[] inFiles, DataInputStream[] inFilesBin,
-			BufferedWriter[] outFiles, DataOutputStream[] outFilesBin) throws IOException {
-		for (int i = 0; i < outFiles.length; i++) {
-			if (fromSchema.getColumnType(i) == VarType.VARCHAR)
-				inFiles[i].close();
-			else
-				inFilesBin[i].close();
-		}
-
-		for (int i = 0; i < outFiles.length; i++) {
-			if (schema.getColumnType(i) == VarType.VARCHAR)
-				outFiles[i].close();
-			else
-				outFilesBin[i].close();
-		}
-	}
-
-
-
+	
+	
+	
 	//classes
 	public static class Condition {
 		public String fieldName;
