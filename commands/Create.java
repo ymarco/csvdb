@@ -11,9 +11,18 @@ import cmd.Main;
 import schema.Column;
 import schema.Schema;
 
-public class Create {
-	//ine: if not exists
-	public static void run(String tableName, boolean ine, Column[] columns) {
+public class Create implements Command {
+	public final String tableName;
+	public final boolean ine; //if not exists
+	public final Column[] columns;
+	
+	public Create(String tableName, boolean ine, Column[] columns) {
+		this.tableName = tableName;
+		this.ine = ine;
+		this.columns = columns;
+	}
+	
+	public void run() {
 		if (createSchema(tableName, ine, columns))
 			createJson(tableName, columns);
 	}
@@ -21,7 +30,7 @@ public class Create {
 	/**
 	 * @return if success
 	 */
-	private static boolean createSchema(String tableName, boolean ine, Column[] columns) {
+	private boolean createSchema(String tableName, boolean ine, Column[] columns) {
 		if (Schema.HaveSchema(tableName)) {
 			if (!ine)
 				throw new RuntimeException("you tried to create an existing table without the IF NOT EXISTS");
@@ -31,7 +40,7 @@ public class Create {
 		return true;
 	}
 	
-	private static void createJson(String tableName, Column[] columns) {
+	private void createJson(String tableName, Column[] columns) {
 		JSONArray schema = new JSONArray();
 		for (int i = 0; i < columns.length; i++) {
 			JSONObject col = new JSONObject();

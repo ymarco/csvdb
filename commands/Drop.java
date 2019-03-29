@@ -11,9 +11,16 @@ import cmd.Main;
 import schema.Column;
 import schema.Schema;
 
-public class Drop {
-	//ie: if exists
-	public static void run(String tableName, boolean ie) {
+public class Drop implements Command {
+	final String tableName;
+	final boolean ie; //if exists
+	
+	public Drop(String tableName, boolean ie) {
+		this.tableName = tableName;
+		this.ie = ie;
+	}
+	
+	public void run() {
 		if (removeSchema(tableName, ie))
 			removeFiles(tableName);
 	}
@@ -21,7 +28,7 @@ public class Drop {
 	/**
 	 * @return if success
 	 */
-	private static boolean removeSchema(String tableName, boolean ie) {
+	private boolean removeSchema(String tableName, boolean ie) {
 		if (!Schema.HaveSchema(tableName)) {
 			if (!ie)
 				throw new RuntimeException("you tried to drop a non existing table without the IF EXISTS");
@@ -31,7 +38,7 @@ public class Drop {
 		return true;
 	}
 	
-	private static void removeFiles(String tableName) {
+	private void removeFiles(String tableName) {
 		File file = new File(Main.rootdir + "\\" + tableName);
 		for(String s: file.list()){
 		    File currentFile = new File(file.getPath(),s);

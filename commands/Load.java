@@ -11,12 +11,22 @@ import de.siegmar.fastcsv.reader.RowReader;
 import schema.Schema;
 import schema.VarType;
 
-public class Load {
-	public static void run(String fileName, String tableName, int ignoreLines) {
+public class Load implements Command {
+	public final String fileName;
+	public final String tableName;
+	public final int ignoreLines;
+	
+	public Load(String fileName, String tableName, int ignoreLines) {
+		this.fileName = fileName;
+		this.tableName = tableName;
+		this.ignoreLines = ignoreLines;
+	}
+	
+	public void run() {
 		createFiles(fileName, tableName, ignoreLines);
 	}
 	
-	private static void createFiles(String fileName, String tableName, int ignoreLines) {
+	private void createFiles(String fileName, String tableName, int ignoreLines) {
 		if (!Schema.HaveSchema(tableName))
 			throw new RuntimeException("you tried to load a non existing table");
 		try {

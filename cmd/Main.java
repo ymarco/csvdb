@@ -7,8 +7,10 @@ import java.util.Scanner;
 import commands.Create;
 import commands.Drop;
 import commands.Load;
+import jdk.internal.util.xml.impl.Parser;
 import schema.Column;
 import schema.VarType;
+import tokenizer.Tokenizer;
 
 public class Main {
 	public static String rootdir = "";
@@ -79,7 +81,7 @@ public class Main {
 			code += line;
 			if (line.endsWith(";"))
 				break;
-			code += " "; // i don't want to add ' ' after ';'
+			code += "\n\r"; // i don't want to add '\n\r' after ';'
 		}
 		if (code.equals("exit();") || code.equals("exit;"))
 			return false;
@@ -92,14 +94,14 @@ public class Main {
 	}
 	
 	static void parseAndRun(String code) {
-		
+		//Parser.parse(code).run();
 	}
 	
 	static void test() {
 		Column[] columns = {new Column(VarType.VARCHAR, "c1"), new Column(VarType.VARCHAR, "c2"),
 							new Column(VarType.VARCHAR, "c3"),  new Column(VarType.INT, "c4")};
-		Create.run("testtest", false, columns);
-		Load.run("C:\\Users\\flash_000\\Desktop\\testCsv.csv", "testtest", 0);;
+		new Create("testtest", false, columns).run();
+		new Load("C:\\Users\\flash_000\\Desktop\\testCsv.csv", "testtest", 0).run();
 		System.out.println("end test");
 	}
 }
