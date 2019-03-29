@@ -50,7 +50,7 @@ public class Select implements Command {
 		Column[] columns = new Column[expressions.length];
 		for (int i = 0; i < columns.length; i++) {
 			Column column = fromSchema.getColumn(expressions[i].fieldName); 
-			columns[i] = new Column(column.getType(), expressions[i].asName);
+			columns[i] = new Column(column.type, expressions[i].asName);
 		}
 		new Create(tableName, false, columns).run();
 	}

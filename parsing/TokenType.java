@@ -1,4 +1,4 @@
-package tokenizer;
+package parsing;
 
 public enum TokenType {
     EOF,

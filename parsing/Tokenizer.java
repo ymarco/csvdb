@@ -39,7 +39,7 @@ public class Tokenizer {
 	}
 
 	private boolean eof() {
-		return curser < text.length();
+		return curser >= text.length(); //you did return curser < text.length();
 	}
 
 	private char cur() {
@@ -68,13 +68,13 @@ public class Tokenizer {
 	}
 
 	private void skipComment() {
-		if ((curser + 1) == text.length()) {
+		if ((curser + 1) >= text.length()) {
 			/*
 			 * there is 1 char left before eof, so there is no chance for a comment
 			 */
 			return;
 		}
-		if (text.substring(curser, 2).equals("--")) {
+		if (text.substring(curser, curser + 2).equals("--")) {
 			skipToNextLine();
 		}
 	}
@@ -89,7 +89,6 @@ public class Tokenizer {
 	private String errInfo() {
 		String res = "";
 		res += text_split_by_lines[row];
-		/* We need a string multiplication thing here */
 		res += "\n" + TextUtils.repert(" ", column) + "^^^" + "\n";
 		return res;
 	}
@@ -165,12 +164,8 @@ public class Tokenizer {
 		String token_val = "";
 		token_val += cur();
 		proceedCur();
-		if (eof()) {
-			if (Token.operators.contains(token_val))
-				return new Token(TokenType.KEYWORD, token_val);
-			else
-				throwErr("Syntax Error: invalid token");
-		}
+		if (Token.operators.contains(token_val))
+			return new Token(TokenType.OPERATOR, token_val);
 		/*
 		 * if we got here it means that it can be a 2-char operator (or an error)
 		 */

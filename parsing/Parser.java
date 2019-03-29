@@ -1,6 +1,7 @@
 package parsing;
 
 import java.util.ArrayList;
+
 import schema.*;
 import commands.*;
 
@@ -28,13 +29,13 @@ public class Parser {
 			return parseLoad();
 		case "select":
 			return parseSelect();
-		/* unreachable */
+			/* unreachable */
 		default:
 			return null;
 		}
 
 	}
-	
+
 	private void throwErr(String msg) {
 		tkzr.throwErr(msg);
 	}
@@ -79,7 +80,7 @@ public class Parser {
 		else
 			throwErr("KEYWORD _table_name not found");
 		// check for "(" operator
-		expectNextToken(TokenType.OPERATOR, ""));
+		expectNextToken(TokenType.OPERATOR, "(");
 
 		/*
 		 * now reading arguments, consisting of IDENTIFIER (name), KEYWORD (type), //
@@ -104,7 +105,7 @@ public class Parser {
 		}
 		/* finished reading arguments */
 		expectNextToken(TokenType.EOF);
-		return new Create(name, enable_ifnexists, (Column[]) args.toArray());
+		return new Create(name, enable_ifnexists, (Column[]) args.toArray(new Column[0]));
 
 	}
 
@@ -122,6 +123,7 @@ public class Parser {
 		expectNextToken(TokenType.IDENTIFIER);
 		dst = curr_token.val;
 		System.out.println("dst: \"" + dst + "\"\n");
+		nextToken();
 		if (curr_token.type != TokenType.EOF) {
 			expectNextToken(TokenType.KEYWORD, "ignore");
 			expectNextToken(TokenType.LIT_NUM);
@@ -147,8 +149,9 @@ public class Parser {
 		}
 		//check for table_name
 		if(curr_token.type == TokenType.IDENTIFIER){
-		name = curr_token.val;
-		} else throwErr("KEYWORD _table_name not found");
+			name = curr_token.val;
+		} else
+			throwErr("KEYWORD _table_name not found");
 
 		expectNextToken(TokenType.EOF);
 		Drop res = new Drop(name, enable_ifexists);

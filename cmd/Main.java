@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import commands.Command;
 import commands.Create;
 import commands.Load;
 import commands.Select;
 import commands.Select.Expression;
+import parsing.Parser;
 import schema.Column;
 import schema.VarType;
 
@@ -95,7 +97,9 @@ public class Main {
 	}
 	
 	static void parseAndRun(String code) {
-		//Parser.parse(code).run();
+		Parser parser = new Parser(code.substring(0, code.length() - 1));
+		Command command = parser.parse();
+		command.run();
 	}
 	
 	static void test() {
