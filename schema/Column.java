@@ -1,7 +1,5 @@
 package schema;
 
-import enums.VarType;
-
 public class Column {
 	public final VarType type;
 	public final String name;

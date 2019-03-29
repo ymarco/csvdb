@@ -8,8 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import de.siegmar.fastcsv.reader.RowReader;
-import enums.VarType;
 import schema.Schema;
+import schema.VarType;
 
 public class Load {
 	public static void run(String fileName, String tableName, int ignoreLines) {
