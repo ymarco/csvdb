@@ -117,12 +117,10 @@ public class Parser {
 		expectNextToken(TokenType.KEYWORD, "infile");
 		expectNextToken(TokenType.LIT_STR);
 		src = curr_token.val;
-		System.out.println("src: \"" + src + "\"\n");
 		expectNextToken(TokenType.KEYWORD, "into");
 		expectNextToken(TokenType.KEYWORD, "table");
 		expectNextToken(TokenType.IDENTIFIER);
 		dst = curr_token.val;
-		System.out.println("dst: \"" + dst + "\"\n");
 		nextToken();
 		if (curr_token.type != TokenType.EOF) {
 			expectNextToken(TokenType.KEYWORD, "ignore");

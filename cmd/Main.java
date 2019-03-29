@@ -36,7 +36,7 @@ public class Main {
 				Command cmd = parser.parse();
 				cmd.run();
 			} catch (Exception e) {
-				System.err.println("ERROR:\n");
+				System.out.println("ERROR:\n");
 				System.out.println(e.getLocalizedMessage());
 				if (verbose)
 					e.printStackTrace();
