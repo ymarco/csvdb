@@ -1,6 +1,6 @@
 package tokenizer;
 
-import utils.ParseUtils;
+import utils.TextUtils;
 
 
 class Tokenizer {
@@ -24,11 +24,11 @@ class Tokenizer {
 		skip();
 		if (eof())
 			return new Token(TokenType.EOF, "");
-		if (ParseUtils.isAlphaOrUnderscore(cur()))
+		if (TextUtils.isAlphaOrUnderscore(cur()))
 			return getIdentifierOrKeyword();
 		if (cur() == '"')
 			return getLitStr();
-		if (ParseUtils.isDigitOrDotOrPM(cur()))
+		if (TextUtils.isDigitOrDotOrPM(cur()))
 			return getLitNum();
 
 		/*
@@ -63,7 +63,7 @@ class Tokenizer {
 	}
 
 	private void skipWspace() {
-		while (!eof() && Character.isSpace(cur()))
+		while (!eof() && TextUtils.isSpace(cur()))
 			proceedCur();
 	}
 
@@ -90,32 +90,31 @@ class Tokenizer {
 		String res = "";
 		res += text_split_by_lines[row];
 		/* We need a string multiplication thing here */
-		res += "\n" + " " * column + "^^^" + "\n";
+		res += "\n" + TextUtils.repert(" ", column) + "^^^" + "\n";
 		return res;
 	}
 
 	void throwErr(String msg) {
 		String info_and_msg = errInfo() + msg + "\n";
-		throw ParseError(info_and_msg);
+		throw new RuntimeException(info_and_msg);
 	}
 
 	private Token getIdentifierOrKeyword() {
-		String token_val;
-		while (!eof() && (ParseUtils.isAlphaOrUnderscore(cur()) || Character.isDigit(cur()))) {
+		String token_val = "";
+		while (!eof() && (TextUtils.isAlphaOrUnderscore(cur()) || Character.isDigit(cur()))) {
 			token_val += cur();
 			proceedCur();
 		}
 		String token_val_lower = token_val.toLowerCase();
 		if (Token.keywords.contains(token_val_lower))
-			;
-		return new Token(TokenType.KEYWORD, token_val_lower);
+			return new Token(TokenType.KEYWORD, token_val_lower);
 		return new Token(TokenType.IDENTIFIER, token_val);
 	}
 
 	private Token getLitNum() {// note that this returns a STRING containing the num, e.g. "34" and NOT 34
 		// int start_pos = curser; //used for error printing
 		String token_val = "";
-		if (!ParseUtils.isDigitOrDotOrPM(cur()))
+		if (!TextUtils.isDigitOrDotOrPM(cur()))
 			throwErr("Tokenizer: _get_lit_num was called, but the \"number\" didnt start with digit,.,+,- in the curser");
 		boolean is_dotted = false;
 		while (!eof()) {
@@ -128,7 +127,7 @@ class Tokenizer {
 					is_dotted = true;
 					token_val += cur();
 				}
-			} else if (Character.isSpace(cur())) { // end of number
+			} else if (TextUtils.isSpace(cur())) { // end of number
 				return new Token(TokenType.LIT_NUM, token_val);
 			} else {
 				throwErr("Tokenizer: a thing started with a number and than changed into somethng else invalid");
