@@ -15,4 +15,14 @@ public enum VarType {
 	public String toString() {
 		return toString; 
 	}
+	
+	public static VarType toVarType(String s) {
+		switch (s.toLowerCase()) {
+		case "int": return INT;
+		case "varchar": return VARCHAR;
+		case "float": return FLOAT;
+		case "timestamp": return TIMESTAMP;
+		}
+		return null;
+	}
 }

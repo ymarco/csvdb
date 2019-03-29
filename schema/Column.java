@@ -1,8 +1,8 @@
 package schema;
 
 public class Column {
-	private VarType type;
-	private String name;
+	public final VarType type;
+	public final String name;
 	
 //	public float avg;
 //	public long min;
@@ -11,13 +11,5 @@ public class Column {
 	public Column(VarType type, String name) {
 		this.type = type;
 		this.name = name;
-	}
-	
-	public VarType getType() {
-		return type;
-	}
-	
-	public String getName() {
-		return name;
 	}
 }

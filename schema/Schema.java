@@ -20,7 +20,7 @@ public class Schema {
 		this.tablePath = Main.rootdir + "\\" + tableName;
 		
 		for (int i = 0; i < columns.length; i++)
-			fieldNameToIndex.put(columns[i].getName(), i);
+			fieldNameToIndex.put(columns[i].name, i);
 	}
 	
 	
@@ -37,11 +37,11 @@ public class Schema {
 	}
 	
 	public String getColumnName(int i) {
-		return getColumn(i).getName();
+		return getColumn(i).name;
 	}
 	
 	public VarType getColumnType(int i) {
-		return getColumn(i).getType();
+		return getColumn(i).type;
 	}
 	
 	public VarType getColumnType(String columnName) {
