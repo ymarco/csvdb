@@ -1,14 +1,8 @@
 package commands;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 import cmd.Main;
-import schema.Column;
 import schema.Schema;
 
 public class Drop implements Command {

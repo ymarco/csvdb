@@ -12,9 +12,9 @@ import schema.Schema;
 import schema.VarType;
 
 public class Load implements Command {
-	public final String fileName;
-	public final String tableName;
-	public final int ignoreLines;
+	private String fileName;
+	private String tableName;
+	private int ignoreLines;
 	
 	public Load(String fileName, String tableName, int ignoreLines) {
 		this.fileName = fileName;
@@ -59,27 +59,33 @@ public class Load implements Command {
 						switch (schema.getColumnType(i)) {
 						case INT:
 							outFilesBin[i].writeLong(Long.parseLong(fields[i]));
+							outFilesBin[i].flush();
 							break;
 						case TIMESTAMP:
 							outFilesBin[i].writeLong(Long.parseUnsignedLong(fields[i]));
+							outFilesBin[i].flush();
 							break;
 						case FLOAT:
 							outFilesBin[i].writeFloat(Float.parseFloat(fields[i]));
+							outFilesBin[i].flush();
 							break;
 						case VARCHAR:
 							String item = fields[i];
 							item = item.replace("\\", "\\\\");
 							item = item.replace("\r\n", "\\n");
 							outFiles[i].write(item + "\n");
+							outFiles[i].flush();
 							break;
 						}
 					} catch (Exception e) {
+						file.close();
 						throw new RuntimeException("you tried to load file to invalid table");
 					}
 					
 				}
 				lineCount++;
 			}
+			
 			schema.setLineCount(lineCount);
 			//close
 			file.close();

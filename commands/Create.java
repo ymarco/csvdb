@@ -12,9 +12,9 @@ import schema.Column;
 import schema.Schema;
 
 public class Create implements Command {
-	public final String tableName;
-	public final boolean ine; //if not exists
-	public final Column[] columns;
+	private String tableName;
+	private boolean ine; //if not exists
+	private Column[] columns;
 	
 	public Create(String tableName, boolean ine, Column[] columns) {
 		this.tableName = tableName;

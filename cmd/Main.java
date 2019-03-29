@@ -5,12 +5,9 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 import commands.Create;
-import commands.Drop;
 import commands.Load;
-import jdk.internal.util.xml.impl.Parser;
 import schema.Column;
 import schema.VarType;
-import tokenizer.Tokenizer;
 
 public class Main {
 	public static String rootdir = "";
