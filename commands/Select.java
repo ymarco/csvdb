@@ -81,13 +81,13 @@ public class Select implements Command {
 			int lineCount = 0;
 			for (int i = 0; i < fromSchema.getLinesCount(); i++) {
 				for (Expression expression : expressions) {
+					
 					int columnInd = schema.getColumnIndex(expression.asName);
 					int fromColumnInd = fromSchema.getColumnIndex(expression.fieldName);
 					try {
 						switch (schema.getColumnType(i)) {
 						case INT:
-							long in = inFilesBin[fromColumnInd].readLong();
-							outFilesBin[columnInd].writeLong(in);
+							outFilesBin[columnInd].writeLong(inFilesBin[fromColumnInd].readLong());
 							outFilesBin[columnInd].flush();
 							break;
 						case TIMESTAMP:
