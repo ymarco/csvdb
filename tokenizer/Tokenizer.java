@@ -3,19 +3,19 @@ package tokenizer;
 import utils.TextUtils;
 
 
-class Tokenizer {
+public class Tokenizer {
 	private final String text;
 	private final String[] text_split_by_lines;
 	private int curser = 0; // index to text
 	/* these are used for error printing */
 	private int row = 0;
 	private int column = 0;
-
-	Tokenizer(String text) {
+	
+	public Tokenizer(String text) {
 		this.text = text;
 		this.text_split_by_lines = text.split("\n");
 	}
-
+	
 	/**
 	 * @return next pair of type-value Token when reaching EOF, the EOF token is
 	 *         returned repeatedly.
