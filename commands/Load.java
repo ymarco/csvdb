@@ -23,8 +23,7 @@ public class Load {
 			RowReader file = new RowReader(new FileReader(fileName), ',', '"');
 			// ignore lines
 			while (ignoreLines > 0 && !file.isFinished()) {
-				RowReader.Line l = file.readLine();
-				String[] fields = l.getFields();
+				file.readLine();
 				ignoreLines--;
 			}
 			//create BufferedReaders
@@ -65,7 +64,7 @@ public class Load {
 							break;
 						}
 					} catch (Exception e) {
-						throw new RuntimeException("");
+						throw new RuntimeException("you tried to load file to invalid table");
 					}
 					
 				}
