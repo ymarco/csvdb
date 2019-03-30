@@ -33,8 +33,7 @@ public class Where {
 						test = (var -> Long.compareUnsigned(var.ts, constant.ts) < 0);
 						break;
 					case VARCHAR:
-						throw new RuntimeException("invalid WHERE:" +
-								"WHERE VARCHAR < ...");
+						throw new RuntimeException("invalid WHERE:\nWHERE VARCHAR < ...");
 					default:
 						test = null;
 				}
@@ -51,8 +50,7 @@ public class Where {
 						test = (var -> Long.compareUnsigned(var.ts, constant.ts) <= 0);
 						break;
 					case VARCHAR:
-						throw new RuntimeException("invalid WHERE:" +
-								"WHERE VARCHAR <= ...");
+						throw new RuntimeException("invalid WHERE:\nWHERE VARCHAR <= ...");
 					default:
 						test = null;
 				}
@@ -69,8 +67,7 @@ public class Where {
 						test = (var -> Long.compareUnsigned(var.ts, constant.ts) > 0);
 						break;
 					case VARCHAR:
-						throw new RuntimeException("invalid WHERE:" +
-								"WHERE VARCHAR > ...");
+						throw new RuntimeException("invalid WHERE:\nWHERE VARCHAR > ...");
 					default:
 						test = null;
 				}
@@ -87,8 +84,7 @@ public class Where {
 						test = (var -> Long.compareUnsigned(var.ts, constant.ts) >= 0);
 						break;
 					case VARCHAR:
-						throw new RuntimeException("invalid WHERE:" +
-								"WHERE VARCHAR >= ...");
+						throw new RuntimeException("invalid WHERE:\nWHERE VARCHAR >= ...");
 					default:
 						test = null;
 				}
