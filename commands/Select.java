@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import schema.Column;
+import schema.DBVar;
 import schema.Schema;
 import schema.VarType;
 import utils.FilesUtils;
@@ -23,7 +24,8 @@ public class Select implements Command {
 	private GroupBy groupBy; //don't work now
 	private OrderBy orderBy; //don't work now
 
-	public Select(String tableName, String fromTableName, Expression[] expressions, Condition where, GroupBy groupBy, OrderBy orderBy) {this.tableName = tableName;
+	public Select(String tableName, String fromTableName, Expression[] expressions, Condition where, GroupBy groupBy, OrderBy orderBy) {
+		this.tableName = tableName;
 		this.fromTableName = fromTableName;
 		this.expressions = expressions;
 		this.where = where;
@@ -49,7 +51,7 @@ public class Select implements Command {
 
 		Column[] columns = new Column[expressions.length];
 		for (int i = 0; i < columns.length; i++) {
-			Column column = fromSchema.getColumn(expressions[i].fieldName); 
+			Column column = fromSchema.getColumn(expressions[i].fieldName);
 			columns[i] = new Column(column.type, expressions[i].asName);
 		}
 		new Create(tableName, false, columns).run();
@@ -63,7 +65,7 @@ public class Select implements Command {
 			int whereInd = -1;
 			if (where != null)
 				whereInd = fromSchema.getColumnIndex(expressions[schema.getColumnIndex(where.fieldName)].fieldName);
-			
+
 			//open
 			BufferedReader[] inFiles = new BufferedReader[fromSchema.getColumnsCount()];
 			DataInputStream[] inFilesBin = new DataInputStream[fromSchema.getColumnsCount()];
@@ -83,33 +85,33 @@ public class Select implements Command {
 				else
 					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
 			}
-			
+
 			//fill
 			int lineCount = 0;
+			DBVar[] line = new DBVar[fromSchema.getColumnsCount()];
 			for (int i = 0; i < fromSchema.getLinesCount(); i++) {
 				//read (to line)
-				Object[] line = new Object[fromSchema.getColumnsCount()];
 				for (int j = 0; j < line.length; j++) {
 					switch (fromSchema.getColumnType(j)) {
-					case INT:
-						line[j] = inFilesBin[j].readLong();
-						break;
-					case TIMESTAMP:
-						line[j] = inFilesBin[j].readLong();
-						break;
-					case FLOAT:
-						line[j] = inFilesBin[j].readFloat();
-						break;
-					case VARCHAR:
-						line[j] = inFiles[j].readLine();
-						break;
+						case INT:
+							line[j].i = inFilesBin[j].readLong();
+							break;
+						case TIMESTAMP:
+							line[j].ts = inFilesBin[j].readLong();
+							break;
+						case FLOAT:
+							line[j].f = inFilesBin[j].readFloat();
+							break;
+						case VARCHAR:
+							line[j].s = inFiles[j].readLine();
+							break;
 					}
 				}
-				
+
 				//check where
-				if (where != null && !where.isTrue(line[whereInd]))
+				if (where != null && !where.test.check(line[whereInd]))
 					continue;
-				
+
 				//write
 				for (int j = 0; j < expressions.length; j++) {
 					Expression expression = expressions[j];
@@ -117,18 +119,19 @@ public class Select implements Command {
 					int fieldIndex = schema.getColumnIndex(expression.asName);
 					try {
 						switch (schema.getColumnType(j)) {
-						case INT:
-							outFilesBin[fieldIndex].writeLong((long) line[fromFieldIndex]);
-							break;
-						case TIMESTAMP:
-							outFilesBin[fieldIndex].writeLong((long) line[fromFieldIndex]);
-							break;
-						case FLOAT:
-							outFilesBin[fieldIndex].writeFloat((float) line[fromFieldIndex]);
-							break;
-						case VARCHAR:
-							outFiles[fieldIndex].write((String) line[fromFieldIndex] + "\n");
-							break;
+							case INT:
+								outFilesBin[fieldIndex].writeLong(line[fromFieldIndex].i);
+								break;
+							case TIMESTAMP:
+								outFilesBin[fieldIndex].writeLong(line[fromFieldIndex].ts);
+								break;
+							case FLOAT:
+								outFilesBin[fieldIndex].writeDouble(line[fromFieldIndex].f);
+								break;
+							case VARCHAR:
+								outFiles[fieldIndex].write(line[fromFieldIndex].s);
+								outFiles[fieldIndex].write('\n');
+								break;
 						}
 					} catch (Exception e) {
 						FilesUtils.closeAll(inFiles);
@@ -150,30 +153,137 @@ public class Select implements Command {
 			throw new RuntimeException("^^^Select Exeption^^^");
 		}
 	}
-	
-	
-	
+
+
 	//classes
 	public static class Condition {
-		public String fieldName;
-		public Operator op;
-		public Object constant;
+		private final Schema schema;
+		public final String fieldName;
+		private DBVar constant;
 
-		public Condition(String fieldName, Operator op, Object constant) {
-			this.fieldName = fieldName;
-			this.op = op;
-			this.constant = constant;
+		interface TestCondition {
+			boolean check(DBVar var);
 		}
-		
-		// don't work on Strings
-		public boolean isTrue(Object field) {
-			if (field instanceof Long)
-				return op.isTrue((long) field, (long) constant);
-			if (field instanceof Float)
-				return op.isTrue((float) field, (float) constant);
-			if (constant == "NULL")
-				return op.isTrueBNull((String) field);
-			return op.isTrue((String) field, (String) constant);
+
+		public final TestCondition test;
+
+		public Condition(Schema schema, String fieldName, String operator, String constant_) {
+			this.schema = schema;
+			this.fieldName= fieldName;
+			this.constant = parseConstant(constant_);
+			VarType vt = schema.getColumnType(fieldName);
+			/* now creating the test function*/
+			switch (operator) {
+				case "<":
+					switch (vt) {
+						case INT:
+							test = (var -> var.i < constant.i);
+							break;
+						case FLOAT:
+							test = (var -> var.f < constant.f);
+							break;
+						case TIMESTAMP:
+							test = (var -> Long.compareUnsigned(var.ts, constant.ts) < 0);
+							break;
+						case VARCHAR:
+							throw new RuntimeException("invalid WHERE:" +
+									"WHERE VARCHAR < ...");
+						default:
+							test = null;
+					}
+					break;
+				case "<=":
+					switch (vt) {
+						case INT:
+							test = (var -> var.i <= constant.i);
+							break;
+						case FLOAT:
+							test = (var -> var.f <= constant.f);
+							break;
+						case TIMESTAMP:
+							test = (var -> Long.compareUnsigned(var.ts, constant.ts) <= 0);
+							break;
+						case VARCHAR:
+							throw new RuntimeException("invalid WHERE:" +
+									"WHERE VARCHAR <= ...");
+						default:
+							test = null;
+					}
+					break;
+				case ">":
+					switch (vt) {
+						case INT:
+							test = (var -> var.i > constant.i);
+							break;
+						case FLOAT:
+							test = (var -> var.f > constant.f);
+							break;
+						case TIMESTAMP:
+							test = (var -> Long.compareUnsigned(var.ts, constant.ts) > 0);
+							break;
+						case VARCHAR:
+							throw new RuntimeException("invalid WHERE:" +
+									"WHERE VARCHAR > ...");
+						default:
+							test = null;
+					}
+					break;
+				case ">=":
+					switch (vt) {
+						case INT:
+							test = (var -> var.i >= constant.i);
+							break;
+						case FLOAT:
+							test = (var -> var.f >= constant.f);
+							break;
+						case TIMESTAMP:
+							test = (var -> Long.compareUnsigned(var.ts, constant.ts) >= 0);
+							break;
+						case VARCHAR:
+							throw new RuntimeException("invalid WHERE:" +
+									"WHERE VARCHAR >= ...");
+						default:
+							test = null;
+					}
+					break;
+				case "<>":
+					switch (vt) {
+						case INT:
+							test = (var -> var.i != constant.i);
+							break;
+						case FLOAT:
+							test = (var -> var.f != constant.f);
+							break;
+						case TIMESTAMP:
+							test = (var -> var.ts != constant.ts);
+							break;
+						case VARCHAR:
+							throw new RuntimeException("invalid WHERE:" +
+									"WHERE VARCHAR <> ...");
+						default:
+							test = null;
+					}
+					break;
+				default:
+					throw new RuntimeException("invalid where operator");
+
+			}
+		}
+
+		private static DBVar parseConstant(String constant) {
+			DBVar res = new DBVar();
+			if (constant.equals("none")) {
+				res.i = DBVar.NULL_INT;
+				res.s = DBVar.NULL_STRING;
+				res.f = DBVar.NULL_FLOAT;
+				res.ts = DBVar.NULL_TS;
+			} else {
+				res.i = Long.parseLong(constant);
+				res.s = constant;
+				res.f = Double.parseDouble(constant);
+				res.ts = Long.parseUnsignedLong(constant);
+			}
+			return res;
 		}
 	}
 
@@ -206,72 +316,4 @@ public class Select implements Command {
 	}
 
 
-	public static enum Operator {
-		lit,
-		litEq,
-		eq,
-		bigEq,
-		big,
-		notEq;
-
-		public static Operator Get(String op) {
-			switch (op) {
-			case "<":
-				return lit;
-			case "<=":
-				return litEq;
-			case "=":
-				return eq;
-			case ">=":
-				return bigEq;
-			case ">":
-				return big;
-			case "<>":
-				return notEq;
-			default:
-				return null;
-			}
-		}
-
-		public boolean isTrue(float a, float b) {
-			switch (this) {
-			case lit:
-				return a < b;
-			case litEq:
-				return a <= b;
-			case eq:
-				return a == b;
-			case bigEq:
-				return a >= b;
-			case big:
-				return a > b;
-			case notEq:
-				return a != b;
-			default:
-				return false;
-			}
-		}
-		
-		public boolean isTrue(String a, String b) {
-			switch (this) {
-			case eq:
-				return a.equals(b);
-			case notEq:
-				return !a.equals(b);
-			default:
-				return false;
-			}
-		}
-		
-		public boolean isTrueBNull(String a) {
-			switch (this) {
-			case eq:
-				return a == null;
-			case notEq:
-				return a != null;
-			default:
-				return false;
-			}
-		}
-	}
 }
