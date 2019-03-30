@@ -119,19 +119,15 @@ public class Select implements Command {
 						switch (schema.getColumnType(j)) {
 						case INT:
 							outFilesBin[fieldIndex].writeLong((long) line[fromFieldIndex]);
-							outFilesBin[fieldIndex].flush();
 							break;
 						case TIMESTAMP:
 							outFilesBin[fieldIndex].writeLong((long) line[fromFieldIndex]);
-							outFilesBin[fieldIndex].flush();
 							break;
 						case FLOAT:
 							outFilesBin[fieldIndex].writeFloat((float) line[fromFieldIndex]);
-							outFilesBin[fieldIndex].flush();
 							break;
 						case VARCHAR:
 							outFiles[fieldIndex].write((String) line[fromFieldIndex] + "\n");
-							outFiles[fieldIndex].flush();
 							break;
 						}
 					} catch (Exception e) {

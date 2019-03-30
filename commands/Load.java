@@ -60,22 +60,18 @@ public class Load implements Command {
 						switch (schema.getColumnType(i)) {
 						case INT:
 							outFilesBin[i].writeLong(Long.parseLong(fields[i]));
-							outFilesBin[i].flush();
 							break;
 						case TIMESTAMP:
 							outFilesBin[i].writeLong(Long.parseUnsignedLong(fields[i]));
-							outFilesBin[i].flush();
 							break;
 						case FLOAT:
 							outFilesBin[i].writeFloat(Float.parseFloat(fields[i]));
-							outFilesBin[i].flush();
 							break;
 						case VARCHAR:
 							String item = fields[i];
 							item = item.replace("\\", "\\\\");
 							item = item.replace("\r\n", "\\n");
 							outFiles[i].write(item + "\n");
-							outFiles[i].flush();
 							break;
 						}
 					} catch (Exception e) {
