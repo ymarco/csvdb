@@ -56,7 +56,12 @@ public class Main {
 				switch (args[i]) {
 				case "--rootdir":
 					rootdir = args[i + 1];
-					new File(rootdir).mkdirs(); // result of mkdirs() is ignored - why?
+					File rootdirFile = new File(rootdir);
+					rootdirFile.mkdirs(); // return if the file created, we need to know if the file are exists. 
+					if (!rootdirFile.exists()) {
+						System.out.println("failed to load the rootdir");
+						System.exit(-1);
+					}
 					i++;
 					break;
 				case "--run":
