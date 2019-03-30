@@ -4,13 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-import commands.*;
-import commands.Select;
-import commands.Select.Expression;
-import commands.select.Where;
+import commands.Command;
 import parsing.Parser;
-import schema.Column;
-import schema.VarType;
 
 public class Main {
 	public static String rootdir = "";
@@ -119,12 +114,12 @@ public class Main {
 	}
 
 	private static void test() {
-		Column[] columns = {new Column(VarType.VARCHAR, "c1"), new Column(VarType.VARCHAR, "c2"),
-				new Column(VarType.VARCHAR, "c3"), new Column(VarType.INT, "c4")};
-		new Create("testtest", false, columns).run();
-		new Load("C:\\Users\\flash_000\\Desktop\\testCsv.csv", "testtest", 0).run();
-		Expression[] expressions = {new Expression("c1"), new Expression("c3", "c5"), new Expression("c4", "c")};
-		new Select("aaa", "testtest", expressions, new Where("c", Select.Operator.big, 25L), null, null).run();
-		System.out.println("end test");
+//		Column[] columns = {new Column(VarType.VARCHAR, "c1"), new Column(VarType.VARCHAR, "c2"),
+//				new Column(VarType.VARCHAR, "c3"), new Column(VarType.INT, "c4")};
+//		new Create("testtest", false, columns).run();
+//		new Load("C:\\Users\\flash_000\\Desktop\\testCsv.csv", "testtest", 0).run();
+//		Expression[] expressions = {new Expression("c1"), new Expression("c3", "c5"), new Expression("c4", "c")};
+//		new Select("aaa", "testtest", expressions, new Where("c", Select.Operator.big, 25L), null, null).run();
+//		System.out.println("end test");
 	}
 }

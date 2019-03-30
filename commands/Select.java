@@ -135,7 +135,7 @@ public class Select implements Command {
 								outFilesBin[fieldIndex].writeDouble(line[fromFieldIndex].f);
 								break;
 							case VARCHAR:
-								outFiles[fieldIndex].write(line[fromFieldIndex].s);
+								outFiles[fieldIndex].write(FilesUtils.endoceStringForWriting(line[fromFieldIndex].s));
 								outFiles[fieldIndex].write('\n');
 								break;
 						}

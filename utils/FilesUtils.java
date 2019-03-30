@@ -31,4 +31,16 @@ public class FilesUtils {
 			if (dis != null)
 				dis.close();
 	}
+	
+	public static String endoceStringForWriting(String s) {
+		s = s.replace("\\", "\\\\");
+		s = s.replace("\r\n", "\\n");
+		return s;
+	}
+	
+	public static String decodeStringFromWriting(String s) {
+		s = s.replace("\\n", "\r\n");
+		s = s.replace("\\\\", "\\");
+		return s;
+	}
 }

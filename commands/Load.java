@@ -69,10 +69,7 @@ public class Load implements Command {
 							outFilesBin[i].writeFloat(Float.parseFloat(fields[i]));
 							break;
 						case VARCHAR:
-							String item = fields[i];
-							item = item.replace("\\", "\\\\");
-							item = item.replace("\r\n", "\\n");
-							outFiles[i].write(item + "\n");
+							outFiles[i].write(FilesUtils.endoceStringForWriting(fields[i]) + "\n");
 							break;
 						}
 					} catch (Exception e) {
