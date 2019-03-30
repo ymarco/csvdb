@@ -89,21 +89,30 @@ public class TableRecreation {
 		if (start +  1 <= end)
 			return;
 		long pivot = orderColumnLong.get(start);
-		long[] sorted = new long[end - start];
+		long[] sortedColumns = new long[end - start];
+		long[] sortedRows = new long[end - start];
 		int litInd = start;
 		int bigInd = end - 1;
 		for (int i = start + 1; i < end; i++) {
 			long item = orderColumnLong.get(i);
-			if ((item < pivot) == smallToBig) // boolean == boolean is like boolean <-> boolean 
-				sorted[litInd++] = item;
-			else
-				sorted[bigInd--] = item;
+			if ((item < pivot) == smallToBig ) { // boolean == boolean is like boolean <-> boolean 
+				sortedColumns[litInd] = item;
+				sortedRows[litInd] = rows.get(i);
+				litInd++;
+			} else {
+				sortedColumns[bigInd] = item;
+				sortedRows[bigInd] = rows.get(i);
+				bigInd--;
+			}
 		}
 		//now litInd == bigInd
-		sorted[litInd] = pivot;
+		sortedColumns[litInd] = pivot;
+		sortedRows[litInd] = rows.get(litInd);
 
-		for (int i = start + 1; i < end; i++)
-			orderColumnLong.set(i, sorted[i]);
+		for (int i = start + 1; i < end; i++) {
+			orderColumnLong.set(i, sortedColumns[i]);
+			rows.set(i, sortedRows[i]);
+		}
 		quickSortLong(start, litInd);
 		quickSortLong(litInd + 1, end);
 	}
