@@ -121,44 +121,61 @@ public class TableRecreation {
 		if (start +  1 <= end)
 			return;
 		double pivot = orderColumnDouble.get(start);
-		double[] sorted = new double[end - start];
+		double[] sortedColumns = new double[end - start];
+		long[] sortedRows = new long[end - start];
 		int litInd = start;
 		int bigInd = end - 1;
 		for (int i = start + 1; i < end; i++) {
 			double item = orderColumnDouble.get(i);
-			if ((item < pivot) == smallToBig)
-				sorted[litInd++] = item;
-			else
-				sorted[bigInd--] = item;
+			if ((item < pivot) == smallToBig ) { // boolean == boolean is like boolean <-> boolean 
+				sortedColumns[litInd] = item;
+				sortedRows[litInd] = rows.get(i);
+				litInd++;
+			} else {
+				sortedColumns[bigInd] = item;
+				sortedRows[bigInd] = rows.get(i);
+				bigInd--;
+			}
 		}
 		//now litInd == bigInd
-		sorted[litInd] = pivot;
+		sortedColumns[litInd] = pivot;
+		sortedRows[litInd] = rows.get(litInd);
 
-		for (int i = start + 1; i < end; i++)
-			orderColumnDouble.set(i, sorted[i]);
+		for (int i = start + 1; i < end; i++) {
+			orderColumnDouble.set(i, sortedColumns[i]);
+			rows.set(i, sortedRows[i]);
+		}
 		quickSortLong(start, litInd);
 		quickSortLong(litInd + 1, end);
 	}
-
 	private void quickSortString(int start, int end) {
 		if (start +  1 <= end)
 			return;
 		String pivot = orderColumnString.get(start);
-		String[] sorted = new String[end - start];
+		String[] sortedColumns = new String[end - start];
+		long[] sortedRows = new long[end - start];
 		int litInd = start;
 		int bigInd = end - 1;
 		for (int i = start + 1; i < end; i++) {
 			String item = orderColumnString.get(i);
-			if ((pivot.compareTo(item) < 0) == smallToBig)
-				sorted[litInd++] = item;
-			else
-				sorted[bigInd--] = item;
+			if ((pivot.compareTo(item) < 0) == smallToBig) {
+				sortedColumns[litInd] = item;
+				sortedRows[litInd] = rows.get(i);
+				litInd++;
+			} else {
+				sortedColumns[bigInd] = item;
+				sortedRows[bigInd] = rows.get(i);
+				bigInd--;
+			}
 		}
 		//now litInd == bigInd
-		sorted[litInd] = pivot;
+		sortedColumns[litInd] = pivot;
+		sortedRows[litInd] = rows.get(litInd);
 
-		for (int i = start + 1; i < end; i++)
-			orderColumnString.set(i, sorted[i]);
+		for (int i = start + 1; i < end; i++) {
+			orderColumnString.set(i, sortedColumns[i]);
+			rows.set(i, sortedRows[i]);
+		}
 		quickSortLong(start, litInd);
 		quickSortLong(litInd + 1, end);
 	}
