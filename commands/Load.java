@@ -86,10 +86,6 @@ public class Load implements Command {
 				}
 				lineCount++;
 			}
-			
-			FilesUtils.flushAll(outFiles);
-			FilesUtils.flushAll(outFilesBin);
-			
 			schema.setLineCount(lineCount);
 			
 			//close

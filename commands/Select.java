@@ -145,9 +145,6 @@ public class Select implements Command {
 				}
 
 				schema.setLineCount(lineCount);
-				
-				FilesUtils.flushAll(outFiles);
-				FilesUtils.flushAll(outFilesBin);
 			}
 			FilesUtils.closeAll(inFiles);
 			FilesUtils.closeAll(inFilesBin);

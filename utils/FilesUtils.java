@@ -7,18 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class FilesUtils {
-	public static void flushAll(BufferedWriter[] files) throws IOException {
-		for (BufferedWriter bw : files)
-			if (bw != null)
-				bw.flush();
-	}
-
-	public static void flushAll(DataOutputStream[] files) throws IOException {
-		for (DataOutputStream dos : files)
-			if (dos != null)
-				dos.flush();
-	}
-
+	
 	public static void closeAll(BufferedWriter[] files) throws IOException {
 		for (BufferedWriter bw : files)
 			if (bw != null)
