@@ -27,6 +27,14 @@ public class Schema {
 	public Column getColumn(int i) {
 		return columns[i];
 	}
+
+	public String getColumnFileName(int i) {
+		/*TODO*/ return null;
+	}
+
+	public String getColumnFileName(String columnName) {
+		retrun getColumnFileName(getColumnIndex(culumnName));
+	}
 	
 	public int getColumnIndex(String columnName) {
 		return fieldNameToIndex.get(columnName);
