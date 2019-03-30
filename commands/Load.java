@@ -13,8 +13,6 @@ import schema.VarType;
 import utils.FilesUtils;
 
 public class Load implements Command {
-	private static final int FlUSH_EVERY = 20;
-	
 	private String fileName;
 	private String tableName;
 	private int ignoreLines;
@@ -87,11 +85,6 @@ public class Load implements Command {
 					
 				}
 				lineCount++;
-				if (lineCount % FlUSH_EVERY == 0) {
-					FilesUtils.flushAll(outFiles);
-					FilesUtils.flushAll(outFilesBin);
-				}
-					
 			}
 			
 			FilesUtils.flushAll(outFiles);
