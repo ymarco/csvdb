@@ -13,6 +13,7 @@ import schema.VarType;
 
 public class Main {
 	public static String rootdir = "";
+	public static String columnFilesExtensios = ".col";
 	private static boolean verbose;
 	private static boolean useCommandLine = true;
 	private static Scanner codeReader = null;

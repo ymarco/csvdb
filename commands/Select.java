@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import cmd.Main;
 import schema.Column;
 import schema.Schema;
 import schema.VarType;
@@ -72,16 +73,16 @@ public class Select implements Command {
 
 			for (int i = 0; i < inFiles.length; i++) {
 				if (fromSchema.getColumnType(i) == VarType.VARCHAR)
-					inFiles[i] = new BufferedReader(new FileReader(fromSchema.getTablePath() + "\\" + fromSchema.getColumnName(i) + ".onym"));
+					inFiles[i] = new BufferedReader(new FileReader(fromSchema.getTablePath() + "\\" + fromSchema.getColumnName(i) + Main.columnFilesExtensios));
 				else
-					inFilesBin[i] = new DataInputStream(new FileInputStream(fromSchema.getTablePath() + "\\" + fromSchema.getColumnName(i) + ".onym"));
+					inFilesBin[i] = new DataInputStream(new FileInputStream(fromSchema.getTablePath() + "\\" + fromSchema.getColumnName(i) + Main.columnFilesExtensios));
 			}
 
 			for (int i = 0; i < outFiles.length; i++) {
 				if (schema.getColumnType(i) == VarType.VARCHAR)
-					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
+					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i) + Main.columnFilesExtensios));
 				else
-					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
+					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + Main.columnFilesExtensios));
 			}
 			
 			//fill
@@ -273,5 +274,13 @@ public class Select implements Command {
 				return false;
 			}
 		}
+	}
+	
+	public static enum expressionFuncs {
+		MIN,
+		MAX,
+		AVG,
+		SUM,
+		COUNT;
 	}
 }

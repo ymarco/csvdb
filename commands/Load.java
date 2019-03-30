@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import cmd.Main;
 import de.siegmar.fastcsv.reader.RowReader;
 import schema.Schema;
 import schema.VarType;
@@ -43,9 +44,9 @@ public class Load implements Command {
 			DataOutputStream[] outFilesBin = new DataOutputStream[schema.getColumnsCount()];
 			for (int i = 0; i < outFiles.length; i++) {
 				if (schema.getColumnType(i) == VarType.VARCHAR)
-					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
+					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i) + Main.columnFilesExtensios));
 				else
-					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
+					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + Main.columnFilesExtensios));
 			}
 			
 			// put in other files

@@ -28,13 +28,7 @@ public class Schema {
 		return columns[i];
 	}
 
-	public String getColumnFileName(int i) {
-		/*TODO*/ return null;
-	}
-
-	public String getColumnFileName(String columnName) {
-		retrun getColumnFileName(getColumnIndex(culumnName));
-	}
+	
 	
 	public int getColumnIndex(String columnName) {
 		return fieldNameToIndex.get(columnName);
@@ -92,5 +86,11 @@ public class Schema {
 		return schemas.remove(tableName);
 	}
 	
-	
+	public String getColumnFileName(int i) {
+		return getColumnName(i) + Main.columnFilesExtensios;
+	}
+
+	public String getColumnFileName(String columnName) {
+		return getColumnFileName(getColumnIndex(columnName));
+	}
 }
