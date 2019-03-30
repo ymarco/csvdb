@@ -2,8 +2,12 @@ package parsing;
 
 import java.util.ArrayList;
 
-import schema.*;
-import commands.*;
+import commands.Command;
+import commands.Create;
+import commands.Drop;
+import commands.Load;
+import schema.Column;
+import schema.VarType;
 
 public class Parser {
 	private final Tokenizer tkzr;

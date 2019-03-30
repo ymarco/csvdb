@@ -154,6 +154,19 @@ public class Select implements Command {
 	
 	
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	//classes
 	public static class Condition {
 		public String fieldName;
@@ -181,7 +194,7 @@ public class Select implements Command {
 	public static class Expression {
 		public String fieldName;
 		public String asName;
-
+		
 		public Expression(String fieldName, String asName) {
 			this.fieldName = fieldName;
 			this.asName = asName;
@@ -276,11 +289,24 @@ public class Select implements Command {
 		}
 	}
 	
-	public static enum expressionFuncs {
-		MIN,
-		MAX,
-		AVG,
-		SUM,
-		COUNT;
-	}
+//	//no func is null
+//	public static enum ExpressionFuncs {
+//		MIN,
+//		MAX,
+//		AVG,
+//		SUM,
+//		COUNT;
+//	}
+//	
+//	public static class columnAggregate {
+//		private VarType type;
+//		private int colInd;
+//		private float val = 0;  
+//		
+//		public void aggregate(Object item) {
+//			item
+//		}
+//		
+//		
+//	}
 }

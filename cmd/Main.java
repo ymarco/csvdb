@@ -20,7 +20,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		applyArgs(args);
-
+		LoadData.load();
+		
 		while (true) {
 			try {
 

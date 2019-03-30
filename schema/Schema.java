@@ -7,7 +7,6 @@ import cmd.Main;
 public class Schema {
 	private static Hashtable<String, Schema> schemas = new Hashtable<String, Schema>();
 	
-	
 	private String tableName;
 	private String tablePath;
 	private Column[] columns;
@@ -69,6 +68,8 @@ public class Schema {
 	public int getLinesCount() {
 		return lineCount;
 	}
+	
+	
 	
 	public static void AddSchema(String tableName, Column[] columns) {
 		schemas.put(tableName, new Schema(tableName, columns));
