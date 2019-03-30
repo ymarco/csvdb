@@ -16,15 +16,18 @@ import schema.Schema;
 import schema.VarType;
 import utils.FilesUtils;
 
+import commands.select.*;
+
+
 public class Select implements Command {
 	private String tableName;
 	private String fromTableName;
 	private Expression[] expressions;
-	private Condition where; //don't work now
+	private Where where; //don't work now
 	private GroupBy groupBy; //don't work now
 	private OrderBy orderBy; //don't work now
 
-	public Select(String tableName, String fromTableName, Expression[] expressions, Condition where, GroupBy groupBy, OrderBy orderBy) {
+	public Select(String tableName, String fromTableName, Expression[] expressions, Where where, GroupBy groupBy, OrderBy orderBy) {
 		this.tableName = tableName;
 		this.fromTableName = fromTableName;
 		this.expressions = expressions;
@@ -89,6 +92,9 @@ public class Select implements Command {
 			//fill
 			int lineCount = 0;
 			DBVar[] line = new DBVar[fromSchema.getColumnsCount()];
+			for (int i = 0; i < fromSchema.getColumnsCount(); i++) {
+				line[i] = new DBVar();
+			}
 			for (int i = 0; i < fromSchema.getLinesCount(); i++) {
 				//read (to line)
 				for (int j = 0; j < line.length; j++) {
@@ -155,138 +161,6 @@ public class Select implements Command {
 	}
 
 
-	//classes
-	public static class Condition {
-		private final Schema schema;
-		public final String fieldName;
-		private DBVar constant;
-
-		interface TestCondition {
-			boolean check(DBVar var);
-		}
-
-		public final TestCondition test;
-
-		public Condition(Schema schema, String fieldName, String operator, String constant_) {
-			this.schema = schema;
-			this.fieldName= fieldName;
-			this.constant = parseConstant(constant_);
-			VarType vt = schema.getColumnType(fieldName);
-			/* now creating the test function*/
-			switch (operator) {
-				case "<":
-					switch (vt) {
-						case INT:
-							test = (var -> var.i < constant.i);
-							break;
-						case FLOAT:
-							test = (var -> var.f < constant.f);
-							break;
-						case TIMESTAMP:
-							test = (var -> Long.compareUnsigned(var.ts, constant.ts) < 0);
-							break;
-						case VARCHAR:
-							throw new RuntimeException("invalid WHERE:" +
-									"WHERE VARCHAR < ...");
-						default:
-							test = null;
-					}
-					break;
-				case "<=":
-					switch (vt) {
-						case INT:
-							test = (var -> var.i <= constant.i);
-							break;
-						case FLOAT:
-							test = (var -> var.f <= constant.f);
-							break;
-						case TIMESTAMP:
-							test = (var -> Long.compareUnsigned(var.ts, constant.ts) <= 0);
-							break;
-						case VARCHAR:
-							throw new RuntimeException("invalid WHERE:" +
-									"WHERE VARCHAR <= ...");
-						default:
-							test = null;
-					}
-					break;
-				case ">":
-					switch (vt) {
-						case INT:
-							test = (var -> var.i > constant.i);
-							break;
-						case FLOAT:
-							test = (var -> var.f > constant.f);
-							break;
-						case TIMESTAMP:
-							test = (var -> Long.compareUnsigned(var.ts, constant.ts) > 0);
-							break;
-						case VARCHAR:
-							throw new RuntimeException("invalid WHERE:" +
-									"WHERE VARCHAR > ...");
-						default:
-							test = null;
-					}
-					break;
-				case ">=":
-					switch (vt) {
-						case INT:
-							test = (var -> var.i >= constant.i);
-							break;
-						case FLOAT:
-							test = (var -> var.f >= constant.f);
-							break;
-						case TIMESTAMP:
-							test = (var -> Long.compareUnsigned(var.ts, constant.ts) >= 0);
-							break;
-						case VARCHAR:
-							throw new RuntimeException("invalid WHERE:" +
-									"WHERE VARCHAR >= ...");
-						default:
-							test = null;
-					}
-					break;
-				case "<>":
-					switch (vt) {
-						case INT:
-							test = (var -> var.i != constant.i);
-							break;
-						case FLOAT:
-							test = (var -> var.f != constant.f);
-							break;
-						case TIMESTAMP:
-							test = (var -> var.ts != constant.ts);
-							break;
-						case VARCHAR:
-							throw new RuntimeException("invalid WHERE:" +
-									"WHERE VARCHAR <> ...");
-						default:
-							test = null;
-					}
-					break;
-				default:
-					throw new RuntimeException("invalid where operator");
-
-			}
-		}
-
-		private static DBVar parseConstant(String constant) {
-			DBVar res = new DBVar();
-			if (constant.equals("none")) {
-				res.i = DBVar.NULL_INT;
-				res.s = DBVar.NULL_STRING;
-				res.f = DBVar.NULL_FLOAT;
-				res.ts = DBVar.NULL_TS;
-			} else {
-				res.i = Long.parseLong(constant);
-				res.s = constant;
-				res.f = Double.parseDouble(constant);
-				res.ts = Long.parseUnsignedLong(constant);
-			}
-			return res;
-		}
-	}
-
 	public static class Expression {
 		public String fieldName;
 		public String asName;
@@ -299,20 +173,6 @@ public class Select implements Command {
 		public Expression(String fieldName) {
 			this(fieldName, fieldName);
 		}
-	}
-
-	public static class GroupBy {
-		public String[] fieldsName;
-		public Condition having;
-
-		public GroupBy(String[] fieldsName, Condition having) {
-			this.fieldsName = fieldsName;
-			this.having = having;
-		}
-	}
-
-	public static class OrderBy {
-
 	}
 
 
