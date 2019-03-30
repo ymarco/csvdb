@@ -16,7 +16,6 @@ import schema.VarType;
 import utils.FilesUtils;
 
 public class Select implements Command {
-	private static final int FlUSH_EVERY = 20;
 	private String tableName;
 	private String fromTableName;
 	private Expression[] expressions;
@@ -120,19 +119,15 @@ public class Select implements Command {
 						switch (schema.getColumnType(j)) {
 						case INT:
 							outFilesBin[fieldIndex].writeLong((long) line[fromFieldIndex]);
-							outFilesBin[fieldIndex].flush();
 							break;
 						case TIMESTAMP:
 							outFilesBin[fieldIndex].writeLong((long) line[fromFieldIndex]);
-							outFilesBin[fieldIndex].flush();
 							break;
 						case FLOAT:
 							outFilesBin[fieldIndex].writeFloat((float) line[fromFieldIndex]);
-							outFilesBin[fieldIndex].flush();
 							break;
 						case VARCHAR:
 							outFiles[fieldIndex].write((String) line[fromFieldIndex] + "\n");
-							outFiles[fieldIndex].flush();
 							break;
 						}
 					} catch (Exception e) {
@@ -143,17 +138,9 @@ public class Select implements Command {
 						throw new RuntimeException("you tried to select file to invalid table");
 					}
 					lineCount++;
-					
-					if (lineCount % FlUSH_EVERY == 0) {
-						FilesUtils.flushAll(outFiles);
-						FilesUtils.flushAll(outFilesBin);
-					}
 				}
 
 				schema.setLineCount(lineCount);
-				
-				FilesUtils.flushAll(outFiles);
-				FilesUtils.flushAll(outFilesBin);
 			}
 			FilesUtils.closeAll(inFiles);
 			FilesUtils.closeAll(inFilesBin);

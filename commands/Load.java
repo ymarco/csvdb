@@ -13,8 +13,6 @@ import schema.VarType;
 import utils.FilesUtils;
 
 public class Load implements Command {
-	private static final int FlUSH_EVERY = 20;
-	
 	private String fileName;
 	private String tableName;
 	private int ignoreLines;
@@ -62,22 +60,18 @@ public class Load implements Command {
 						switch (schema.getColumnType(i)) {
 						case INT:
 							outFilesBin[i].writeLong(Long.parseLong(fields[i]));
-							outFilesBin[i].flush();
 							break;
 						case TIMESTAMP:
 							outFilesBin[i].writeLong(Long.parseUnsignedLong(fields[i]));
-							outFilesBin[i].flush();
 							break;
 						case FLOAT:
 							outFilesBin[i].writeFloat(Float.parseFloat(fields[i]));
-							outFilesBin[i].flush();
 							break;
 						case VARCHAR:
 							String item = fields[i];
 							item = item.replace("\\", "\\\\");
 							item = item.replace("\r\n", "\\n");
 							outFiles[i].write(item + "\n");
-							outFiles[i].flush();
 							break;
 						}
 					} catch (Exception e) {
@@ -87,16 +81,7 @@ public class Load implements Command {
 					
 				}
 				lineCount++;
-				if (lineCount % FlUSH_EVERY == 0) {
-					FilesUtils.flushAll(outFiles);
-					FilesUtils.flushAll(outFilesBin);
-				}
-					
 			}
-			
-			FilesUtils.flushAll(outFiles);
-			FilesUtils.flushAll(outFilesBin);
-			
 			schema.setLineCount(lineCount);
 			
 			//close
