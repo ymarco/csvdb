@@ -16,6 +16,8 @@ public class LoadData {
 	public static void load() {
 		File rootFolder = new File(Main.rootdir);
 		for (File table : rootFolder.listFiles()) {
+			if (table.getName().startsWith("#"))
+				continue;
 			File dataFile = new File(table.getPath() + "\\table.json");
 			if (!dataFile.exists())
 				continue;
