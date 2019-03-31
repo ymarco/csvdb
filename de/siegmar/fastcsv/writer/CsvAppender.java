@@ -39,7 +39,7 @@ public final class CsvAppender implements Closeable, Flushable {
 
     private boolean newline = true;
 
-    CsvAppender(final Writer writer, final char fieldSeparator, final char textDelimiter,
+    public CsvAppender(final Writer writer, final char fieldSeparator, final char textDelimiter,
                 final boolean alwaysDelimitText, final char[] lineDelimiter) {
         this.writer = new FastBufferedWriter(writer);
         this.fieldSeparator = fieldSeparator;

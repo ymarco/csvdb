@@ -94,4 +94,12 @@ public class Schema {
 	public String getColumnFileName(String columnName) {
 		return getColumnFileName(getColumnIndex(columnName));
 	}
+	
+	public String getColumnPath(int i) {
+		return getTablePath() + "\\" + getColumnFileName(i);
+	}
+
+	public String getColumnPath(String columnName) {
+		return getColumnPath(getColumnIndex(columnName));
+	}
 }
