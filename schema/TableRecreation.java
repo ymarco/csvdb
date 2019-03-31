@@ -14,7 +14,6 @@ import java.util.List;
 import cmd.Main;
 import utils.FilesUtils;
 
-//TODO
 public class TableRecreation {
 	private List<Long> rows = new ArrayList<Long>();
 	private List<Long> orderColumnLong = new ArrayList<Long>();

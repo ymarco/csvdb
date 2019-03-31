@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import commands.Command;
 import parsing.Parser;
+import utils.TextUtils;
 
 public class Main {
 	public static String rootdir = "";
@@ -94,32 +95,21 @@ public class Main {
 	 */
 	/*
 	 * TODO:
-	 * if the ';' is in quotes or escaped or before some other text it doesn't work
+	 * if the ';' is in quotes or escaped it doesn't work
 	 */
 	private static String readCommand() {
 		if (useCommandLine)
 			System.out.print("csvdb>");
-		StringBuilder code = new StringBuilder();
+		StringBuilder code = new StringBuilder(codeReader.next(";"));
+		TextUtils.removeComments(code);
 		while (!code.toString().endsWith(";")) {
-			String line = codeReader.nextLine();
-			int note = line.indexOf("--");
-			if (note != -1)
-				line = line.substring(0, note);
-			code.append(line);
-			if (line.endsWith(";"))
-				break;
-			code.append("\n\r"); // i don't want to add '\n\r' after ';'
+			code.append(codeReader.next(";"));
+			TextUtils.removeComments(code);
 		}
 		return code.toString();
 	}
 
 	private static void test() {
-//		Column[] columns = {new Column(VarType.VARCHAR, "c1"), new Column(VarType.VARCHAR, "c2"),
-//				new Column(VarType.VARCHAR, "c3"), new Column(VarType.INT, "c4")};
-//		new Create("testtest", false, columns).run();
-//		new Load("C:\\Users\\flash_000\\Desktop\\testCsv.csv", "testtest", 0).run();
-//		Expression[] expressions = {new Expression("c1"), new Expression("c3", "c5"), new Expression("c4", "c")};
-//		new Select("aaa", "testtest", expressions, new Where("c", Select.Operator.big, 25L), null, null).run();
-//		System.out.println("end test");
+		
 	}
 }

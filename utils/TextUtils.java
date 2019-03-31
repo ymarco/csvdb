@@ -19,5 +19,16 @@ public class TextUtils {
 			res += s;
 		return res;
 	}
+	
+	public static StringBuilder removeComments(StringBuilder sb) {
+		int index = sb.indexOf("--");
+		while (index > -1) {
+			sb.substring(index, sb.length());
+			int endLineIndex = sb.indexOf("\n\r") + index;
+			sb.replace(index, endLineIndex, "");
+			index = sb.indexOf("--");
+		}
+		return sb;
+	}
 
 }
