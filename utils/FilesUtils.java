@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 public class FilesUtils {
@@ -42,5 +43,14 @@ public class FilesUtils {
 		s = s.replace("\\n", "\r\n");
 		s = s.replace("\\\\", "\\");
 		return s;
+	}
+	
+	public static void clearFolder(File file) {
+		for(String s: file.list()){
+		    File currentFile = new File(file.getPath(),s);
+		    if (currentFile.isDirectory())
+		    	clearFolder(currentFile);
+		    currentFile.delete();
+		}
 	}
 }

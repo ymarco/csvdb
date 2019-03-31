@@ -4,6 +4,7 @@ import java.io.File;
 
 import cmd.Main;
 import schema.Schema;
+import utils.FilesUtils;
 
 public class Drop implements Command {
 	final String tableName;
@@ -34,10 +35,7 @@ public class Drop implements Command {
 	
 	private void removeFiles(String tableName) {
 		File file = new File(Main.rootdir + "\\" + tableName);
-		for(String s: file.list()){
-		    File currentFile = new File(file.getPath(),s);
-		    currentFile.delete();
-		}
+		FilesUtils.clearFolder(file);
 		file.delete();
 	}
 }
