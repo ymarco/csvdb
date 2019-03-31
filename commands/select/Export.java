@@ -14,11 +14,11 @@ import utils.FilesUtils;
 
 public class Export {
 
-	public static void export(String  toFile) {
-		export("#export", toFile);
+	public static void exportToCsv(String  toFile) {
+		exportToCsv("#export", toFile);
 	}
 
-	public static void export(String tableName, String toFile) {
+	public static void exportToCsv(String tableName, String toFile) {
 		try {
 			Schema schema = Schema.GetSchema(tableName);
 			DataInputStream[] inputFilesBin = new DataInputStream[schema.getColumnsCount()];
