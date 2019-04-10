@@ -22,7 +22,7 @@ public class Tokenizer {
 	 */
 	public Token nextToken() {
 		skip();
-		if (eof())
+		if (eof() || cur() == ';')
 			return new Token(TokenType.EOF, "");
 		if (TextUtils.isAlphaOrUnderscore(cur()))
 			return getIdentifierOrKeyword();

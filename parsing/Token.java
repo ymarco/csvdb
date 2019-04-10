@@ -25,5 +25,5 @@ public class Token {
 					"float", "varchar", "timestamp", "desc", "asc", "and", "or", "not", "create", "if", "exists"));
 
 	public static final Set<String> operators = new HashSet<>(
-			Arrays.asList(",", "(", ")", "<", "<=", "<>", "=", ">=", ">", ";", "*"));
+			Arrays.asList(",", "(", ")", "<", "<=", "<>", "=", ">=", ">",/* ";",*/ "*"));
 }

@@ -47,7 +47,7 @@ public class FilesUtils {
 	
 	public static void clearFolder(File file) {
 		for(String s: file.list()){
-		    File currentFile = new File(file.getPath(),s);
+		    File currentFile = new File(file.getPath(), s);
 		    if (currentFile.isDirectory())
 		    	clearFolder(currentFile);
 		    currentFile.delete();

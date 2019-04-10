@@ -10,7 +10,7 @@ public class TextUtils {
 	}
 	
 	public static boolean isSpace(char c) {
-		return c == ' ' || c == '\t' || c == 'k' || c == '\n';
+		return c == ' ' || c == '\t' || c == '\r' || c == '\n';
 	}
 	
 	public static String repert(String s, int times) {

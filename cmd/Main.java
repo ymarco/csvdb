@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 import commands.Command;
 import parsing.Parser;
-import utils.TextUtils;
 
 public class Main {
 	public static String rootdir = "";
@@ -64,7 +63,7 @@ public class Main {
 				case "--run":
 					if (codeReader == null)
 						throw new Exception();
-					codeReader = new Scanner(new File(args[i + 1]));
+					codeReader = new Scanner(new File(args[i + 1])).useDelimiter(";");
 					useCommandLine = false;
 					i++;
 					break;
@@ -79,7 +78,7 @@ public class Main {
 				}
 			}
 			if (codeReader == null)
-				codeReader = new Scanner(System.in);
+				codeReader = new Scanner(System.in).useDelimiter(";");
 
 		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
@@ -100,11 +99,11 @@ public class Main {
 	private static String readCommand() {
 		if (useCommandLine)
 			System.out.print("csvdb>");
-		StringBuilder code = new StringBuilder(codeReader.next(";"));
-		TextUtils.removeComments(code);
+		String code = codeReader.next() + ";";
+		code.replaceAll("--\\s*$", "");
 		while (!code.toString().endsWith(";")) {
-			code.append(codeReader.next(";"));
-			TextUtils.removeComments(code);
+			code += codeReader.next() + ";";
+			code.replaceAll("--\\s*$", "");
 		}
 		return code.toString();
 	}
