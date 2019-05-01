@@ -39,7 +39,7 @@ public class Select implements Command {
 	public void run() {
 		if (Schema.HaveSchema(tableName))
 			throw new RuntimeException("you tried to select an existing table");
-
+		
 		createTable();
 		fillTable();
 	}

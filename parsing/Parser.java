@@ -195,8 +195,8 @@ public class Parser {
 			}
 		}
 		//into outfile
-		if (!currToken.equals(new Token(TokenType.KEYWORD, "into"))) {
-			expectNextToken(TokenType.KEYWORD, "into");
+		if (currToken.equals(new Token(TokenType.KEYWORD, "into"))) {
+			expectNextToken(TokenType.KEYWORD, "outfile");
 			expectNextToken(TokenType.LIT_STR);
 			String intoFile = currToken.val; // TODO Select don't have inFile
 			nextToken();
@@ -237,6 +237,9 @@ public class Parser {
 			orderBy = new OrderBy();
 			nextToken();
 		}
+		//eof
+		expectNextToken(TokenType.EOF);
+		//return
 		return new Select(tableName, fromTableName, expressions, where, groupBy, orderBy);
 	}
 	
