@@ -38,6 +38,7 @@ public class Main {
 				System.out.println(e.getLocalizedMessage());
 				if (verbose)
 					e.printStackTrace();
+				System.err.flush();
 				if (!useCommandLine)
 					break;
 			}
