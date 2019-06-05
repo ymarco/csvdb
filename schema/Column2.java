@@ -35,7 +35,7 @@ public class Column2 {
 		
 	}
 	
-	//TODO add aggrate
+	//TODO add aggrate.
 	
 	
 	
