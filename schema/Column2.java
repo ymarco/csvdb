@@ -9,11 +9,13 @@ public class Column2 {
 	public float avg;
 	public Object sum;
 	public long count;
+	public String filePath;
 
 	public Column2(VarType type, String name, String filePath) {
 		this.type = type;
 		this.name = name;
-
+		this.filePath = filePath;
+		
 		if (type == VarType.FLOAT) {
 			min = Float.MAX_VALUE;
 			max = Float.MIN_VALUE;
@@ -29,6 +31,8 @@ public class Column2 {
 			max = 0L;
 			sum = 0L;
 		}
+		
+		
 	}
 	
 	//TODO add aggrate
