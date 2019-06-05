@@ -13,12 +13,12 @@ import schema.Schema;
 import schema.VarType;
 import utils.FilesUtils;
 
-public class Load implements Command {
+public class Load2 implements Command {
 	private String fileName;
 	private String tableName;
 	private int ignoreLines;
 	
-	public Load(String fileName, String tableName, int ignoreLines) {
+	public Load2(String fileName, String tableName, int ignoreLines) {
 		this.fileName = fileName;
 		this.tableName = tableName;
 		this.ignoreLines = ignoreLines;

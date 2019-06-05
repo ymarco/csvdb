@@ -1,4 +1,4 @@
-package cmd;
+package commandLine;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,7 +22,7 @@ public class Main {
 			try {
 
 				String code = readCommand();
-
+				
 				if (code.equals("exit();") || code.equals("exit;"))
 					break;
 				if (code.equals("test();") || code.equals("test;")) {

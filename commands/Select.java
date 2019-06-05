@@ -10,13 +10,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import commands.select.GroupBy;
+import commands.select.OrderBy;
+import commands.select.Where;
 import schema.Column;
 import schema.DBVar;
 import schema.Schema;
 import schema.VarType;
 import utils.FilesUtils;
-
-import commands.select.*;
 
 
 public class Select implements Command {
@@ -162,16 +163,28 @@ public class Select implements Command {
 
 
 	public static class Expression {
+		public enum AggFuncs {NOTHING, MIN, MAX, AVG, SUM, COUNT};
+		
 		public String fieldName;
 		public String asName;
-
+		public AggFuncs aggFunc;
+		
+		public Expression(String fieldName) {
+			this(fieldName, AggFuncs.NOTHING);
+		}
+		
+		public Expression(String fieldName, AggFuncs aggFunc) {
+			this(fieldName, fieldName, aggFunc);
+		}
+		
 		public Expression(String fieldName, String asName) {
+			this(fieldName, asName, AggFuncs.NOTHING);
+		}
+		
+		public Expression(String fieldName, String asName, AggFuncs aggFunc) {
 			this.fieldName = fieldName;
 			this.asName = asName;
-		}
-
-		public Expression(String fieldName) {
-			this(fieldName, fieldName);
+			this.aggFunc = aggFunc;
 		}
 	}
 

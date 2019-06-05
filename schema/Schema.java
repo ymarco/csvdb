@@ -2,7 +2,7 @@ package schema;
 
 import java.util.Hashtable;
 
-import cmd.Main;
+import commandLine.Main;
 
 public class Schema {
 	private static Hashtable<String, Schema> schemas = new Hashtable<String, Schema>();

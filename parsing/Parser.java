@@ -7,11 +7,12 @@ import commands.Command;
 import commands.Create;
 import commands.Drop;
 import commands.Load;
-import commands.Select;
-import commands.Select.Expression;
+import commands.Select2;
+import commands.Select2.Expression;
+import commands.Select2.Expression.AggFuncs;
 import commands.select.GroupBy;
 import commands.select.OrderBy;
-import commands.select.Where;
+import commands.select.Where2;
 import schema.Column;
 import schema.Schema;
 import schema.VarType;
@@ -40,7 +41,7 @@ public class Parser {
 			return parseLoad();
 		case "select":
 			return parseSelect();
-			/* unreachable */
+		/* unreachable */
 		default:
 			return null;
 		}
@@ -148,7 +149,6 @@ public class Parser {
 		} else if (currToken.type != TokenType.EOF) {
 			throwErr("unexpected token");
 		}
-
 		return new Load(src, dst, ignore_lines);
 	}
 
@@ -176,10 +176,10 @@ public class Parser {
 	}
 
 	private Command parseSelect() {
-		String tableName = null;
+		String intoFile = null;
 		String fromTableName;
 		Expression[] expressions = null;
-		Where where = null;
+		Where2 where = null;
 		GroupBy groupBy = null;
 		OrderBy orderBy = null;
 		
@@ -198,16 +198,16 @@ public class Parser {
 		if (currToken.equals(new Token(TokenType.KEYWORD, "into"))) {
 			expectNextToken(TokenType.KEYWORD, "outfile");
 			expectNextToken(TokenType.LIT_STR);
-			String intoFile = currToken.val; // TODO Select don't have inFile
+			intoFile = currToken.val;
 			nextToken();
 		}
 		//from
 		expectThisToken(TokenType.KEYWORD, "from");
 		expectNextToken(TokenType.IDENTIFIER);
 		fromTableName = currToken.val;
-		if (!Schema.HaveSchema(tableName))
+		if (!Schema.HaveSchema(fromTableName))
 			throwErr("unexisting table");
-		Schema schema = Schema.GetSchema(tableName);
+		Schema schema = Schema.GetSchema(fromTableName);
 		//where
 		nextToken();
 		if (currToken.equals(new Token(TokenType.KEYWORD, "where")))
@@ -225,28 +225,67 @@ public class Parser {
 			while (currToken.equals(new Token(TokenType.OPERATOR, ",")));
 			
 			//having
-			Where having = null;
+			Where2 having = null;
 			if (currToken.equals(new Token(TokenType.KEYWORD, "having")))
 				having = parseCondition(schema);
 			
 			groupBy = new GroupBy(fields.toArray(new String[0]), having);
 		}
-		//TODO order by
+		//order by
 		if (currToken.equals(new Token(TokenType.KEYWORD, "order"))) {
 			expectNextToken(TokenType.KEYWORD, "by");
-			orderBy = new OrderBy();
+			expectNextToken(TokenType.IDENTIFIER);
+			String outputField = currToken.val;
+			nextToken();
+			
+			OrderBy.SortType sortType = OrderBy.SortType.ASC;
+			if (currToken.type == TokenType.KEYWORD) {
+				if (currToken.val.equals("asc"));
+				else if (currToken.val.equals("desc"))
+					sortType = OrderBy.SortType.DESC;
+				else
+					throwErr("sort type need to be ASC or DESC");
+			}
+			orderBy = new OrderBy(outputField, sortType);
 			nextToken();
 		}
 		//eof
 		expectNextToken(TokenType.EOF);
 		//return
-		return new Select(tableName, fromTableName, expressions, where, groupBy, orderBy);
+		return new Select2(intoFile, fromTableName, expressions, where, groupBy, orderBy);
 	}
 	
 	private Expression parseSelectExpression() {
+		AggFuncs aggFunc = AggFuncs.NOTHING;
+		if (currToken.type == TokenType.KEYWORD) {
+			switch (currToken.val) {
+			case "min":
+				aggFunc = AggFuncs.MIN;
+				break;
+			case "max":
+				aggFunc = AggFuncs.MAX;
+				break;
+			case "avg":
+				aggFunc = AggFuncs.AVG;
+				break;
+			case "sum":
+				aggFunc = AggFuncs.SUM;
+				break;
+			case "count":
+				aggFunc = AggFuncs.COUNT;
+				break;
+			default:
+				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
+			}
+			expectNextToken(TokenType.OPERATOR, "(");
+		}
 		expectThisToken(TokenType.IDENTIFIER);
 		String fieldName = currToken.val;
 		nextToken();
+		if (aggFunc != AggFuncs.NOTHING) {
+			expectThisToken(TokenType.OPERATOR, ")");
+			nextToken();
+		}
 		if (currToken.equals(new Token(TokenType.KEYWORD, "as"))) {
 			expectNextToken(TokenType.IDENTIFIER);
 			nextToken();
@@ -255,11 +294,7 @@ public class Parser {
 		return new Expression(fieldName);
 	}
 	
-//	private OrderField parseOrderField() {
-//		
-//	}
-	
-	private Where parseCondition(Schema schema) {
+	private Where2 parseCondition(Schema schema) {
 		expectNextToken(TokenType.IDENTIFIER);
 		String fieldName = currToken.val;
 		expectNextToken(TokenType.OPERATOR);
@@ -269,6 +304,6 @@ public class Parser {
 			throwErr("unexpected token");
 		String constant = currToken.val;
 		nextToken();
-		return new Where(schema, fieldName, operator, constant);
+		return new Where2(schema, fieldName, operator, constant);
 	}
 }

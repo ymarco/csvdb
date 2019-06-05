@@ -1,4 +1,4 @@
-package cmd;
+package commandLine;
 
 import java.io.File;
 import java.io.FileReader;
