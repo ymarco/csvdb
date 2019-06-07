@@ -1,10 +1,8 @@
 package commands;
 
-import java.io.IOException;
-
 import commands.select.GroupBy;
+import commands.select.LoadedTable;
 import commands.select.OrderBy;
-import commands.select.Where2;
 import commands.select.Where3;
 
 
@@ -25,7 +23,10 @@ public class Select3 implements Command {
 	}
 
 	public void run() {
-		
+		LoadedTable lt = new LoadedTable(fromTableName, expressions);
+		lt.where(where);
+		if (orderBy != null)
+			lt.orderBy(orderBy);
 	}
 	
 	public static class Expression {

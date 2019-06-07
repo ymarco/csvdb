@@ -1,12 +1,18 @@
 package commands.select;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import commands.Select3.Expression;
 import commands.Select3.Expression.AggFuncs;
+import commands.select.OrderBy.SortType;
 import exceptions.CsvdbException;
 import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
 import schema.VarType;
+import utils.Tuple;
 
 public class LoadedTable {
 	LoadedColumn[] columns;
@@ -41,8 +47,8 @@ public class LoadedTable {
 		return columns[schema.getColumnIndex(columnName)];
 	}
 	
-	public void where(String columnName, Where3 where) {
-		boolean[] whereIndexes = getColumnByName(columnName).getWhereIndexes(where);
+	public void where(Where3 where) {
+		boolean[] whereIndexes = getColumnByName(where.fieldName).getWhereIndexes(where);
 		int newRowsCount = 0;
 		for (boolean index : whereIndexes)
 			if (index)
@@ -52,13 +58,24 @@ public class LoadedTable {
 		rowsCount = newRowsCount;
 	}
 	
-	public void orderBy(String columnName) {
-		//TODO
+	public void orderBy(OrderBy orderBy) {
+		int[] orderByIndexes = getColumnByName(orderBy.outputFieldName).getOrderByIndexes(orderBy.sortType);
+		for (LoadedColumn column : columns)
+			column.applayOrderByIndexes(orderByIndexes);
 	}
 	
 	public void gropBy(String columnName) {
 		//TODO
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	class LoadedColumn {
@@ -135,6 +152,51 @@ public class LoadedTable {
 				for (int oldInd = 0; oldInd < indexes.length; oldInd++)
 					if (indexes[oldInd])
 						newValuesV[newIndV++] = valuesV[oldInd];
+				valuesV = newValuesV;
+				break;
+			}
+		}
+		
+		public int[] getOrderByIndexes(SortType sortType) {
+			Comparator<DBVar> comparator = columnType.getComparator();
+			List<Tuple<DBVar,Integer>> colDBvar = new ArrayList<Tuple<DBVar,Integer>>(rowsCount);
+			for (int i = 0; i < rowsCount; i++)
+				colDBvar.add(new Tuple<DBVar, Integer>(getItem(i), i));
+			if (sortType == SortType.ASC)
+				colDBvar.sort((x,y)->comparator.compare(x.f,y.f));
+			else
+				colDBvar.sort((x,y)-> -comparator.compare(x.f,y.f));
+			
+			int[] res = new int[colDBvar.size()];
+			for (int i = 0; i < res.length; i++)
+				res[i] = colDBvar.get(i).s;
+			return res;
+		}
+		
+		public void applayOrderByIndexes(int[] indexes) {
+			switch (columnType) {
+			case INT:
+				long[] newValuesI = new long[rowsCount];
+				for (int i = 0; i < newValuesI.length; i++)
+					newValuesI[i] = valuesI[i];
+				valuesI = newValuesI;
+				break;
+			case FLOAT:
+				double[] newValuesF = new double[rowsCount];
+				for (int i = 0; i < newValuesF.length; i++)
+					newValuesF[i] = valuesF[i];
+				valuesF = newValuesF;
+				break;
+			case TIMESTAMP:
+				long[] newValuesTS = new long[rowsCount];
+				for (int i = 0; i < newValuesTS.length; i++)
+					newValuesTS[i] = valuesTS[i];
+				valuesTS = newValuesTS;
+				break;
+			case VARCHAR:
+				String[] newValuesV = new String[rowsCount];
+				for (int i = 0; i < newValuesV.length; i++)
+					newValuesV[i] = valuesV[i];
 				valuesV = newValuesV;
 				break;
 			}

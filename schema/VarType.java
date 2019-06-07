@@ -1,15 +1,19 @@
 package schema;
 
+import java.util.Comparator;
+
 public enum VarType {
-	INT("int"),
-    FLOAT("float"),
-    VARCHAR("varchar"),
-    TIMESTAMP("timestamp");
+	INT("int",(x,y)->Long.compare(x.i, y.i)),
+    FLOAT("float",(x,y)->Double.compare(x.f, y.f)),
+    VARCHAR("varchar",(x,y)->Long.compareUnsigned(x.ts, y.ts)),
+    TIMESTAMP("timestamp",(x,y)->x.s.compareTo(y.s));
 	
-	String toString;
+	private final String toString;
+	private final Comparator<DBVar> comparator;
 	
-	private VarType(String toString) {
+	private VarType(String toString, Comparator<DBVar> comparator) {
 		this.toString = toString;
+		this.comparator = comparator;
 	}
 	
 	public String toString() {
@@ -24,5 +28,9 @@ public enum VarType {
 		case "timestamp": return TIMESTAMP;
 		}
 		return null;
+	}
+	
+	public Comparator<DBVar> getComparator() {
+		return comparator;
 	}
 }
