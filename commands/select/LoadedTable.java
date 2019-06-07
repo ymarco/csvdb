@@ -49,6 +49,7 @@ public class LoadedTable {
 				newRowsCount++;
 		for (LoadedColumn column : columns)
 			column.applayWhereIndexes(whereIndexes, newRowsCount);
+		rowsCount = newRowsCount;
 	}
 	
 	public void orderBy(String columnName) {
