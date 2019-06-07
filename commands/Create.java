@@ -8,15 +8,15 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import commandLine.Main;
-import schema.Column;
+import schema.Column2;
 import schema.Schema;
 
 public class Create implements Command {
 	private String tableName;
 	private boolean ine; //if not exists
-	private Column[] columns;
+	private Column2[] columns;
 	
-	public Create(String tableName, boolean ine, Column[] columns) {
+	public Create(String tableName, boolean ine, Column2[] columns) {
 		this.tableName = tableName;
 		this.ine = ine;
 		this.columns = columns;
@@ -30,7 +30,7 @@ public class Create implements Command {
 	/**
 	 * @return if success
 	 */
-	private boolean createSchema(String tableName, boolean ine, Column[] columns) {
+	private boolean createSchema(String tableName, boolean ine, Column2[] columns) {
 		if (Schema.HaveSchema(tableName)) {
 			if (!ine)
 				throw new RuntimeException("you tried to create an existing table without the IF NOT EXISTS");
@@ -40,7 +40,7 @@ public class Create implements Command {
 		return true;
 	}
 	
-	private void createJson(String tableName, Column[] columns) {
+	private void createJson(String tableName, Column2[] columns) {
 		JSONArray schema = new JSONArray();
 		for (int i = 0; i < columns.length; i++) {
 			JSONObject col = new JSONObject();

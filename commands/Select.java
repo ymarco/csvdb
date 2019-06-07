@@ -13,7 +13,7 @@ import java.io.IOException;
 import commands.select.GroupBy;
 import commands.select.OrderBy;
 import commands.select.Where;
-import schema.Column;
+import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
 import schema.VarType;
@@ -53,10 +53,10 @@ public class Select implements Command {
 				expressions[i] = new Expression(fromSchema.getColumnName(i));
 		}
 
-		Column[] columns = new Column[expressions.length];
+		Column2[] columns = new Column2[expressions.length];
 		for (int i = 0; i < columns.length; i++) {
-			Column column = fromSchema.getColumn(expressions[i].fieldName);
-			columns[i] = new Column(column.type, expressions[i].asName);
+			Column2 column = fromSchema.getColumn(expressions[i].fieldName);
+			columns[i] = new Column2(column.type, expressions[i].asName, null /*for compile*/);
 		}
 		new Create(tableName, false, columns).run();
 	}

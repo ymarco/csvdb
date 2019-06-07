@@ -3,6 +3,7 @@ package parsing;
 import java.util.ArrayList;
 import java.util.List;
 
+import commandLine.Main;
 import commands.Command;
 import commands.Create;
 import commands.Drop;
@@ -13,7 +14,7 @@ import commands.Select2.Expression.AggFuncs;
 import commands.select.GroupBy;
 import commands.select.OrderBy;
 import commands.select.Where2;
-import schema.Column;
+import schema.Column2;
 import schema.Schema;
 import schema.VarType;
 
@@ -84,7 +85,7 @@ public class Parser {
 	private Command parseCreate() {
 		String name = "";
 		boolean enable_ifnexists = false;
-		ArrayList<Column> args = new ArrayList<Column>();
+		ArrayList<Column2> args = new ArrayList<Column2>();
 		expectNextToken(TokenType.KEYWORD, "table");
 		// check for [IF NOT EXISTS]
 		nextToken();
@@ -108,12 +109,12 @@ public class Parser {
 		 */
 		while (true) {
 			expectNextToken(TokenType.IDENTIFIER); // argument name
-			String arg_name = currToken.val;
+			String argName = currToken.val;
 			expectNextToken(TokenType.KEYWORD); // argument type
 			if (!Token.keywords.contains(currToken.val))
 				throwErr("parse error: insecondid database type");
-			VarType arg_type = VarType.toVarType(currToken.val);
-			args.add(new Column(arg_type, arg_name));
+			VarType argType = VarType.toVarType(currToken.val);
+			args.add(new Column2(argType, argName, Main.rootdir + "//" + name + "//" + argName + ".col"));
 			expectNextToken(TokenType.OPERATOR);
 			if (currToken.val.equals(",")) // more arguments
 				continue;
@@ -125,7 +126,7 @@ public class Parser {
 		}
 		/* finished reading arguments */
 		expectNextToken(TokenType.EOF);
-		return new Create(name, enable_ifnexists, (Column[]) args.toArray(new Column[0]));
+		return new Create(name, enable_ifnexists, (Column2[]) args.toArray(new Column2[0]));
 
 	}
 

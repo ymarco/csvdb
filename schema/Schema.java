@@ -9,11 +9,11 @@ public class Schema {
 	
 	private String tableName;
 	private String tablePath;
-	private Column[] columns;
+	private Column2[] columns;
 	private Hashtable<String, Integer> fieldNameToIndex = new Hashtable<String, Integer>();
 	private int lineCount = -1;
 	
-	private Schema(String tableName, Column[] columns) {
+	private Schema(String tableName, Column2[] columns) {
 		this.tableName = tableName;
 		this.columns = columns;
 		this.tablePath = Main.rootdir + "\\" + tableName;
@@ -23,7 +23,7 @@ public class Schema {
 	}
 	
 	
-	public Column getColumn(int i) {
+	public Column2 getColumn(int i) {
 		return columns[i];
 	}
 
@@ -33,7 +33,7 @@ public class Schema {
 		return fieldNameToIndex.get(columnName);
 	}
 	
-	public Column getColumn(String columnName) {
+	public Column2 getColumn(String columnName) {
 		return getColumn(getColumnIndex(columnName));
 	}
 	
@@ -71,7 +71,7 @@ public class Schema {
 	
 	
 	
-	public static void AddSchema(String tableName, Column[] columns) {
+	public static void AddSchema(String tableName, Column2[] columns) {
 		schemas.put(tableName, new Schema(tableName, columns));
 	}
 	

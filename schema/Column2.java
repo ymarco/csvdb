@@ -103,4 +103,10 @@ public class Column2 {
 			throw new CsvdbException("column file erorr");
 		}
 	}
+	
+	
+	//TODO order: return new indexes
+//	public int[] order(boolean lowToHight) {
+//		
+//	}
 }
