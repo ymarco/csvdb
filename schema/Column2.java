@@ -29,36 +29,43 @@ public class Column2 {
 		this.type = type;
 		this.name = name;
 		this.filePath = filePath;
-		
-		if (type == VarType.FLOAT) {
-			min = Float.MAX_VALUE;
-			max = Float.MIN_VALUE;
-			sum = 0F;
+
+		switch (type) {
+
+			case INT:
+				min = Long.MAX_VALUE;
+				max = Long.MIN_VALUE;
+				sum = 0L;
+				break;
+			case FLOAT:
+				min = Float.MAX_VALUE;
+				max = Float.MIN_VALUE;
+				sum = 0F;
+				break;
+			case VARCHAR:
+				min = null;
+				max = null;
+				sum = null;
+				break;
+			case TIMESTAMP:
+				min = -1L;
+				max = 0L;
+				sum = 0L;
+				break;
 		}
-		if (type == VarType.INT) {
-			min = Long.MAX_VALUE;
-			max = Long.MIN_VALUE;
-			sum = 0L;
-		}
-		if (type == VarType.TIMESTAMP) {
-			min = -1L;
-			max = 0L;
-			sum = 0L;
-		}
-		
-		
+
+
 	}
-	
+
 	//TODO add aggrate
-	
-	
-	
+
+
 	long[] valuesI;
 	double[] valuesF;
 	long[] valuesTS;
 	String[] valuesV;
-	
-	
+
+
 	public void loadToMemoryI() {
 		try {
 			List<Long> values = new ArrayList<>();
@@ -73,7 +80,7 @@ public class Column2 {
 			throw new CsvdbException("column file erorr");
 		}
 	}
-	
+
 	public void loadToMemoryF() {
 		try {
 			List<Double> values = new ArrayList<>();
@@ -88,7 +95,7 @@ public class Column2 {
 			throw new CsvdbException("column file erorr");
 		}
 	}
-	
+
 	public void loadToMemoryTS() {
 		try {
 			List<Long> values = new ArrayList<>();
