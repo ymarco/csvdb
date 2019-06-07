@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cmd.Main;
+import commandLine.Main;
 import utils.FilesUtils;
 
 public class TableRecreation {
@@ -310,6 +310,6 @@ public class TableRecreation {
 		for (long r : rows) {
 			for i in range(columns.len):
 				dst_files[i].writeRow(src_files[i].atRow(r))
-		 */
+		*/
 	}
 }

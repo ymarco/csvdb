@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import cmd.Main;
+import commandLine.Main;
 import schema.Column;
 import schema.Schema;
 

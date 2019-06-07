@@ -2,7 +2,7 @@ package commands;
 
 import java.io.File;
 
-import cmd.Main;
+import commandLine.Main;
 import schema.Schema;
 import utils.FilesUtils;
 

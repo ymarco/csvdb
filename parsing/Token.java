@@ -18,6 +18,13 @@ public class Token {
 			return "Token[EOF]";
 		return "Token[" + type.name() + ", " + val + "]";
 	}
+	
+	public boolean equals(Object other) {
+		if (!(other instanceof Token))
+			return false;
+		Token otherToken = (Token) other;
+		return otherToken.type == type && otherToken.val.equals(val);
+	}
 
 	public static final Set<String> keywords = new HashSet<>(
 			Arrays.asList("select", "from", "where", "avg", "sum", "min", "max", "load", "drop", "order", "by", "group",
