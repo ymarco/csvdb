@@ -2,7 +2,6 @@ package commands.select;
 
 import schema.DBVar;
 import schema.Schema;
-import schema.VarType;
 
 //classes
 public class Where2 {
@@ -16,17 +15,17 @@ public class Where2 {
 		this.constant = parseConstant(constant, schema.getColumnType(fieldName));
 	}
 
-	private static DBVar parseConstant(String constant, VarType varType) {
+	private static DBVar parseConstant(String constant, DBVar.Type type) {
 		DBVar res = new DBVar();
 		try {
-			switch (varType) {
+			switch (type) {
 			case INT:
 				res.i = constant.equals("null") ? DBVar.NULL_INT : Long.parseLong(constant); 
 				return res;
 			case FLOAT:
 				res.f = constant.equals("null") ? DBVar.NULL_FLOAT : Double.parseDouble(constant); 
 				return res;
-			case TIMESTAMP:
+			case TS:
 				res.ts = constant.equals("null") ? DBVar.NULL_TS : Long.parseUnsignedLong(constant); 
 				return res;
 			case VARCHAR:

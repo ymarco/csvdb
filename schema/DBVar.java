@@ -1,14 +1,42 @@
 package schema;
 
-public class DBVar {
-	public long i;
-	public String s;
-	public double f;
-	public long ts; // ts is treated as an UNSIGNED long
-	public VarType varType;
-	
-	public static final long   NULL_INT = Long.MIN_VALUE;
-	public static final String NULL_STRING = "";
-	public static final double NULL_FLOAT = Double.NEGATIVE_INFINITY;
-	public static final long   NULL_TS = 0;
+import java.util.Comparator;
+
+public abstract class DBVar {
+
+	public abstract DBVar getNull();
+
+	public abstract Comparator<DBVar> comparator();
+
+	public abstract Comparator<DBVar> getNegComparator();
+
+	public abstract Type getType();
+
+
+	public enum Type {
+		INT("int"),
+	    FLOAT("float"),
+	    VARCHAR("varchar"),
+	    TS("timestamp");
+
+		private final String toString;
+
+		Type(String toString) {
+			this.toString = toString;
+		}
+
+		public String toString() {
+			return toString;
+		}
+
+		public static Type toVarType(String s) {
+			switch (s.toLowerCase()) {
+			case "int": return INT;
+			case "varchar": return VARCHAR;
+			case "float": return FLOAT;
+			case "timestamp": return TS;
+			}
+			return null;
+		}
+	}
 }

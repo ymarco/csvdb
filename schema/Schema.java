@@ -41,11 +41,11 @@ public class Schema {
 		return getColumn(i).name;
 	}
 	
-	public VarType getColumnType(int i) {
+	public DBVar.Type getColumnType(int i) {
 		return getColumn(i).type;
 	}
 	
-	public VarType getColumnType(String columnName) {
+	public DBVar.Type getColumnType(String columnName) {
 		return getColumnType(getColumnIndex(columnName));
 	}
 	

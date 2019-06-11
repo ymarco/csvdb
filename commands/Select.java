@@ -12,11 +12,10 @@ import java.io.IOException;
 
 import commands.select.GroupBy;
 import commands.select.OrderBy;
-import commands.select.Where;
+import commands.select.WhereNEW;
 import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
-import schema.VarType;
 import utils.FilesUtils;
 
 
@@ -24,11 +23,11 @@ public class Select implements Command {
 	private String tableName;
 	private String fromTableName;
 	private Expression[] expressions;
-	private Where where; //don't work now
+	private WhereNEW where; //don't work now
 	private GroupBy groupBy; //don't work now
 	private OrderBy orderBy; //don't work now
 
-	public Select(String tableName, String fromTableName, Expression[] expressions, Where where, GroupBy groupBy, OrderBy orderBy) {
+	public Select(String tableName, String fromTableName, Expression[] expressions, WhereNEW where, GroupBy groupBy, OrderBy orderBy) {
 		this.tableName = tableName;
 		this.fromTableName = fromTableName;
 		this.expressions = expressions;
@@ -77,14 +76,14 @@ public class Select implements Command {
 			DataOutputStream[] outFilesBin = new DataOutputStream[schema.getColumnsCount()];
 
 			for (int i = 0; i < inFiles.length; i++) {
-				if (fromSchema.getColumnType(i) == VarType.VARCHAR)
+				if (fromSchema.getColumnType(i) == DBVar.Type.VARCHAR)
 					inFiles[i] = new BufferedReader(new FileReader(fromSchema.getTablePath() + "\\" + fromSchema.getColumnName(i) + ".onym"));
 				else
 					inFilesBin[i] = new DataInputStream(new FileInputStream(fromSchema.getTablePath() + "\\" + fromSchema.getColumnName(i) + ".onym"));
 			}
 
 			for (int i = 0; i < outFiles.length; i++) {
-				if (schema.getColumnType(i) == VarType.VARCHAR)
+				if (schema.getColumnType(i) == DBVar.Type.VARCHAR)
 					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
 				else
 					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + ".onym"));
@@ -103,7 +102,7 @@ public class Select implements Command {
 						case INT:
 							line[j].i = inFilesBin[j].readLong();
 							break;
-						case TIMESTAMP:
+						case TS:
 							line[j].ts = inFilesBin[j].readLong();
 							break;
 						case FLOAT:
@@ -129,7 +128,7 @@ public class Select implements Command {
 							case INT:
 								outFilesBin[fieldIndex].writeLong(line[fromFieldIndex].i);
 								break;
-							case TIMESTAMP:
+							case TS:
 								outFilesBin[fieldIndex].writeLong(line[fromFieldIndex].ts);
 								break;
 							case FLOAT:

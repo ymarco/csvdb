@@ -15,8 +15,8 @@ import commands.select.GroupBy;
 import commands.select.OrderBy;
 import commands.select.Where2;
 import schema.Column2;
+import schema.DBVar;
 import schema.Schema;
-import schema.VarType;
 
 public class Parser {
 	private final Tokenizer tkzr;
@@ -113,7 +113,7 @@ public class Parser {
 			expectNextToken(TokenType.KEYWORD); // argument type
 			if (!Token.keywords.contains(currToken.val))
 				throwErr("parse error: insecondid database type");
-			VarType argType = VarType.toVarType(currToken.val);
+			DBVar.Type argType = DBVar.Type.toVarType(currToken.val);
 			args.add(new Column2(argType, argName, Main.rootdir + "//" + name + "//" + argName + ".col"));
 			expectNextToken(TokenType.OPERATOR);
 			if (currToken.val.equals(",")) // more arguments

@@ -11,7 +11,6 @@ import exceptions.CsvdbException;
 import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
-import schema.VarType;
 import utils.Tuple;
 
 public class LoadedTable {
@@ -34,7 +33,7 @@ public class LoadedTable {
 			
 			int colInd = oldSchema.getColumnIndex(expression.fieldName);
 			String filePath = oldSchema.getColumnPath(colInd);
-			VarType colType = oldSchema.getColumnType(colInd);
+			DBVar.Type colType = oldSchema.getColumnType(colInd);
 			columns[i] = new LoadedColumn(filePath, colType, expression.aggFunc);
 			
 			schemaColumns[i] = new Column2(colType, expression.asName, filePath);
@@ -83,10 +82,10 @@ public class LoadedTable {
 		public double[] valuesF;
 		public long[] valuesTS;
 		public String[] valuesV;
-		public final VarType columnType;
+		public final DBVar.Type columnType;
 		
 		
-		public LoadedColumn(String filePath, VarType columnType, AggFuncs aggFunc) {
+		public LoadedColumn(String filePath, DBVar.Type columnType, AggFuncs aggFunc) {
 			this.columnType = columnType;
 			//TODO load column and support aggFunc
 		}
@@ -101,7 +100,7 @@ public class LoadedTable {
 			case FLOAT:
 				res.f = valuesF[i];
 				return res;
-			case TIMESTAMP:
+			case TS:
 				res.ts = valuesTS[i];
 				return res;
 			case VARCHAR:
@@ -138,7 +137,7 @@ public class LoadedTable {
 						newValuesF[newIndF++] = valuesF[oldInd];
 				valuesF = newValuesF;
 				break;
-			case TIMESTAMP:
+			case TS:
 				long[] newValuesTS = new long[newRowsCount];
 				int newIndTS = 0;
 				for (int oldInd = 0; oldInd < indexes.length; oldInd++)
@@ -187,7 +186,7 @@ public class LoadedTable {
 					newValuesF[i] = valuesF[i];
 				valuesF = newValuesF;
 				break;
-			case TIMESTAMP:
+			case TS:
 				long[] newValuesTS = new long[rowsCount];
 				for (int i = 0; i < newValuesTS.length; i++)
 					newValuesTS[i] = valuesTS[i];
