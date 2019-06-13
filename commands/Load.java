@@ -29,8 +29,7 @@ public class Load implements Command {
 	}
 	
 	private void createFiles(String fileName, String tableName, int ignoreLines) {
-		if (!Schema.HaveSchema(tableName))
-			throw new RuntimeException("you tried to load a non existing table");
+		Schema schema = Schema.GetSchema(tableName);
 		try {
 			RowReader file = new RowReader(new FileReader(fileName), ',', '"');
 			// ignore lines
@@ -39,7 +38,6 @@ public class Load implements Command {
 				ignoreLines--;
 			}
 			//create BufferedReaders
-			Schema schema = Schema.GetSchema(tableName);
 			BufferedWriter[] outFiles = new BufferedWriter[schema.getColumnsCount()];
 			DataOutputStream[] outFilesBin = new DataOutputStream[schema.getColumnsCount()];
 			for (int i = 0; i < outFiles.length; i++) {

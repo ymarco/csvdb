@@ -4,21 +4,19 @@ import schema.DBVar;
 import schema.Schema;
 
 import java.util.Comparator;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 //classes
-public class WhereNEW {
-	public final String fieldName;
+public class WhereSTREAMS implements Statement {
+    public final int colNum;
 	private DBVar constant;
 
-	public interface TestCondition {
-		boolean check(DBVar var);
-	}
+	public final Predicate<DBVar> pred;
 
-	public final TestCondition test;
-
-	public WhereNEW(Schema schema, String fieldName, String operator, String constant_) {
-		this.fieldName = fieldName;
-		DBVar.Type vt = schema.getColumnType(fieldName);
+	public WhereSTREAMS(Schema schema, int colNum, String operator, String constant_) {
+        this.colNum = colNum;
+		DBVar.Type vt = schema.getColumnType(colNum);
 		//this.constant = parseConstant(constant_, vt);
 
 		try {
@@ -39,34 +37,38 @@ public class WhereNEW {
 		} catch (NumberFormatException e) {
             throw new RuntimeException("invalid constant for where: " + constant_);
 		}
-		/* now creating the test function*/
+		/* now creating the pred function*/
 		Comparator<DBVar> comparator = this.constant.comparator();
 		DBVar const_null = constant.getNull();
 		switch (operator) {
 			case "<":
-				test = v -> comparator.compare(constant, v) < 0;
+				pred = v -> comparator.compare(constant, v) < 0;
 				break;
 			case "<=":
-				test = v -> comparator.compare(constant, v) <= 0;
+				pred = v -> comparator.compare(constant, v) <= 0;
 				break;
 			case ">":
-				test = v -> comparator.compare(constant, v) > 0;
+				pred = v -> comparator.compare(constant, v) > 0;
 				break;
 			case ">=":
-				test = v -> comparator.compare(constant, v) >= 0;
+				pred = v -> comparator.compare(constant, v) >= 0;
 				break;
 			case "<>":
-				test = v -> comparator.compare(constant, v) != 0;
+				pred = v -> comparator.compare(constant, v) != 0;
 				break;
-			case "is":
-				test = v -> comparator.compare(const_null, v) != 0;
+			case "is none":
+				pred = v -> comparator.compare(const_null, v) != 0;
 				break;
-			case "is not":
-				test = v -> comparator.compare(const_null.getNull(), v) == 0;
+			case "is not none":
+				pred = v -> comparator.compare(const_null, v) == 0;
 				break;
 			default:
 				throw new RuntimeException("invalid where operator");
 
 		}
+	}
+	@Override
+	public Stream<DBVar[]> apply(Stream<DBVar[]> s) {
+		return s.filter((DBVar[] d) -> pred.test(d[colNum]));
 	}
 }

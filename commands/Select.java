@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import commands.select.GroupBy;
 import commands.select.OrderBy;
-import commands.select.WhereNEW;
+import commands.select.WhereSTREAMS;
 import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
@@ -23,11 +23,11 @@ public class Select implements Command {
 	private String tableName;
 	private String fromTableName;
 	private Expression[] expressions;
-	private WhereNEW where; //don't work now
+	private WhereSTREAMS where; //don't work now
 	private GroupBy groupBy; //don't work now
 	private OrderBy orderBy; //don't work now
 
-	public Select(String tableName, String fromTableName, Expression[] expressions, WhereNEW where, GroupBy groupBy, OrderBy orderBy) {
+	public Select(String tableName, String fromTableName, Expression[] expressions, WhereSTREAMS where, GroupBy groupBy, OrderBy orderBy) {
 		this.tableName = tableName;
 		this.fromTableName = fromTableName;
 		this.expressions = expressions;
@@ -115,7 +115,7 @@ public class Select implements Command {
 				}
 
 				//check where
-				if (where != null && !where.test.check(line[whereInd]))
+				if (where != null && !where.pred.check(line[whereInd]))
 					continue;
 
 				//write
