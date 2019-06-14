@@ -8,13 +8,13 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 //classes
-public class WhereSTREAMS implements Statement {
+public class Where implements Statement {
     public final int colNum;
 	private DBVar constant;
 
 	public final Predicate<DBVar> pred;
 
-	public WhereSTREAMS(Schema schema, int colNum, String operator, String constant_) {
+	public Where(Schema schema, int colNum, String operator, String constant_) {
         this.colNum = colNum;
 		DBVar.Type vt = schema.getColumnType(colNum);
 		//this.constant = parseConstant(constant_, vt);

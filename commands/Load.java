@@ -1,93 +1,87 @@
 package commands;
 
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import commandLine.Main;
 import de.siegmar.fastcsv.reader.RowReader;
 import schema.DBVar;
+import schema.dbvars.DBFloat;
 import schema.Schema;
+import schema.dbvars.DBInt;
+import schema.dbvars.DBTS;
+import schema.dbvars.DBVarchar;
 import utils.FilesUtils;
+
+import java.io.*;
 
 public class Load implements Command {
 	private String fileName;
 	private String tableName;
 	private int ignoreLines;
-	
+
 	public Load(String fileName, String tableName, int ignoreLines) {
 		this.fileName = fileName;
 		this.tableName = tableName;
 		this.ignoreLines = ignoreLines;
 	}
-	
+
 	public void run() {
-		createFiles(fileName, tableName, ignoreLines);
-	}
-	
-	private void createFiles(String fileName, String tableName, int ignoreLines) {
-		Schema schema = Schema.GetSchema(tableName);
 		try {
-			RowReader file = new RowReader(new FileReader(fileName), ',', '"');
-			// ignore lines
-			while (ignoreLines > 0 && !file.isFinished()) {
-				file.readLine();
-				ignoreLines--;
-			}
-			//create BufferedReaders
-			BufferedWriter[] outFiles = new BufferedWriter[schema.getColumnsCount()];
-			DataOutputStream[] outFilesBin = new DataOutputStream[schema.getColumnsCount()];
-			for (int i = 0; i < outFiles.length; i++) {
-				if (schema.getColumnType(i) == DBVar.Type.VARCHAR)
-					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i) + Main.columnFilesExtensios));
-				else
-					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + Main.columnFilesExtensios));
-			}
-			
-			// put in other files
-			int lineCount = 0;
-			while (!file.isFinished()) {
-				//read
-				RowReader.Line l = file.readLine();
-				String[] fields = l.getFields();
-				//write
-				for (int i = 0; i < fields.length; i++) {
-					try {
-						switch (schema.getColumnType(i)) {
+			createFiles(fileName, tableName, ignoreLines);
+		} catch (IOException e) {
+			throw new RuntimeException("idk");
+		}
+	}
+
+	private void createFiles(String fileName, String tableName, int ignoreLines) throws IOException {
+		if (!Schema.HaveSchema(tableName))
+			throw new RuntimeException("you tried to load a non existing table");
+		Schema schema = Schema.GetSchema(tableName);
+		int linesCount = FilesUtils.countLines(tableName);
+		DBVar[][] table = new DBVar[linesCount][schema.getColumnsCount()];
+		RowReader file = new RowReader(new FileReader(fileName), ',', '"');
+		// read past the lines that should be ignored
+		while (ignoreLines > 0 && !file.isFinished()) {
+			file.readLine();
+			ignoreLines--;
+		}
+		// load from csv to table
+		int lineNumber = 0;
+		while (!file.isFinished()) {
+			//read
+			RowReader.Line line = file.readLine();
+			String[] row = line.getFields();
+			//write
+			for (int colNumber = 0; colNumber < row.length; colNumber++) {
+				try {
+					String curr = row[colNumber];
+					switch (schema.getColumnType(colNumber)) {
 						case INT:
-							outFilesBin[i].writeLong(Long.parseLong(fields[i]));
+							table[lineNumber][colNumber] = new DBInt(curr);
 							break;
 						case TS:
-							outFilesBin[i].writeLong(Long.parseUnsignedLong(fields[i]));
+							table[lineNumber][colNumber] = new DBTS(curr);
 							break;
 						case FLOAT:
-							outFilesBin[i].writeFloat(Float.parseFloat(fields[i]));
+							table[lineNumber][colNumber] = new DBFloat(curr);
 							break;
 						case VARCHAR:
-							//outFiles[i].write(FilesUtils.endoceStringForWriting(fields[i]) + "\n"); //string/0
-							outFiles[i].write(fields[i] + "\0");
+							table[lineNumber][colNumber] = new DBVarchar(curr);
 							break;
-						}
-					} catch (Exception e) {
-						file.close();
-						throw new RuntimeException("you tried to load file to invalid table");
 					}
-					
+				} catch (NumberFormatException e) { // TODO narrow the exception
+					file.close();
+					throw new RuntimeException("you tried to load file to invalid csv;" +
+							" couldnt format it into a valid table.");
 				}
-				lineCount++;
+
 			}
-			schema.setLineCount(lineCount);
-			
-			//close
-			file.close();
-			FilesUtils.closeAll(outFiles);
-			FilesUtils.closeAll(outFilesBin);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new RuntimeException("^^Error in LOAD^^");
+			lineNumber++;
 		}
+		schema.setLineCount(lineNumber);
+
+	writeTable(table, schema.getTablePath());
+	}
+
+	public static void writeTable(DBVar[][] table, String path) throws IOException {
+		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path));
+		out.writeObject(table);
 	}
 }

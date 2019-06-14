@@ -5,8 +5,8 @@ import java.util.List;
 
 import commandLine.Main;
 import commands.*;
-import commands.SelectSTREAMS.Expression;
-import commands.SelectSTREAMS.Expression.AggFuncs;
+import commands.Select.Expression;
+import commands.Select.Expression.AggFuncs;
 import commands.select.*;
 import schema.Column2;
 import schema.DBVar;
@@ -174,9 +174,9 @@ public class Parser {
 		String intoFile = null;
 		String srcTableName;
 		Expression[] expressions = null;
-		WhereSTREAMS where = null;
-		GroupBySTREAMS groupBy = null;
-		OrderBySTREAMS orderBy = null;
+		Where where = null;
+		GroupBy groupBy = null;
+		OrderBy orderBy = null;
 
 
 		//expression
@@ -219,11 +219,11 @@ public class Parser {
 			while (currToken.equals(new Token(Token.Type.OPERATOR, ",")));
 
 			//having
-			WhereSTREAMS having = null;
+			Where having = null;
 			if (currToken.equals(new Token(Token.Type.KEYWORD, "having")))
 				having = parseCondition(schema);
 
-			groupBy = new GroupBySTREAMS(fields.toArray(new String[0]), having);
+			groupBy = new GroupBy(fields.toArray(new String[0]), having);
 		}
 		//order by
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "order"))) {
@@ -240,13 +240,13 @@ public class Parser {
 				else
 					throwErr("sort type can only be ASC or DESC");
 			}
-			orderBy = new OrderBySTREAMS(schema.getTableName(), schema.getColumnIndex(outputField), isDesc);
+			orderBy = new OrderBy(schema.getTableName(), schema.getColumnIndex(outputField), isDesc);
 			nextToken();
 		}
 		//eof
 		expectNextToken(Token.Type.EOF);
 		//return
-		return new SelectSTREAMS(intoFile, srcTableName, expressions, where, groupBy, orderBy);
+		return new Select(intoFile, srcTableName, expressions, where, groupBy, orderBy);
 	}
 
 	private Expression parseSelectExpression() {
@@ -288,7 +288,7 @@ public class Parser {
 		return new Expression(fieldName);
 	}
 
-	private WhereSTREAMS parseCondition(Schema schema) {
+	private Where parseCondition(Schema schema) {
 		expectNextToken(Token.Type.IDENTIFIER);
 		String fieldName = currToken.val;
 		expectNextToken(Token.Type.OPERATOR);
@@ -298,6 +298,6 @@ public class Parser {
 			throwErr("unexpected token");
 		String constant = currToken.val;
 		nextToken();
-		return new WhereSTREAMS(schema, schema.getColumnIndex(fieldName), operator, constant);
+		return new Where(schema, schema.getColumnIndex(fieldName), operator, constant);
 	}
 }
