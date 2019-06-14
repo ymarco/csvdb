@@ -26,7 +26,7 @@ public class Load implements Command {
 		try {
 			createFiles(fileName, tableName, ignoreLines);
 		} catch (IOException e) {
-			throw new RuntimeException("idk");
+			throw new RuntimeException(e);
 		}
 	}
 

@@ -12,7 +12,8 @@ class Tokenizer {
 	private int column = 0;
 
 	Tokenizer(String text) {
-		this.text = text.toLowerCase();
+//		this.text = text.toLowerCase();
+		this.text = text;
 		this.text_split_by_lines = text.split("\n");
 	}
 
@@ -103,9 +104,10 @@ class Tokenizer {
 			token_val.append(cur());
 			proceedCur();
 		}
-		if (Token.keywords.contains(token_val.toString()))
-			return new Token(Token.Type.KEYWORD, token_val.toString());
-		return new Token(Token.Type.IDENTIFIER, token_val.toString());
+		String token_val_string = token_val.toString().toLowerCase(); 
+		if (Token.keywords.contains(token_val_string))
+			return new Token(Token.Type.KEYWORD, token_val_string);
+		return new Token(Token.Type.IDENTIFIER, token_val_string);
 	}
 
 	private Token getLitNum() throws TokenizingException {// note that this returns a STRING containing the num, e.g. "34" and NOT 34

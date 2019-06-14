@@ -106,7 +106,9 @@ public class Main {
 			code += codeReader.next() + ";";
 			code.replaceAll("--\\s*$", "");
 		}
-		return code.toString();
+		while (code.startsWith("\r") || code.startsWith("\n"))
+			code = code.substring(2, code.length());
+		return code;
 	}
 
 	private static void test() {
