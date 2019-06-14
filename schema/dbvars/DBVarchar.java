@@ -4,31 +4,26 @@ import schema.DBVar;
 
 import java.util.Comparator;
 
-public class Float extends DBVar {
-	public double val;
+public class DBVarchar extends DBVar {
+	String val;
 
-	public Float(String s) throws NumberFormatException {
-		this(Double.parseDouble(s.equals("") ? Double.toString(NULL.val) : s));
-	}
-
-	Float(double val) {
+	public DBVarchar(String val) {
 		this.val = val;
 	}
 
-	public static final Float NULL = new Float(Double.NaN);
+	public static final DBVarchar NULL = new DBVarchar("");
 
 	@Override
 	public DBVar getNull() {
 		return NULL;
 	}
 
+	public static final Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((DBVarchar) dbVar).val);
+
 	@Override
 	public Comparator<DBVar> comparator() {
 		return comparator;
 	}
-
-	public static final Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((Float) dbVar).val);
-
 	@Override
 	public Comparator<DBVar> getNegComparator() {
 		return negComparator;
@@ -43,9 +38,8 @@ public class Float extends DBVar {
 
 	@Override
 	public boolean isNull() {
-		return this.val == NULL.val;
+        return this.val.equals(NULL.val);
 	}
 
-	private static final DBVar.Type type = Type.FLOAT;
-
+	public static final DBVar.Type type = Type.VARCHAR;
 }

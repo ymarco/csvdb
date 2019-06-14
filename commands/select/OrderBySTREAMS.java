@@ -2,10 +2,10 @@ package commands.select;
 
 import schema.DBVar;
 import schema.Schema;
-import schema.dbvars.Int;
-import schema.dbvars.TS;
-import schema.dbvars.Varchar;
-import schema.dbvars.Float;
+import schema.dbvars.DBInt;
+import schema.dbvars.DBTS;
+import schema.dbvars.DBVarchar;
+import schema.dbvars.DBFloat;
 
 import java.util.Comparator;
 import java.util.stream.Stream;
@@ -33,16 +33,16 @@ public class OrderBySTREAMS implements Statement {
 		// create basic comparator
 		switch (schema.getColumn(colNum).type) {
 			case INT:
-				basicComparator = Int.comparator;
+				basicComparator = DBInt.comparator;
 				break;
 			case FLOAT:
-				basicComparator = Float.comparator;
+				basicComparator = DBFloat.comparator;
 				break;
 			case VARCHAR:
-				basicComparator = Varchar.comparator;
+				basicComparator = DBVarchar.comparator;
 				break;
 			case TS:
-				basicComparator = TS.comparator;
+				basicComparator = DBTS.comparator;
 				break;
 			default:
 				throw new IllegalStateException("Unexpected value: " + schema.getColumn(colNum).type);

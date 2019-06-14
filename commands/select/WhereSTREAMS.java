@@ -22,16 +22,16 @@ public class WhereSTREAMS implements Statement {
 		try {
 			switch (vt) {
 				case INT:
-					this.constant = new schema.dbvars.Int(constant_);
+					this.constant = new schema.dbvars.DBInt(constant_);
 					break;
 				case FLOAT:
-					this.constant = new schema.dbvars.Float(constant_);
+					this.constant = new schema.dbvars.DBFloat(constant_);
 					break;
 				case VARCHAR:
-					this.constant = new schema.dbvars.Varchar(constant_);
+					this.constant = new schema.dbvars.DBVarchar(constant_);
 					break;
 				case TS:
-					this.constant = new schema.dbvars.TS(constant_);
+					this.constant = new schema.dbvars.DBTS(constant_);
 					break;
 			}
 		} catch (NumberFormatException e) {

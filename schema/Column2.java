@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import exceptions.CsvdbException;
-import schema.dbvars.Float;
 
 public class Column2 {
 	public final DBVar.Type type;

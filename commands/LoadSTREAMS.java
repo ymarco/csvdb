@@ -2,11 +2,11 @@ package commands;
 
 import de.siegmar.fastcsv.reader.RowReader;
 import schema.DBVar;
-import schema.dbvars.Float;
+import schema.dbvars.DBFloat;
 import schema.Schema;
-import schema.dbvars.Int;
-import schema.dbvars.TS;
-import schema.dbvars.Varchar;
+import schema.dbvars.DBInt;
+import schema.dbvars.DBTS;
+import schema.dbvars.DBVarchar;
 import utils.FilesUtils;
 
 import java.io.*;
@@ -54,16 +54,16 @@ public class LoadSTREAMS implements Command {
 					String curr = row[colNumber];
 					switch (schema.getColumnType(colNumber)) {
 						case INT:
-							table[lineNumber][colNumber] = new Int(curr);
+							table[lineNumber][colNumber] = new DBInt(curr);
 							break;
 						case TS:
-							table[lineNumber][colNumber] = new TS(curr);
+							table[lineNumber][colNumber] = new DBTS(curr);
 							break;
 						case FLOAT:
-							table[lineNumber][colNumber] = new Float(curr);
+							table[lineNumber][colNumber] = new DBFloat(curr);
 							break;
 						case VARCHAR:
-							table[lineNumber][colNumber] = new Varchar(curr);
+							table[lineNumber][colNumber] = new DBVarchar(curr);
 							break;
 					}
 				} catch (NumberFormatException e) { // TODO narrow the exception

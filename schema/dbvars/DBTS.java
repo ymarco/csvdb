@@ -4,25 +4,25 @@ import schema.DBVar;
 
 import java.util.Comparator;
 
-public class TS extends DBVar {
+public class DBTS extends DBVar {
 	long val;
 
-	public TS(long val) {
+	public DBTS(long val) {
 		this.val = val;
 	}
 
-	public TS(String s) throws NumberFormatException {
+	public DBTS(String s) throws NumberFormatException {
 		this(Long.parseUnsignedLong(s.equals("") ? Long.toUnsignedString(NULL.val) : s));
 	}
 
-	public static final TS NULL = new TS(Long.MIN_VALUE);
+	public static final DBTS NULL = new DBTS(Long.MIN_VALUE);
 
 	@Override
 	public DBVar getNull() {
 		return NULL;
 	}
 
-	public static final Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((TS) dbVar).val);
+	public static final Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((DBTS) dbVar).val);
 
 	@Override
 	public Comparator<DBVar> comparator() {

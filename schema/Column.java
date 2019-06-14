@@ -1,6 +1,6 @@
 package schema;
 
-import schema.dbvars.Float;
+import schema.dbvars.DBFloat;
 
 public class Column {
 	public final DBVar.Type type;
