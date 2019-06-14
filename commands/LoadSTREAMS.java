@@ -14,12 +14,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-public class LoadROW implements Command {
+public class LoadSTREAMS implements Command {
 	private String fileName;
 	private String tableName;
 	private int ignoreLines;
 
-	public LoadROW(String fileName, String tableName, int ignoreLines) {
+	public LoadSTREAMS(String fileName, String tableName, int ignoreLines) {
 		this.fileName = fileName;
 		this.tableName = tableName;
 		this.ignoreLines = ignoreLines;
@@ -80,6 +80,7 @@ public class LoadROW implements Command {
 		}
 		schema.setLineCount(lineNumber);
 
-		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(tableName + ".table"));
+		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(schema.getTablePath()));
+		out.writeObject(table);
 	}
 }

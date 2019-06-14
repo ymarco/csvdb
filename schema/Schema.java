@@ -1,6 +1,9 @@
 package schema;
 
+import java.io.*;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.stream.Stream;
 
 import commandLine.Main;
 
@@ -12,11 +15,12 @@ public class Schema {
 	private Column2[] columns;
 	private Hashtable<String, Integer> fieldNameToIndex = new Hashtable<String, Integer>();
 	private int lineCount = -1;
+	private DBVar[][] table = null;
 
 	private Schema(String tableName, Column2[] columns) {
 		this.tableName = tableName;
 		this.columns = columns;
-		this.tablePath = Main.rootdir + "\\" + tableName;
+		this.tablePath = String.join(File.separator, Main.rootdir, tableName);
 
 		for (int i = 0; i < columns.length; i++)
 			fieldNameToIndex.put(columns[i].name, i);
@@ -104,8 +108,37 @@ public class Schema {
 		return getColumnPath(getColumnIndex(columnName));
 	}
 
-	public DBVar[][] getTable() {
-		return null; //TODO
+	private void loadTableToMem() {
+		try {
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(tablePath));
+			table = (DBVar[][]) in.readObject();
+		} catch (IOException e) {
+			throw new RuntimeException("table file for table " + tableName + "not found in path " + tablePath);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			throw new RuntimeException("error loading table in path " + tablePath);
+		}
+	}
+
+	private void unladTableFromMem() {
+		table = null;
+		/*
+		 table is private and nothing else should have a reference to it
+		 (except for streams using it)
+		 so now it can be garbage collected.
+		*/
+	}
+
+	private void loadTableToMemIfNotLoaded() {
+		if (table == null)
+			loadTableToMem();
+	}
+
+	public Stream<DBVar[]> getTableStream() {
+		loadTableToMemIfNotLoaded();
+		Stream<DBVar[]> res = Arrays.stream(table);
+		unladTableFromMem();
+		return res;
 	}
 
 	public static class NotFoundException extends RuntimeException {

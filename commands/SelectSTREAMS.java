@@ -33,7 +33,7 @@ public class SelectSTREAMS implements Command {
 
 	public void run() {
 		createNewSchema();
-		Stream<DBVar[]> s = Arrays.stream(srcSchema.getTable());
+		Stream<DBVar[]> s = srcSchema.getTableStream();
 		s = where.apply(s);
 		s = orderBy.apply(s);
 		if (groupBy == null) {
