@@ -12,7 +12,7 @@ public class Tokenizer {
 	private int column = 0;
 	
 	public Tokenizer(String text) {
-		this.text = text;
+		this.text = text.toLowerCase();
 		this.text_split_by_lines = text.split("\n");
 	}
 	
@@ -104,9 +104,8 @@ public class Tokenizer {
 			token_val += cur();
 			proceedCur();
 		}
-		String token_val_lower = token_val.toLowerCase();
-		if (Token.keywords.contains(token_val_lower))
-			return new Token(Token.Type.KEYWORD, token_val_lower);
+		if (Token.keywords.contains(token_val))
+			return new Token(Token.Type.KEYWORD, token_val);
 		return new Token(Token.Type.IDENTIFIER, token_val);
 	}
 

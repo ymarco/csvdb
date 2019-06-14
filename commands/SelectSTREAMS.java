@@ -5,6 +5,7 @@ import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -32,17 +33,33 @@ public class SelectSTREAMS implements Command {
 	}
 
 	public void run() {
-		createNewSchema();
+		Schema newSchema = createNewSchema();
 		Stream<DBVar[]> s = srcSchema.getTableStream();
 		s = where.apply(s);
 		s = orderBy.apply(s);
-		if (groupBy == null) {
+		if (groupBy == null) { // no group by
+			// selectedColumns[i] is the index of the source column of column i in the new table
+			int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
+			DBVar[][] newTabse = s.map(
+					va -> {
+						DBVar[] res = new DBVar[selectedColumns.length];
+						for (int i = 0; i < selectedColumns.length; i++) {
+							res[i] = va[selectedColumns[i]];
+						}
+						return res;
+					}).toArray(DBVar[][]::new);
 
+			try {
+				LoadSTREAMS.writeTable(newTabse, newSchema.getTablePath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			s = groupBy.apply(s);
 		}
-		s = groupBy.apply(s);
 	}
 
-	private void createNewSchema() {
+	private Schema createNewSchema() {
 		if (expressions == null) {
 			expressions = new Expression[srcSchema.getLinesCount()];
 			for (int i = 0; i < expressions.length; i++)
@@ -55,6 +72,7 @@ public class SelectSTREAMS implements Command {
 			columns[i] = new Column2(column.type, expressions[i].asName, null /*for compile*/);
 		}
 		new Create(newTableName, false, columns).run();
+		return Schema.GetSchema(newTableName);
 	}
 
 
