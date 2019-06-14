@@ -12,12 +12,14 @@ public abstract class DBVar {
 
 	public abstract Type getType();
 
+	public abstract boolean isNull();
+
 
 	public enum Type {
 		INT("int"),
-	    FLOAT("float"),
-	    VARCHAR("varchar"),
-	    TS("timestamp");
+		FLOAT("float"),
+		VARCHAR("varchar"),
+		TS("timestamp");
 
 		private final String toString;
 
@@ -31,10 +33,14 @@ public abstract class DBVar {
 
 		public static Type toVarType(String s) {
 			switch (s.toLowerCase()) {
-			case "int": return INT;
-			case "varchar": return VARCHAR;
-			case "float": return FLOAT;
-			case "timestamp": return TS;
+				case "int":
+					return INT;
+				case "varchar":
+					return VARCHAR;
+				case "float":
+					return FLOAT;
+				case "timestamp":
+					return TS;
 			}
 			return null;
 		}

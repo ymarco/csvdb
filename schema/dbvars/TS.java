@@ -12,33 +12,39 @@ public class TS extends DBVar {
 	}
 
 	public TS(String s) throws NumberFormatException {
-		this(Long.parseUnsignedLong(s));
+		this(Long.parseUnsignedLong(s.equals("") ? Long.toUnsignedString(NULL.val) : s));
 	}
 
-	static final TS NULL = new TS(Long.MIN_VALUE);
+	public static final TS NULL = new TS(Long.MIN_VALUE);
 
 	@Override
 	public DBVar getNull() {
 		return NULL;
 	}
 
-	private static Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((TS) dbVar).val);
+	public static final Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((TS) dbVar).val);
 
 	@Override
 	public Comparator<DBVar> comparator() {
 		return comparator;
 	}
+
 	@Override
 	public Comparator<DBVar> getNegComparator() {
 		return negComparator;
 	}
 
-	private static Comparator<DBVar> negComparator = comparator.reversed();
+	public static final Comparator<DBVar> negComparator = comparator.reversed();
 
 	@Override
 	public Type getType() {
 		return type;
 	}
 
-	private static DBVar.Type type = Type.TS;
+	@Override
+	public boolean isNull() {
+		return this.val == NULL.val;
+	}
+
+	public static final DBVar.Type type = Type.TS;
 }

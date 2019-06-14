@@ -11,14 +11,14 @@ public class Varchar extends DBVar {
 		this.val = val;
 	}
 
-	private static final Varchar NULL = new Varchar("");
+	public static final Varchar NULL = new Varchar("");
 
 	@Override
 	public DBVar getNull() {
 		return NULL;
 	}
 
-	private static Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((Varchar) dbVar).val);
+	public static final Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((Varchar) dbVar).val);
 
 	@Override
 	public Comparator<DBVar> comparator() {
@@ -29,12 +29,17 @@ public class Varchar extends DBVar {
 		return negComparator;
 	}
 
-	private static Comparator<DBVar> negComparator = comparator.reversed();
+	public static final Comparator<DBVar> negComparator = comparator.reversed();
 
 	@Override
 	public Type getType() {
 		return type;
 	}
 
-	private static DBVar.Type type = Type.VARCHAR;
+	@Override
+	public boolean isNull() {
+        return this.val.equals(NULL.val);
+	}
+
+	public static final DBVar.Type type = Type.VARCHAR;
 }

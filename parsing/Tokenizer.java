@@ -23,7 +23,7 @@ public class Tokenizer {
 	public Token nextToken() {
 		skip();
 		if (eof() || cur() == ';')
-			return new Token(TokenType.EOF, "");
+			return new Token(Token.Type.EOF, "");
 		if (TextUtils.isAlphaOrUnderscore(cur()))
 			return getIdentifierOrKeyword();
 		if (cur() == '"')
@@ -106,8 +106,8 @@ public class Tokenizer {
 		}
 		String token_val_lower = token_val.toLowerCase();
 		if (Token.keywords.contains(token_val_lower))
-			return new Token(TokenType.KEYWORD, token_val_lower);
-		return new Token(TokenType.IDENTIFIER, token_val);
+			return new Token(Token.Type.KEYWORD, token_val_lower);
+		return new Token(Token.Type.IDENTIFIER, token_val);
 	}
 
 	private Token getLitNum() {// note that this returns a STRING containing the num, e.g. "34" and NOT 34
@@ -127,7 +127,7 @@ public class Tokenizer {
 					token_val += cur();
 				}
 			} else if (TextUtils.isSpace(cur())) { // end of number
-				return new Token(TokenType.LIT_NUM, token_val);
+				return new Token(Token.Type.LIT_NUM, token_val);
 			} else {
 				throwErr("Tokenizer: a thing started with a number and than changed into somethng else invalid");
 			}
@@ -136,7 +136,7 @@ public class Tokenizer {
 		/*
 		 * if we got here it means we reached eof and the numbe has ended
 		 */
-		return new Token(TokenType.LIT_NUM, token_val);
+		return new Token(Token.Type.LIT_NUM, token_val);
 	}
 
 	private Token getLitStr() {
@@ -147,7 +147,7 @@ public class Tokenizer {
 		while (!eof()) {
 			if (cur() == '"') { // found the closing "
 				proceedCur(); // going past the " and exiting the str lit
-				return new Token(TokenType.LIT_STR, token_val);
+				return new Token(Token.Type.LIT_STR, token_val);
 			}
 			token_val += cur();
 			proceedCur();
@@ -165,14 +165,14 @@ public class Tokenizer {
 		token_val += cur();
 		proceedCur();
 		if (Token.operators.contains(token_val))
-			return new Token(TokenType.OPERATOR, token_val);
+			return new Token(Token.Type.OPERATOR, token_val);
 		/*
 		 * if we got here it means that it can be a 2-char operator (or an error)
 		 */
 		token_val += cur();
 		proceedCur();
 		if (Token.operators.contains(token_val))
-			return new Token(TokenType.KEYWORD, token_val);
+			return new Token(Token.Type.KEYWORD, token_val);
 		else
 			throwErr("Syntax Error: invalid token");
 		/* unreachable */

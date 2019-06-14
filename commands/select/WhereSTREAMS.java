@@ -37,30 +37,30 @@ public class WhereSTREAMS implements Statement {
 		} catch (NumberFormatException e) {
             throw new RuntimeException("invalid constant for where: " + constant_);
 		}
+
 		/* now creating the pred function*/
 		Comparator<DBVar> comparator = this.constant.comparator();
-		DBVar const_null = constant.getNull();
 		switch (operator) {
 			case "<":
-				pred = v -> comparator.compare(constant, v) < 0;
+				pred = v -> !v.isNull() && comparator.compare(constant, v) < 0;
 				break;
 			case "<=":
-				pred = v -> comparator.compare(constant, v) <= 0;
+				pred = v -> !v.isNull() && comparator.compare(constant, v) <= 0;
 				break;
 			case ">":
-				pred = v -> comparator.compare(constant, v) > 0;
+				pred = v -> !v.isNull() && comparator.compare(constant, v) > 0;
 				break;
 			case ">=":
-				pred = v -> comparator.compare(constant, v) >= 0;
+				pred = v -> !v.isNull() && comparator.compare(constant, v) >= 0;
 				break;
 			case "<>":
-				pred = v -> comparator.compare(constant, v) != 0;
+				pred = v -> !v.isNull() && comparator.compare(constant, v) != 0;
 				break;
 			case "is none":
-				pred = v -> comparator.compare(const_null, v) != 0;
+				pred = v -> v.isNull() ;
 				break;
 			case "is not none":
-				pred = v -> comparator.compare(const_null, v) == 0;
+				pred = v -> !v.isNull();
 				break;
 			default:
 				throw new RuntimeException("invalid where operator");

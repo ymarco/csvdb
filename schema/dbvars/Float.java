@@ -8,14 +8,14 @@ public class Float extends DBVar {
 	public double val;
 
 	public Float(String s) throws NumberFormatException {
-		this(Double.parseDouble(s));
+		this(Double.parseDouble(s.equals("") ? Double.toString(NULL.val) : s));
 	}
 
 	Float(double val) {
 		this.val = val;
 	}
 
-	private static final Float NULL = new Float(Double.NaN);
+	public static final Float NULL = new Float(Double.NaN);
 
 	@Override
 	public DBVar getNull() {
@@ -27,20 +27,25 @@ public class Float extends DBVar {
 		return comparator;
 	}
 
-	private static Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((Float) dbVar).val);
+	public static final Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((Float) dbVar).val);
 
 	@Override
 	public Comparator<DBVar> getNegComparator() {
 		return negComparator;
 	}
 
-	private static Comparator<DBVar> negComparator = comparator.reversed();
+	public static final Comparator<DBVar> negComparator = comparator.reversed();
 
 	@Override
 	public Type getType() {
 		return type;
 	}
 
-	private static DBVar.Type type = Type.FLOAT;
+	@Override
+	public boolean isNull() {
+		return this.val == NULL.val;
+	}
+
+	private static final DBVar.Type type = Type.FLOAT;
 
 }

@@ -20,9 +20,6 @@ public class LoadedTable {
 	
 	public LoadedTable(String tableName, Expression[] expressions) {
 		//TODO if there are 2 columns with the same column
-		
-		if (!Schema.HaveSchema(tableName))
-			throw new CsvdbException("you tried to select on unexisting table");
 		Schema oldSchema = Schema.GetSchema(tableName);
 		rowsCount = oldSchema.getLinesCount();
 		Column2[] schemaColumns = new Column2[expressions.length];

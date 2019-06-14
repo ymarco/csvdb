@@ -15,14 +15,14 @@ public class Int extends DBVar {
 		this(Long.parseLong(s));
 	}
 
-	private static final Int NULL = new Int(Long.MIN_VALUE);
+	public static final Int NULL = new Int(Long.MIN_VALUE);
 
 	@Override
 	public DBVar getNull() {
 		return NULL;
 	}
 
-	private static Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((Int) dbVar).val);
+	public static final Comparator<DBVar> comparator = Comparator.comparing(dbVar -> ((Int) dbVar).val);
 
 	@Override
 	public Comparator<DBVar> comparator() {
@@ -33,7 +33,7 @@ public class Int extends DBVar {
 		return negComparator;
 	}
 
-	private static Comparator<DBVar> negComparator = comparator.reversed();
+	private static final Comparator<DBVar> negComparator = comparator.reversed();
 
 
 	@Override
@@ -41,5 +41,10 @@ public class Int extends DBVar {
 		return type;
 	}
 
-	private static DBVar.Type type = Type.INT;
+	@Override
+	public boolean isNull() {
+        return this.val == NULL.val;
+	}
+
+	public static final DBVar.Type type = Type.INT;
 }

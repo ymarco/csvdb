@@ -28,9 +28,9 @@ public class Parser {
 
 	public Command parse() {
 		nextToken();
-		if (currToken.type == TokenType.EOF)
+		if (currToken.type == Token.Type.EOF)
 			return null;
-		if (currToken.type != TokenType.KEYWORD)
+		if (currToken.type != Token.Type.KEYWORD)
 			throwErr("first token wasnt a keyword");
 
 		switch (currToken.val) {
@@ -57,24 +57,24 @@ public class Parser {
 		currToken = tkzr.nextToken();
 	}
 
-	private void expectNextToken(TokenType t, String v) {
+	private void expectNextToken(Token.Type t, String v) {
 		nextToken();
 		expectThisToken(t, v);
 	}
 
-	private void expectNextToken(TokenType tt) {
+	private void expectNextToken(Token.Type tt) {
 		nextToken();
 		expectThisToken(tt);
 	}
 	
-	private void expectThisToken(TokenType t, String v) {
+	private void expectThisToken(Token.Type t, String v) {
 		if (currToken.type != t || !currToken.val.equals(v)) {
 			String errmsg = "unexpected token: was expecting '" + t + "'";
 			throwErr(errmsg);
 		}
 	}
 
-	private void expectThisToken(TokenType tt) {
+	private void expectThisToken(Token.Type tt) {
 		if (currToken.type != tt) {
 			String errmsg = "unexpected token: was expecting token of type '" + tt + "'";
 			throwErr(errmsg);
@@ -86,36 +86,36 @@ public class Parser {
 		String name = "";
 		boolean enable_ifnexists = false;
 		ArrayList<Column2> args = new ArrayList<Column2>();
-		expectNextToken(TokenType.KEYWORD, "table");
+		expectNextToken(Token.Type.KEYWORD, "table");
 		// check for [IF NOT EXISTS]
 		nextToken();
-		if (currToken.equals(new Token(TokenType.KEYWORD, "if"))) {
-			expectNextToken(TokenType.KEYWORD, "not");
-			expectNextToken(TokenType.KEYWORD, "exists");
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "if"))) {
+			expectNextToken(Token.Type.KEYWORD, "not");
+			expectNextToken(Token.Type.KEYWORD, "exists");
 			nextToken();
 			enable_ifnexists = true;
 		}
 		// check for table_name
-		if (currToken.type == TokenType.IDENTIFIER)
+		if (currToken.type == Token.Type.IDENTIFIER)
 			name = currToken.val;
 		else
 			throwErr("KEYWORD _table_name not found");
 		// check for "(" operator
-		expectNextToken(TokenType.OPERATOR, "(");
+		expectNextToken(Token.Type.OPERATOR, "(");
 
 		/*
 		 * now reading arguments, consisting of IDENTIFIER (name), KEYWORD (type), //
 		 * OPERATOR
 		 */
 		while (true) {
-			expectNextToken(TokenType.IDENTIFIER); // argument name
+			expectNextToken(Token.Type.IDENTIFIER); // argument name
 			String argName = currToken.val;
-			expectNextToken(TokenType.KEYWORD); // argument type
+			expectNextToken(Token.Type.KEYWORD); // argument type
 			if (!Token.keywords.contains(currToken.val))
 				throwErr("parse error: insecondid database type");
 			DBVar.Type argType = DBVar.Type.toVarType(currToken.val);
 			args.add(new Column2(argType, argName, Main.rootdir + "//" + name + "//" + argName + ".col"));
-			expectNextToken(TokenType.OPERATOR);
+			expectNextToken(Token.Type.OPERATOR);
 			if (currToken.val.equals(",")) // more arguments
 				continue;
 			if (currToken.val.equals(")")) { // end of arguments
@@ -125,7 +125,7 @@ public class Parser {
 			throwErr("unxpected token: expecting ',' or ')'");
 		}
 		/* finished reading arguments */
-		expectNextToken(TokenType.EOF);
+		expectNextToken(Token.Type.EOF);
 		return new Create(name, enable_ifnexists, (Column2[]) args.toArray(new Column2[0]));
 
 	}
@@ -134,20 +134,20 @@ public class Parser {
 		String src;
 		String dst;
 		int ignore_lines = 0;
-		expectNextToken(TokenType.KEYWORD, "data");
-		expectNextToken(TokenType.KEYWORD, "infile");
-		expectNextToken(TokenType.LIT_STR);
+		expectNextToken(Token.Type.KEYWORD, "data");
+		expectNextToken(Token.Type.KEYWORD, "infile");
+		expectNextToken(Token.Type.LIT_STR);
 		src = currToken.val;
-		expectNextToken(TokenType.KEYWORD, "into");
-		expectNextToken(TokenType.KEYWORD, "table");
-		expectNextToken(TokenType.IDENTIFIER);
+		expectNextToken(Token.Type.KEYWORD, "into");
+		expectNextToken(Token.Type.KEYWORD, "table");
+		expectNextToken(Token.Type.IDENTIFIER);
 		dst = currToken.val;
 		nextToken();
-		if (currToken.type != TokenType.EOF) {
-			expectNextToken(TokenType.KEYWORD, "ignore");
-			expectNextToken(TokenType.LIT_NUM);
+		if (currToken.type != Token.Type.EOF) {
+			expectNextToken(Token.Type.KEYWORD, "ignore");
+			expectNextToken(Token.Type.LIT_NUM);
 			ignore_lines = Integer.parseInt(currToken.val);
-		} else if (currToken.type != TokenType.EOF) {
+		} else if (currToken.type != Token.Type.EOF) {
 			throwErr("unexpected token");
 		}
 		return new Load(src, dst, ignore_lines);
@@ -157,21 +157,21 @@ public class Parser {
 		boolean enable_ifexists = false;
 		String name = "";
 		// check for table kw
-		expectNextToken(TokenType.KEYWORD, "table");
+		expectNextToken(Token.Type.KEYWORD, "table");
 		// check for [IF EXISTS]
 		nextToken();
-		if(currToken.equals(new Token(TokenType.KEYWORD, "if"))) {
-			expectNextToken(TokenType.KEYWORD, "exists");
+		if(currToken.equals(new Token(Token.Type.KEYWORD, "if"))) {
+			expectNextToken(Token.Type.KEYWORD, "exists");
 			enable_ifexists = true;
 			nextToken();
 		}
 		//check for table_name
-		if(currToken.type == TokenType.IDENTIFIER){
+		if(currToken.type == Token.Type.IDENTIFIER){
 			name = currToken.val;
 		} else
 			throwErr("KEYWORD _table_name not found");
 
-		expectNextToken(TokenType.EOF);
+		expectNextToken(Token.Type.EOF);
 		Drop res = new Drop(name, enable_ifexists);
 		return res;
 	}
@@ -187,60 +187,60 @@ public class Parser {
 		
 		//expression
 		nextToken();
-		if (!currToken.equals(new Token(TokenType.OPERATOR, "*"))) {
+		if (!currToken.equals(new Token(Token.Type.OPERATOR, "*"))) {
 			List<Expression> expressionsList = new ArrayList<Expression>();
 			expressionsList.add(parseSelectExpression());
-			while (currToken.equals(new Token(TokenType.OPERATOR, ","))) {
+			while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
 				nextToken();
 				expressionsList.add(parseSelectExpression());
 			}
 		}
 		//into outfile
-		if (currToken.equals(new Token(TokenType.KEYWORD, "into"))) {
-			expectNextToken(TokenType.KEYWORD, "outfile");
-			expectNextToken(TokenType.LIT_STR);
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "into"))) {
+			expectNextToken(Token.Type.KEYWORD, "outfile");
+			expectNextToken(Token.Type.LIT_STR);
 			intoFile = currToken.val;
 			nextToken();
 		}
 		//from
-		expectThisToken(TokenType.KEYWORD, "from");
-		expectNextToken(TokenType.IDENTIFIER);
+		expectThisToken(Token.Type.KEYWORD, "from");
+		expectNextToken(Token.Type.IDENTIFIER);
 		fromTableName = currToken.val;
 		if (!Schema.HaveSchema(fromTableName))
 			throwErr("unexisting table");
 		Schema schema = Schema.GetSchema(fromTableName);
 		//where
 		nextToken();
-		if (currToken.equals(new Token(TokenType.KEYWORD, "where")))
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "where")))
 			where = parseCondition(schema);
 		//group by
-		if (currToken.equals(new Token(TokenType.KEYWORD, "group"))) {
-			expectNextToken(TokenType.KEYWORD, "by");
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "group"))) {
+			expectNextToken(Token.Type.KEYWORD, "by");
 			List<String> fields = new ArrayList<String>();
 			do
 			{
-				expectNextToken(TokenType.IDENTIFIER);
+				expectNextToken(Token.Type.IDENTIFIER);
 				fields.add(currToken.val);
 				nextToken();
 			}
-			while (currToken.equals(new Token(TokenType.OPERATOR, ",")));
+			while (currToken.equals(new Token(Token.Type.OPERATOR, ",")));
 			
 			//having
 			Where2 having = null;
-			if (currToken.equals(new Token(TokenType.KEYWORD, "having")))
+			if (currToken.equals(new Token(Token.Type.KEYWORD, "having")))
 				having = parseCondition(schema);
 			
 			groupBy = new GroupBy(fields.toArray(new String[0]), having);
 		}
 		//order by
-		if (currToken.equals(new Token(TokenType.KEYWORD, "order"))) {
-			expectNextToken(TokenType.KEYWORD, "by");
-			expectNextToken(TokenType.IDENTIFIER);
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "order"))) {
+			expectNextToken(Token.Type.KEYWORD, "by");
+			expectNextToken(Token.Type.IDENTIFIER);
 			String outputField = currToken.val;
 			nextToken();
 			
 			OrderBy.SortType sortType = OrderBy.SortType.ASC;
-			if (currToken.type == TokenType.KEYWORD) {
+			if (currToken.type == Token.Type.KEYWORD) {
 				if (currToken.val.equals("asc"));
 				else if (currToken.val.equals("desc"))
 					sortType = OrderBy.SortType.DESC;
@@ -251,14 +251,14 @@ public class Parser {
 			nextToken();
 		}
 		//eof
-		expectNextToken(TokenType.EOF);
+		expectNextToken(Token.Type.EOF);
 		//return
 		return new Select2(intoFile, fromTableName, expressions, where, groupBy, orderBy);
 	}
 	
 	private Expression parseSelectExpression() {
 		AggFuncs aggFunc = AggFuncs.NOTHING;
-		if (currToken.type == TokenType.KEYWORD) {
+		if (currToken.type == Token.Type.KEYWORD) {
 			switch (currToken.val) {
 			case "min":
 				aggFunc = AggFuncs.MIN;
@@ -278,17 +278,17 @@ public class Parser {
 			default:
 				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
 			}
-			expectNextToken(TokenType.OPERATOR, "(");
+			expectNextToken(Token.Type.OPERATOR, "(");
 		}
-		expectThisToken(TokenType.IDENTIFIER);
+		expectThisToken(Token.Type.IDENTIFIER);
 		String fieldName = currToken.val;
 		nextToken();
 		if (aggFunc != AggFuncs.NOTHING) {
-			expectThisToken(TokenType.OPERATOR, ")");
+			expectThisToken(Token.Type.OPERATOR, ")");
 			nextToken();
 		}
-		if (currToken.equals(new Token(TokenType.KEYWORD, "as"))) {
-			expectNextToken(TokenType.IDENTIFIER);
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "as"))) {
+			expectNextToken(Token.Type.IDENTIFIER);
 			nextToken();
 			return new Expression(fieldName, currToken.val);
 		}
@@ -296,12 +296,12 @@ public class Parser {
 	}
 	
 	private Where2 parseCondition(Schema schema) {
-		expectNextToken(TokenType.IDENTIFIER);
+		expectNextToken(Token.Type.IDENTIFIER);
 		String fieldName = currToken.val;
-		expectNextToken(TokenType.OPERATOR);
+		expectNextToken(Token.Type.OPERATOR);
 		String operator = currToken.val;
 		nextToken();
-		if (currToken.type != TokenType.LIT_NUM || currToken.type != TokenType.LIT_STR)
+		if (currToken.type != Token.Type.LIT_NUM || currToken.type != Token.Type.LIT_STR)
 			throwErr("unexpected token");
 		String constant = currToken.val;
 		nextToken();
