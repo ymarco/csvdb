@@ -8,12 +8,12 @@ import commands.Command;
 import commands.Create;
 import commands.Drop;
 import commands.Load;
-import commands.Select2;
-import commands.Select2.Expression;
-import commands.Select2.Expression.AggFuncs;
+import commands.Select3;
+import commands.Select3.Expression;
+import commands.Select3.Expression.AggFuncs;
 import commands.select.GroupBy;
 import commands.select.OrderBy;
-import commands.select.Where2;
+import commands.select.Where3;
 import schema.Column2;
 import schema.Schema;
 import schema.VarType;
@@ -180,7 +180,7 @@ public class Parser {
 		String intoFile = null;
 		String fromTableName;
 		Expression[] expressions = null;
-		Where2 where = null;
+		Where3 where = null;
 		GroupBy groupBy = null;
 		OrderBy orderBy = null;
 		
@@ -226,7 +226,7 @@ public class Parser {
 			while (currToken.equals(new Token(TokenType.OPERATOR, ",")));
 			
 			//having
-			Where2 having = null;
+			Where3 having = null;
 			if (currToken.equals(new Token(TokenType.KEYWORD, "having")))
 				having = parseCondition(schema);
 			
@@ -253,7 +253,7 @@ public class Parser {
 		//eof
 		expectNextToken(TokenType.EOF);
 		//return
-		return new Select2(intoFile, fromTableName, expressions, where, groupBy, orderBy);
+		return new Select3(intoFile, fromTableName, expressions, where, groupBy, orderBy);
 	}
 	
 	private Expression parseSelectExpression() {
@@ -295,7 +295,7 @@ public class Parser {
 		return new Expression(fieldName);
 	}
 	
-	private Where2 parseCondition(Schema schema) {
+	private Where3 parseCondition(Schema schema) {
 		expectNextToken(TokenType.IDENTIFIER);
 		String fieldName = currToken.val;
 		expectNextToken(TokenType.OPERATOR);
@@ -305,6 +305,6 @@ public class Parser {
 			throwErr("unexpected token");
 		String constant = currToken.val;
 		nextToken();
-		return new Where2(schema, fieldName, operator, constant);
+		return new Where3(schema, fieldName, operator, constant);
 	}
 }

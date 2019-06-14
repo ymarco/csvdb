@@ -2,9 +2,9 @@ package commands.select;
 
 public class GroupBy {
 	public String[] fieldsName;
-	public Where2 having;
+	public Where3 having;
 
-	public GroupBy(String[] fieldsName, Where2 having) {
+	public GroupBy(String[] fieldsName, Where3 having) {
 		this.fieldsName = fieldsName;
 		this.having = having;
 	}
