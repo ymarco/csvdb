@@ -2,14 +2,18 @@ package commands;
 
 import de.siegmar.fastcsv.reader.RowReader;
 import schema.DBVar;
-import schema.dbvars.DBFloat;
 import schema.Schema;
+import schema.dbvars.DBFloat;
 import schema.dbvars.DBInt;
 import schema.dbvars.DBTS;
 import schema.dbvars.DBVarchar;
-import utils.FilesUtils;
 
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Load implements Command {
 	private String fileName;
@@ -34,8 +38,8 @@ public class Load implements Command {
 		if (!Schema.HaveSchema(tableName))
 			throw new RuntimeException("you tried to load a non existing table");
 		Schema schema = Schema.GetSchema(tableName);
-		int linesCount = FilesUtils.countLines(tableName);
-		DBVar[][] table = new DBVar[linesCount][schema.getColumnsCount()];
+//		int linesCount = FilesUtils.countLines(tableName);
+		List<DBVar[]> tableList = new ArrayList<>();
 		RowReader file = new RowReader(new FileReader(fileName), ',', '"');
 		// read past the lines that should be ignored
 		while (ignoreLines > 0 && !file.isFinished()) {
@@ -48,22 +52,24 @@ public class Load implements Command {
 			//read
 			RowReader.Line line = file.readLine();
 			String[] row = line.getFields();
+			DBVar[] parsedRow = new DBVar[schema.getColumnsCount()];
+			tableList.add(new DBVar[schema.getColumnsCount()]);
 			//write
 			for (int colNumber = 0; colNumber < row.length; colNumber++) {
 				try {
 					String curr = row[colNumber];
 					switch (schema.getColumnType(colNumber)) {
 						case INT:
-							table[lineNumber][colNumber] = new DBInt(curr);
+							parsedRow[colNumber] = new DBInt(curr);
 							break;
 						case TS:
-							table[lineNumber][colNumber] = new DBTS(curr);
+							parsedRow[colNumber] = new DBTS(curr);
 							break;
 						case FLOAT:
-							table[lineNumber][colNumber] = new DBFloat(curr);
+							parsedRow[colNumber] = new DBFloat(curr);
 							break;
 						case VARCHAR:
-							table[lineNumber][colNumber] = new DBVarchar(curr);
+							parsedRow[colNumber] = new DBVarchar(curr);
 							break;
 					}
 				} catch (NumberFormatException e) { // TODO narrow the exception
@@ -74,10 +80,14 @@ public class Load implements Command {
 
 			}
 			lineNumber++;
+			tableList.add(parsedRow);
 		}
-		schema.setLineCount(lineNumber);
+		int linesCount = lineNumber+1;
 
-	writeTable(table, schema.getTablePath());
+		schema.setLineCount(linesCount);
+
+		DBVar[][] table = (DBVar[][]) tableList.toArray();
+		writeTable(table, schema.getTablePath());
 	}
 
 	public static void writeTable(DBVar[][] table, String path) throws IOException {
