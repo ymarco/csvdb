@@ -120,7 +120,7 @@ public class Parser {
 		}
 		/* finished reading arguments */
 		expectNextToken(Token.Type.EOF);
-		return new Create(name, enable_ifnexists, (Column2[]) args.toArray(new Column2[0]));
+		return new Create(name, enable_ifnexists, args.toArray(new Column2[0]));
 
 	}
 
@@ -182,11 +182,12 @@ public class Parser {
 		//expression
 		nextToken();
 		if (!currToken.equals(new Token(Token.Type.OPERATOR, "*"))) {
-			List<Expression> expressionsList = new ArrayList<Expression>();
+			List<Expression> expressionsList = new ArrayList<>();
 			expressionsList.add(parseSelectExpression());
 			while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
 				nextToken();
 				expressionsList.add(parseSelectExpression());
+				expressions = (Expression[]) expressionsList.toArray();
 			}
 		}
 		//into outfile
@@ -210,7 +211,7 @@ public class Parser {
 		//group by
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "group"))) {
 			expectNextToken(Token.Type.KEYWORD, "by");
-			List<String> fields = new ArrayList<String>();
+			List<String> fields = new ArrayList<>();
 			do {
 				expectNextToken(Token.Type.IDENTIFIER);
 				fields.add(currToken.val);
@@ -234,8 +235,9 @@ public class Parser {
 
 			boolean isDesc = false;
 			if (currToken.type == Token.Type.KEYWORD) {
-				if (currToken.val.equals("asc")) ;
-				else if (currToken.val.equals("desc"))
+				if (currToken.val.equals("asc")) {
+					isDesc = false;
+				} else if (currToken.val.equals("desc"))
 					isDesc = true;
 				else
 					throwErr("sort type can only be ASC or DESC");

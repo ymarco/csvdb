@@ -3,24 +3,24 @@ package parsing;
 import utils.TextUtils;
 
 
-public class Tokenizer {
+class Tokenizer {
 	private final String text;
 	private final String[] text_split_by_lines;
 	private int curser = 0; // index to text
 	/* these are used for error printing */
 	private int row = 0;
 	private int column = 0;
-	
-	public Tokenizer(String text) {
+
+	Tokenizer(String text) {
 		this.text = text.toLowerCase();
 		this.text_split_by_lines = text.split("\n");
 	}
-	
+
 	/**
 	 * @return next pair of type-value Token when reaching EOF, the EOF token is
-	 *         returned repeatedly.
+	 * returned repeatedly.
 	 */
-	public Token nextToken() {
+	Token nextToken() {
 		skip();
 		if (eof() || cur() == ';')
 			return new Token(Token.Type.EOF, "");
@@ -89,74 +89,71 @@ public class Tokenizer {
 	private String errInfo() {
 		String res = "";
 		res += text_split_by_lines[row];
-		res += "\n" + TextUtils.repert(" ", column) + "^^^" + "\n";
+		res += "\n" + TextUtils.repert(" ", column) + "^^^";
 		return res;
 	}
 
 	void throwErr(String msg) {
-		String info_and_msg = errInfo() + msg + "\n";
-		throw new RuntimeException(info_and_msg);
+		throw new TokenizingException(msg);
 	}
 
 	private Token getIdentifierOrKeyword() {
-		String token_val = "";
+		StringBuilder token_val = new StringBuilder();
 		while (!eof() && (TextUtils.isAlphaOrUnderscore(cur()) || Character.isDigit(cur()))) {
-			token_val += cur();
+			token_val.append(cur());
 			proceedCur();
 		}
-		if (Token.keywords.contains(token_val))
-			return new Token(Token.Type.KEYWORD, token_val);
-		return new Token(Token.Type.IDENTIFIER, token_val);
+		if (Token.keywords.contains(token_val.toString()))
+			return new Token(Token.Type.KEYWORD, token_val.toString());
+		return new Token(Token.Type.IDENTIFIER, token_val.toString());
 	}
 
-	private Token getLitNum() {// note that this returns a STRING containing the num, e.g. "34" and NOT 34
+	private Token getLitNum() throws TokenizingException {// note that this returns a STRING containing the num, e.g. "34" and NOT 34
 		// int start_pos = curser; //used for error printing
-		String token_val = "";
+		StringBuilder token_val = new StringBuilder();
 		if (!TextUtils.isDigitOrDotOrPM(cur()))
-			throwErr("Tokenizer: _get_lit_num was called, but the \"number\" didnt start with digit,.,+,- in the curser");
+			throw new TokenizingException("Tokenizer: _get_lit_num was called, but the 'number' didnt start with digit,.,+,- in the curser");
 		boolean is_dotted = false;
 		while (!eof()) {
 			if (Character.isDigit(cur())) {
-				token_val += cur();
+				token_val.append(cur());
 			} else if (cur() == '.') {
 				if (is_dotted) {
-					throwErr("Tokenizer: _get_lit_num found 2 dots without exponent");
+					throw new TokenizingException("Tokenizer: _get_lit_num found 2 dots without exponent");
 				} else {
 					is_dotted = true;
-					token_val += cur();
+					token_val.append(cur());
 				}
 			} else if (TextUtils.isSpace(cur())) { // end of number
-				return new Token(Token.Type.LIT_NUM, token_val);
+				return new Token(Token.Type.LIT_NUM, token_val.toString());
 			} else {
-				throwErr("Tokenizer: a thing started with a number and than changed into somethng else invalid");
+				throw new TokenizingException("Tokenizer: a thing started with a number and than changed into somethng else invalid");
 			}
 			proceedCur();
 		}
 		/*
 		 * if we got here it means we reached eof and the numbe has ended
 		 */
-		return new Token(Token.Type.LIT_NUM, token_val);
+		return new Token(Token.Type.LIT_NUM, token_val.toString());
 	}
 
 	private Token getLitStr() {
-		String token_val = "";
+		StringBuilder token_val = new StringBuilder();
 		if (cur() != '"')
-			throwErr("Tokenizer: _get_lit_str was called, but there wasnt a \" in the _cur");
+			throw new TokenizingException("Tokenizer: _get_lit_str was called, but there wasnt a \" in the _cur");
 		proceedCur(); // now we are inside the str lit
 		while (!eof()) {
 			if (cur() == '"') { // found the closing "
 				proceedCur(); // going past the " and exiting the str lit
-				return new Token(Token.Type.LIT_STR, token_val);
+				return new Token(Token.Type.LIT_STR, token_val.toString());
 			}
-			token_val += cur();
+			token_val.append(cur());
 			proceedCur();
 		}
 		/*
 		 * if we got here it means that we reached eof without finding the closing "
 		 */
-		throwErr("Tokenizer: did not find the closing \"");
-		/* unreachable */
-		return null;
+		throw new TokenizingException("Tokenizer: did not find the closing \"");
 	}
 
 	private Token getOperator() {
@@ -173,8 +170,12 @@ public class Tokenizer {
 		if (Token.operators.contains(token_val))
 			return new Token(Token.Type.KEYWORD, token_val);
 		else
-			throwErr("Syntax Error: invalid token");
-		/* unreachable */
-		return null;
+			throw new TokenizingException("Syntax Error: invalid token");
+	}
+
+	public class TokenizingException extends RuntimeException {
+		TokenizingException(String message) {
+			super(errInfo() + "\n" + message);
+		}
 	}
 }
