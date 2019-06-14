@@ -8,8 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import schema.DBVar;
 import schema.Schema;
-import schema.VarType;
 import utils.FilesUtils;
 
 public class Export {
@@ -25,7 +25,7 @@ public class Export {
 			BufferedReader[] inputFiles = new BufferedReader[schema.getColumnsCount()];
 			//open
 			for (int i = 0; i < schema.getColumnsCount(); i++)
-				if (schema.getColumnType(i) == VarType.VARCHAR)
+				if (schema.getColumnType(i) == DBVar.Type.VARCHAR)
 					inputFiles[i] = new BufferedReader(new FileReader(schema.getColumnFileName(i)));
 				else
 					inputFilesBin[i] = new DataInputStream(new FileInputStream(schema.getColumnFileName(i)));

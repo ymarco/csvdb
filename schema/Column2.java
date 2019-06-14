@@ -1,21 +1,16 @@
 package schema;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
-import commandLine.Main;
 import exceptions.CsvdbException;
+import schema.dbvars.Float;
 
 public class Column2 {
-	public final VarType type;
+	public final DBVar.Type type;
 	public final String name;
 
 	public Object min;
@@ -25,7 +20,7 @@ public class Column2 {
 	public long count;
 	public String filePath;
 
-	public Column2(VarType type, String name, String filePath) {
+	public Column2(DBVar.Type type, String name, String filePath) {
 		this.type = type;
 		this.name = name;
 		this.filePath = filePath;
@@ -47,7 +42,7 @@ public class Column2 {
 				max = null;
 				sum = null;
 				break;
-			case TIMESTAMP:
+			case TS:
 				min = -1L;
 				max = 0L;
 				sum = 0L;

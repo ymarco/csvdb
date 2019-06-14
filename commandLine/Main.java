@@ -25,7 +25,7 @@ public class Main {
 				
 				if (code.equals("exit();") || code.equals("exit;"))
 					break;
-				if (code.equals("test();") || code.equals("test;")) {
+				if (code.equals("pred();") || code.equals("pred;")) {
 					test();
 					break;
 				}

@@ -1,7 +1,9 @@
 package schema;
 
+import schema.dbvars.Float;
+
 public class Column {
-	public final VarType type;
+	public final DBVar.Type type;
 	public final String name;
 
 	public Object min;
@@ -10,21 +12,21 @@ public class Column {
 	public Object sum;
 	public long count;
 
-	public Column(VarType type, String name) {
+	public Column(DBVar.Type type, String name) {
 		this.type = type;
 		this.name = name;
 
-		if (type == VarType.FLOAT) {
+		if (type == DBVar.Type.FLOAT) {
 			min = Float.MAX_VALUE;
 			max = Float.MIN_VALUE;
 			sum = 0F;
 		}
-		if (type == VarType.INT) {
+		if (type == DBVar.Type.INT) {
 			min = Long.MAX_VALUE;
 			max = Long.MIN_VALUE;
 			sum = 0L;
 		}
-		if (type == VarType.TIMESTAMP) {
+		if (type == DBVar.Type.TS) {
 			min = -1L;
 			max = 0L;
 			sum = 0L;

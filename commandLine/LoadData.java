@@ -8,8 +8,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import schema.Column2;
+import schema.DBVar;
 import schema.Schema;
-import schema.VarType;
 
 public class LoadData {
 	
@@ -35,7 +35,7 @@ public class LoadData {
 			for (int i = 0; i < columns.length; i++) {
 				JSONObject col = (JSONObject) schema.get(i);
 				String field = (String) col.get("field");
-				columns[i] = new Column2(VarType.toVarType((String) col.get("type")), field, Main.rootdir + "\\" + table.getName() + "\\" + field);
+				columns[i] = new Column2(DBVar.Type.toVarType((String) col.get("type")), field, Main.rootdir + "\\" + table.getName() + "\\" + field);
 			}
 			Schema.AddSchema(table.getName(), columns);
 		}

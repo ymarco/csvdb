@@ -9,8 +9,8 @@ import java.io.IOException;
 
 import commandLine.Main;
 import de.siegmar.fastcsv.reader.RowReader;
+import schema.DBVar;
 import schema.Schema;
-import schema.VarType;
 import utils.FilesUtils;
 
 public class Load implements Command {
@@ -29,8 +29,7 @@ public class Load implements Command {
 	}
 	
 	private void createFiles(String fileName, String tableName, int ignoreLines) {
-		if (!Schema.HaveSchema(tableName))
-			throw new RuntimeException("you tried to load a non existing table");
+		Schema schema = Schema.GetSchema(tableName);
 		try {
 			RowReader file = new RowReader(new FileReader(fileName), ',', '"');
 			// ignore lines
@@ -39,11 +38,10 @@ public class Load implements Command {
 				ignoreLines--;
 			}
 			//create BufferedReaders
-			Schema schema = Schema.GetSchema(tableName);
 			BufferedWriter[] outFiles = new BufferedWriter[schema.getColumnsCount()];
 			DataOutputStream[] outFilesBin = new DataOutputStream[schema.getColumnsCount()];
 			for (int i = 0; i < outFiles.length; i++) {
-				if (schema.getColumnType(i) == VarType.VARCHAR)
+				if (schema.getColumnType(i) == DBVar.Type.VARCHAR)
 					outFiles[i] = new BufferedWriter(new FileWriter(schema.getTablePath() + "\\" + schema.getColumnName(i) + Main.columnFilesExtensios));
 				else
 					outFilesBin[i] = new DataOutputStream(new FileOutputStream(schema.getTablePath() + "\\" + schema.getColumnName(i) + Main.columnFilesExtensios));
@@ -62,7 +60,7 @@ public class Load implements Command {
 						case INT:
 							outFilesBin[i].writeLong(Long.parseLong(fields[i]));
 							break;
-						case TIMESTAMP:
+						case TS:
 							outFilesBin[i].writeLong(Long.parseUnsignedLong(fields[i]));
 							break;
 						case FLOAT:

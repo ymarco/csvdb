@@ -19,7 +19,7 @@ public class TableRecreation {
 	private List<Long> orderColumnLong = new ArrayList<Long>();
 	private List<Double> orderColumnDouble = new ArrayList<Double>();
 	private List<String> orderColumnString = new ArrayList<String>();
-	private VarType orderType;
+	private DBVar.Type orderType;
 
 	private static final int MAX_BYTES_TO_SAVE = 1000;
 	private int byte_saving = 0;
@@ -38,7 +38,7 @@ public class TableRecreation {
 			orderColumnLong.add(var.i);
 			byte_saving += 8;
 			break;
-		case TIMESTAMP:
+		case TS:
 			orderColumnLong.add(var.ts);
 			byte_saving += 8;
 			break;
@@ -218,14 +218,14 @@ public class TableRecreation {
 				rowsFile.writeLong(row);
 			rowsFile.close();
 
-			if (orderType == VarType.VARCHAR) {
+			if (orderType == DBVar.Type.VARCHAR) {
 				BufferedWriter colFile = new BufferedWriter(new FileWriter(Main.rootdir + "\\#sort\\col" + fileCount + Main.columnFilesExtensios));
 				for (String item : orderColumnString)
 					colFile.write(FilesUtils.endoceStringForWriting(item));
 				colFile.close();
 			} else  {
 				DataOutputStream colFile = new DataOutputStream(new FileOutputStream(Main.rootdir + "\\#sort\\col" + fileCount + Main.columnFilesExtensios));
-				if (orderType == VarType.FLOAT)
+				if (orderType == DBVar.Type.FLOAT)
 					for (double item : orderColumnDouble)
 						rowsFile.writeDouble(item);
 				else
