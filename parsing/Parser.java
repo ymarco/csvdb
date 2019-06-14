@@ -4,16 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import commandLine.Main;
-import commands.Command;
-import commands.Create;
-import commands.Drop;
-import commands.Load;
-import commands.Select3;
-import commands.Select3.Expression;
-import commands.Select3.Expression.AggFuncs;
-import commands.select.GroupBy;
-import commands.select.OrderBy;
-import commands.select.Where3;
+import commands.*;
+import commands.SelectSTREAMS.Expression;
+import commands.SelectSTREAMS.Expression.AggFuncs;
+import commands.select.*;
 import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
@@ -34,17 +28,17 @@ public class Parser {
 			throwErr("first token wasnt a keyword");
 
 		switch (currToken.val) {
-		case "create":
-			return parseCreate();
-		case "drop":
-			return parseDrop();
-		case "load":
-			return parseLoad();
-		case "select":
-			return parseSelect();
-		/* unreachable */
-		default:
-			return null;
+			case "create":
+				return parseCreate();
+			case "drop":
+				return parseDrop();
+			case "load":
+				return parseLoad();
+			case "select":
+				return parseSelect();
+			/* unreachable */
+			default:
+				return null;
 		}
 
 	}
@@ -66,7 +60,7 @@ public class Parser {
 		nextToken();
 		expectThisToken(tt);
 	}
-	
+
 	private void expectThisToken(Token.Type t, String v) {
 		if (currToken.type != t || !currToken.val.equals(v)) {
 			String errmsg = "unexpected token: was expecting '" + t + "'";
@@ -160,13 +154,13 @@ public class Parser {
 		expectNextToken(Token.Type.KEYWORD, "table");
 		// check for [IF EXISTS]
 		nextToken();
-		if(currToken.equals(new Token(Token.Type.KEYWORD, "if"))) {
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "if"))) {
 			expectNextToken(Token.Type.KEYWORD, "exists");
 			enable_ifexists = true;
 			nextToken();
 		}
 		//check for table_name
-		if(currToken.type == Token.Type.IDENTIFIER){
+		if (currToken.type == Token.Type.IDENTIFIER) {
 			name = currToken.val;
 		} else
 			throwErr("KEYWORD _table_name not found");
@@ -178,13 +172,13 @@ public class Parser {
 
 	private Command parseSelect() {
 		String intoFile = null;
-		String fromTableName;
+		String srcTableName;
 		Expression[] expressions = null;
-		Where3 where = null;
-		GroupBy groupBy = null;
-		OrderBy orderBy = null;
-		
-		
+		WhereSTREAMS where = null;
+		GroupBySTREAMS groupBy = null;
+		OrderBySTREAMS orderBy = null;
+
+
 		//expression
 		nextToken();
 		if (!currToken.equals(new Token(Token.Type.OPERATOR, "*"))) {
@@ -205,10 +199,10 @@ public class Parser {
 		//from
 		expectThisToken(Token.Type.KEYWORD, "from");
 		expectNextToken(Token.Type.IDENTIFIER);
-		fromTableName = currToken.val;
-		if (!Schema.HaveSchema(fromTableName))
+		srcTableName = currToken.val;
+		if (!Schema.HaveSchema(srcTableName))
 			throwErr("unexisting table");
-		Schema schema = Schema.GetSchema(fromTableName);
+		Schema schema = Schema.GetSchema(srcTableName);
 		//where
 		nextToken();
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "where")))
@@ -217,25 +211,19 @@ public class Parser {
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "group"))) {
 			expectNextToken(Token.Type.KEYWORD, "by");
 			List<String> fields = new ArrayList<String>();
-			do
-			{
+			do {
 				expectNextToken(Token.Type.IDENTIFIER);
 				fields.add(currToken.val);
 				nextToken();
 			}
 			while (currToken.equals(new Token(Token.Type.OPERATOR, ",")));
-			
+
 			//having
-<<<<<<< HEAD
-			Where3 having = null;
-			if (currToken.equals(new Token(TokenType.KEYWORD, "having")))
-=======
-			Where2 having = null;
+			WhereSTREAMS having = null;
 			if (currToken.equals(new Token(Token.Type.KEYWORD, "having")))
->>>>>>> branch 'master' of https://ofek2608@bitbucket.org/csvdb_/csvdb.git
 				having = parseCondition(schema);
-			
-			groupBy = new GroupBy(fields.toArray(new String[0]), having);
+
+			groupBy = new GroupBySTREAMS(fields.toArray(new String[0]), having);
 		}
 		//order by
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "order"))) {
@@ -243,45 +231,45 @@ public class Parser {
 			expectNextToken(Token.Type.IDENTIFIER);
 			String outputField = currToken.val;
 			nextToken();
-			
-			OrderBy.SortType sortType = OrderBy.SortType.ASC;
+
+			boolean isDesc = false;
 			if (currToken.type == Token.Type.KEYWORD) {
-				if (currToken.val.equals("asc"));
+				if (currToken.val.equals("asc")) ;
 				else if (currToken.val.equals("desc"))
-					sortType = OrderBy.SortType.DESC;
+					isDesc = true;
 				else
-					throwErr("sort type need to be ASC or DESC");
+					throwErr("sort type can only be ASC or DESC");
 			}
-			orderBy = new OrderBy(outputField, sortType);
+			orderBy = new OrderBySTREAMS(schema.getTableName(), schema.getColumnIndex(outputField), isDesc);
 			nextToken();
 		}
 		//eof
 		expectNextToken(Token.Type.EOF);
 		//return
-		return new Select3(intoFile, fromTableName, expressions, where, groupBy, orderBy);
+		return new SelectSTREAMS(intoFile, srcTableName, expressions, where, groupBy, orderBy);
 	}
-	
+
 	private Expression parseSelectExpression() {
 		AggFuncs aggFunc = AggFuncs.NOTHING;
 		if (currToken.type == Token.Type.KEYWORD) {
 			switch (currToken.val) {
-			case "min":
-				aggFunc = AggFuncs.MIN;
-				break;
-			case "max":
-				aggFunc = AggFuncs.MAX;
-				break;
-			case "avg":
-				aggFunc = AggFuncs.AVG;
-				break;
-			case "sum":
-				aggFunc = AggFuncs.SUM;
-				break;
-			case "count":
-				aggFunc = AggFuncs.COUNT;
-				break;
-			default:
-				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
+				case "min":
+					aggFunc = AggFuncs.MIN;
+					break;
+				case "max":
+					aggFunc = AggFuncs.MAX;
+					break;
+				case "avg":
+					aggFunc = AggFuncs.AVG;
+					break;
+				case "sum":
+					aggFunc = AggFuncs.SUM;
+					break;
+				case "count":
+					aggFunc = AggFuncs.COUNT;
+					break;
+				default:
+					throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
 			}
 			expectNextToken(Token.Type.OPERATOR, "(");
 		}
@@ -299,14 +287,9 @@ public class Parser {
 		}
 		return new Expression(fieldName);
 	}
-	
-<<<<<<< HEAD
-	private Where3 parseCondition(Schema schema) {
-		expectNextToken(TokenType.IDENTIFIER);
-=======
-	private Where2 parseCondition(Schema schema) {
+
+	private WhereSTREAMS parseCondition(Schema schema) {
 		expectNextToken(Token.Type.IDENTIFIER);
->>>>>>> branch 'master' of https://ofek2608@bitbucket.org/csvdb_/csvdb.git
 		String fieldName = currToken.val;
 		expectNextToken(Token.Type.OPERATOR);
 		String operator = currToken.val;
@@ -315,6 +298,6 @@ public class Parser {
 			throwErr("unexpected token");
 		String constant = currToken.val;
 		nextToken();
-		return new Where3(schema, fieldName, operator, constant);
+		return new WhereSTREAMS(schema, schema.getColumnIndex(fieldName), operator, constant);
 	}
 }
