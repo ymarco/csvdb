@@ -100,6 +100,7 @@ public class Schema {
 		return getColumnFileName(getColumnIndex(columnName));
 	}
 
+	@Deprecated
 	public String getColumnPath(int i) {
 		return getTablePath() + "\\" + getColumnFileName(i);
 	}

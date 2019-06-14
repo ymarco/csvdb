@@ -9,10 +9,7 @@ import schema.dbvars.TS;
 import schema.dbvars.Varchar;
 import utils.FilesUtils;
 
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 public class LoadSTREAMS implements Command {
 	private String fileName;
@@ -80,7 +77,11 @@ public class LoadSTREAMS implements Command {
 		}
 		schema.setLineCount(lineNumber);
 
-		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(schema.getTablePath()));
+	writeTable(table, schema.getTablePath());
+	}
+
+	public static void writeTable(DBVar[][] table, String path) throws IOException {
+		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path));
 		out.writeObject(table);
 	}
 }
