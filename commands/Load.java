@@ -40,14 +40,18 @@ public class Load implements Command {
 		if (!Schema.HaveSchema(tableName))
 			throw new RuntimeException("you tried to load a non existing table");
 		Schema schema = Schema.GetSchema(tableName);
-//		int linesCount = FilesUtils.countLines(tableName);
 		List<DBVar[]> tableList = new ArrayList<>();
 		CsvReader csvReader = new CsvReader();
 		CsvParser parser = csvReader.parse(new File(fileName), StandardCharsets.UTF_8);
-		// read past the lines that should be ignored
 		CsvRow row;
-		while ((row = parser.nextRow()) != null && ignoreLines > 0) {
-			ignoreLines--;
+		// read past the lines that should be ignored
+		for (int i = 0; i < ignoreLines; i++) {
+			try {
+				row = parser.nextRow();
+				if (row == null) throw new IOException();
+			} catch (IOException e) {
+				break;
+			}
 		}
 		// load from csv to table
 		int lineNumber = 0;

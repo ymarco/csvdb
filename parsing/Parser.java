@@ -106,7 +106,7 @@ public class Parser {
 			String argName = currToken.val;
 			expectNextToken(Token.Type.KEYWORD); // argument type
 			if (!Token.keywords.contains(currToken.val))
-				throwErr("parse error: insecondid database type");
+				throwErr("parse error: invalid database type");
 			DBVar.Type argType = DBVar.Type.toVarType(currToken.val);
 			args.add(new Column2(argType, argName, Main.rootdir + "//" + name + "//" + argName + ".col"));
 			expectNextToken(Token.Type.OPERATOR);
@@ -166,8 +166,7 @@ public class Parser {
 			throwErr("KEYWORD _table_name not found");
 
 		expectNextToken(Token.Type.EOF);
-		Drop res = new Drop(name, enable_ifexists);
-		return res;
+		return new Drop(name, enable_ifexists);
 	}
 
 	private Command parseSelect() {
