@@ -47,4 +47,9 @@ public class DBTS extends DBVar {
 	}
 
 	public static final DBVar.Type type = Type.TS;
+
+	@Override
+	public String toString() {
+		return (isNull() ? "null" : Long.toUnsignedString(val));
+	}
 }

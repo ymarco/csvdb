@@ -15,6 +15,8 @@ public abstract class DBVar implements Serializable {
 
 	public abstract boolean isNull();
 
+	@Override
+	public abstract String toString();
 
 	public enum Type {
 		INT("int"),

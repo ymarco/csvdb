@@ -28,6 +28,7 @@ public class DBInt extends DBVar {
 	public Comparator<DBVar> comparator() {
 		return comparator;
 	}
+
 	@Override
 	public Comparator<DBVar> getNegComparator() {
 		return negComparator;
@@ -43,8 +44,13 @@ public class DBInt extends DBVar {
 
 	@Override
 	public boolean isNull() {
-        return this.val == NULL.val;
+		return this.val == NULL.val;
 	}
 
 	public static final DBVar.Type type = Type.INT;
+
+	@Override
+	public String toString() {
+		return (isNull() ? "null" : Long.toString(val));
+	}
 }

@@ -46,6 +46,11 @@ public class DBFloat extends DBVar {
 		return this.val == NULL.val;
 	}
 
+	@Override
+	public String toString() {
+		return (isNull() ? "null" : Double.toString(val));
+	}
+
 	private static final DBVar.Type type = Type.FLOAT;
 
 }
