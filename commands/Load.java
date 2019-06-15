@@ -101,7 +101,7 @@ public class Load implements Command {
 		schema.setLineCount(linesCount);
 
 		DBVar[][] table = tableList.toArray(new DBVar[tableList.size()][]);
-		writeTable(table, schema.getTablePath());
+		writeTable(table, schema.getTablePath() + "/table.tbl");
 	}
 
 	public static void writeTable(DBVar[][] table, String path) throws IOException {
