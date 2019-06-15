@@ -1,12 +1,17 @@
 package commands;
 
 import commands.select.*;
+import de.siegmar.fastcsv.writer.CsvAppender;
+import de.siegmar.fastcsv.writer.CsvWriter;
 import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 
@@ -32,31 +37,86 @@ public class Select implements Command {
 		this.groupBy = groupBy;
 	}
 
-	public void run() {
+	private static enum Mode {PRINT_TO_SCREEN, EXPORT_TO_CSV, CREATE_NEW_TABLE}
+
+	private static String[] rowToString(DBVar[] row) {
+		String[] res = new String[row.length];
+		for (int i = 0; i < row.length; i++) {
+			res[i] = row[i].toString();
+		}
+		return res;
+	}
+
+	public void run(Mode mode) {
 		Schema newSchema = createNewSchema();
 		Stream<DBVar[]> s = srcSchema.getTableStream();
 		s = where.apply(s);
 		s = orderBy.apply(s);
-		if (groupBy == null) { // no group by
+		if (groupBy == null) { // no group by TODO: there CAN be aggregator functions here
 			// selectedColumns[i] is the index of the source column of column i in the new table
 			int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
-			DBVar[][] newTabse = s.map(
-					row -> {
-						DBVar[] newRow = new DBVar[selectedColumns.length];
-						for (int i = 0; i < selectedColumns.length; i++) {
-							newRow[i] = row[selectedColumns[i]];
-						}
-						return newRow;
-					}).toArray(DBVar[][]::new);
-
-			try {
-				Load.writeTable(newTabse, newSchema.getTablePath());
-			} catch (IOException e) {
-				e.printStackTrace();
+			Stream<DBVar[]> finalStream = s.map(reformatColumns(selectedColumns));
+			switch (mode) {
+				case PRINT_TO_SCREEN:
+					printToScreen(finalStream);
+					break;
+				case EXPORT_TO_CSV:
+					String outfileName = newTableName + ".csv"; // TODO: get the actual name
+					exportToCSV(outfileName, finalStream);
+					break;
+				case CREATE_NEW_TABLE:
+					createNewTable(finalStream);
+					break;
 			}
+
+
 		} else {
-			s = groupBy.apply(s);
+			s = groupBy.apply(s); //TODO
 		}
+	}
+
+	private void createNewTable(Stream<DBVar[]> s) {
+		DBVar[][] newTable = s.toArray(DBVar[][]::new);
+		//TODO: load table into a new schema
+	}
+
+	private Function<DBVar[], DBVar[]> reformatColumns(int[] selectedColumns) {
+		return row -> {
+			DBVar[] newRow = new DBVar[selectedColumns.length];
+			for (int i = 0; i < selectedColumns.length; i++) {
+				newRow[i] = row[selectedColumns[i]];
+			}
+			return newRow;
+		};
+	}
+
+	private void exportToCSV(String outfileName, Stream<DBVar[]> s) {
+		// prepare csv stuff
+		CsvWriter writer = new CsvWriter();
+		CsvAppender appender;
+		try {
+			appender = writer.append(new File(outfileName), StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		// export to the csv
+		s.map(Select::rowToString)
+				.forEach(a -> {
+					try {
+						appender.appendLine(a);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				});
+	}
+
+	public void run() {
+		run(Mode.PRINT_TO_SCREEN);
+	}
+
+	public static void printToScreen(Stream<DBVar[]> s) {
+		s.limit(200); //no need to clutter the screen
+		s.forEach(System.out::println);
 	}
 
 	private Schema createNewSchema() {
@@ -79,8 +139,6 @@ public class Select implements Command {
 	// what is this? needs comments TODO
 	public static class Expression {
 		public enum AggFuncs {NOTHING, MIN, MAX, AVG, SUM, COUNT}
-
-		;
 
 		public String fieldName;
 		public String asName;

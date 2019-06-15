@@ -290,18 +290,13 @@ public class Parser {
 	}
 
 	private Where parseCondition(Schema schema) {
+		/*where _field_name_ _operator_ _constant_*/
 		expectNextToken(Token.Type.IDENTIFIER);
 		String fieldName = currToken.val;
 		expectNextToken(Token.Type.OPERATOR);
 		String operator = currToken.val;
 		nextToken();
-		String constant = "";
-		if (currToken.type != Token.Type.LIT_NUM || currToken.type != Token.Type.LIT_STR) {
-			if (!currToken.val.equals("null"))
-				throwErr("unexpected token");
-		} else
-			constant = currToken.val;
-		nextToken();
+		String constant = currToken.val;
 		return new Where(schema, schema.getColumnIndex(fieldName), operator, constant);
 	}
 }
