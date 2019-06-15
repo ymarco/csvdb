@@ -50,6 +50,6 @@ public class DBTS extends DBVar {
 
 	@Override
 	public String toString() {
-		return (isNull() ? "null" : Long.toUnsignedString(val));
+		return (isNull() ? "" : Long.toUnsignedString(val));
 	}
 }

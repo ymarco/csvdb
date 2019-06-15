@@ -51,6 +51,6 @@ public class DBInt extends DBVar {
 
 	@Override
 	public String toString() {
-		return (isNull() ? "null" : Long.toString(val));
+		return (isNull() ? "" : Long.toString(val));
 	}
 }
