@@ -8,7 +8,7 @@ public class DBFloat extends DBVar {
 	public double val;
 
 	public DBFloat(String s) throws NumberFormatException {
-		this(Double.parseDouble(s.equals("") ? Double.toString(NULL.val) : s));
+		this(Double.parseDouble(s.equals("") ? Double.toString(NULL.val) : s.trim()));
 	}
 
 	DBFloat(double val) {
@@ -44,6 +44,11 @@ public class DBFloat extends DBVar {
 	@Override
 	public boolean isNull() {
 		return this.val == NULL.val;
+	}
+
+	@Override
+	public String toString() {
+		return (isNull() ? "" : Double.toString(val));
 	}
 
 	private static final DBVar.Type type = Type.FLOAT;

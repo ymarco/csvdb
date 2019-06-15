@@ -24,6 +24,7 @@ public class DBVarchar extends DBVar {
 	public Comparator<DBVar> comparator() {
 		return comparator;
 	}
+
 	@Override
 	public Comparator<DBVar> getNegComparator() {
 		return negComparator;
@@ -38,8 +39,13 @@ public class DBVarchar extends DBVar {
 
 	@Override
 	public boolean isNull() {
-        return this.val.equals(NULL.val);
+		return this.val.equals(NULL.val);
 	}
 
 	public static final DBVar.Type type = Type.VARCHAR;
+
+	@Override
+	public String toString() {
+		return val;
+	}
 }

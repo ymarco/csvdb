@@ -12,7 +12,7 @@ public class DBInt extends DBVar {
 	}
 
 	public DBInt(String s) throws NumberFormatException {
-		this(Long.parseLong(s));
+		this(s.equals("") ? NULL.val : Long.parseLong(s.trim()));
 	}
 
 	public static final DBInt NULL = new DBInt(Long.MIN_VALUE);
@@ -28,6 +28,7 @@ public class DBInt extends DBVar {
 	public Comparator<DBVar> comparator() {
 		return comparator;
 	}
+
 	@Override
 	public Comparator<DBVar> getNegComparator() {
 		return negComparator;
@@ -43,8 +44,13 @@ public class DBInt extends DBVar {
 
 	@Override
 	public boolean isNull() {
-        return this.val == NULL.val;
+		return this.val == NULL.val;
 	}
 
 	public static final DBVar.Type type = Type.INT;
+
+	@Override
+	public String toString() {
+		return (isNull() ? "" : Long.toString(val));
+	}
 }

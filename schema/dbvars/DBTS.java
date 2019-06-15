@@ -12,7 +12,7 @@ public class DBTS extends DBVar {
 	}
 
 	public DBTS(String s) throws NumberFormatException {
-		this(Long.parseUnsignedLong(s.equals("") ? Long.toUnsignedString(NULL.val) : s));
+		this(Long.parseUnsignedLong(s.equals("") ? Long.toUnsignedString(NULL.val) : s.trim()));
 	}
 
 	public static final DBTS NULL = new DBTS(Long.MIN_VALUE);
@@ -47,4 +47,9 @@ public class DBTS extends DBVar {
 	}
 
 	public static final DBVar.Type type = Type.TS;
+
+	@Override
+	public String toString() {
+		return (isNull() ? "" : Long.toUnsignedString(val));
+	}
 }
