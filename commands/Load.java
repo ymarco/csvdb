@@ -1,5 +1,8 @@
 package commands;
 
+import de.siegmar.fastcsv.reader.CsvParser;
+import de.siegmar.fastcsv.reader.CsvReader;
+import de.siegmar.fastcsv.reader.CsvRow;
 import de.siegmar.fastcsv.reader.RowReader;
 import schema.DBVar;
 import schema.Schema;
@@ -8,11 +11,10 @@ import schema.dbvars.DBInt;
 import schema.dbvars.DBTS;
 import schema.dbvars.DBVarchar;
 
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Load implements Command {
@@ -28,36 +30,42 @@ public class Load implements Command {
 
 	public void run() {
 		try {
-			createFiles(fileName, tableName, ignoreLines);
+			loadToSerializedArray(fileName, tableName, ignoreLines);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void createFiles(String fileName, String tableName, int ignoreLines) throws IOException {
+	private void loadToSerializedArray(String fileName, String tableName, int ignoreLines) throws IOException {
 		if (!Schema.HaveSchema(tableName))
 			throw new RuntimeException("you tried to load a non existing table");
 		Schema schema = Schema.GetSchema(tableName);
 //		int linesCount = FilesUtils.countLines(tableName);
 		List<DBVar[]> tableList = new ArrayList<>();
-		RowReader file = new RowReader(new FileReader(fileName), ',', '"');
+		CsvReader csvReader = new CsvReader();
+		CsvParser parser = csvReader.parse(new File(fileName), StandardCharsets.UTF_8);
 		// read past the lines that should be ignored
-		while (ignoreLines > 0 && !file.isFinished()) {
-			file.readLine();
+		CsvRow row;
+		while ((row = parser.nextRow()) != null && ignoreLines > 0) {
 			ignoreLines--;
 		}
 		// load from csv to table
 		int lineNumber = 0;
-		while (!file.isFinished()) {
+		while (true) {
 			//read
-			RowReader.Line line = file.readLine();
-			String[] row = line.getFields();
+			try {
+				row = parser.nextRow();
+				if (row == null) throw new IOException();
+			} catch (IOException e) {
+				break;
+			}
 			DBVar[] parsedRow = new DBVar[schema.getColumnsCount()];
 			tableList.add(new DBVar[schema.getColumnsCount()]);
 			//write
-			for (int colNumber = 0; colNumber < row.length; colNumber++) {
+			for (int colNumber = 0; colNumber < row.getFieldCount(); colNumber++) {
+				String curr = row.getField(colNumber);
+				System.out.println("row[" + colNumber + "] = " + curr);
 				try {
-					String curr = row[colNumber];
 					switch (schema.getColumnType(colNumber)) {
 						case INT:
 							parsedRow[colNumber] = new DBInt(curr);
@@ -72,21 +80,23 @@ public class Load implements Command {
 							parsedRow[colNumber] = new DBVarchar(curr);
 							break;
 					}
-				} catch (NumberFormatException e) { // TODO narrow the exception
-					file.close();
-					throw new RuntimeException("you tried to load file to invalid csv;" +
-							" couldnt format it into a valid table.");
+				} catch (NumberFormatException e) {
+					throw new RuntimeException("you tried to load an invalid csv;" +
+							" couldnt format it into a valid table." +
+							"[error parsing '" + curr + "' to an " + schema.getColumnType(colNumber));
+				} finally {
+                    parser.close();
 				}
 
 			}
 			lineNumber++;
 			tableList.add(parsedRow);
 		}
-		int linesCount = lineNumber+1;
+		int linesCount = lineNumber + 1;
 
 		schema.setLineCount(linesCount);
 
-		DBVar[][] table = (DBVar[][]) tableList.toArray();
+		DBVar[][] table = tableList.toArray(new DBVar[tableList.size()][]);
 		writeTable(table, schema.getTablePath());
 	}
 

@@ -12,7 +12,7 @@ public class DBInt extends DBVar {
 	}
 
 	public DBInt(String s) throws NumberFormatException {
-		this(Long.parseLong(s));
+		this(s.equals("") ? NULL.val : Long.parseLong(s.trim()));
 	}
 
 	public static final DBInt NULL = new DBInt(Long.MIN_VALUE);

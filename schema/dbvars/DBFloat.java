@@ -8,7 +8,7 @@ public class DBFloat extends DBVar {
 	public double val;
 
 	public DBFloat(String s) throws NumberFormatException {
-		this(Double.parseDouble(s.equals("") ? Double.toString(NULL.val) : s));
+		this(Double.parseDouble(s.equals("") ? Double.toString(NULL.val) : s.trim()));
 	}
 
 	DBFloat(double val) {

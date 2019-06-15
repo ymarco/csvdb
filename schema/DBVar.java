@@ -1,8 +1,9 @@
 package schema;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-public abstract class DBVar {
+public abstract class DBVar implements Serializable {
 
 	public abstract DBVar getNull();
 

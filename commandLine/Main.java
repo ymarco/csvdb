@@ -29,6 +29,7 @@ public class Main {
 					System.exit(0);
 				}
 
+				// some hacky and quick commands
 				if (code.equals("exit();") || code.equals("exit;"))
 					break;
 				if (code.equals("pred();") || code.equals("pred;")) {
@@ -36,13 +37,14 @@ public class Main {
 					break;
 				}
 
+				// standard route
 				Parser parser = new Parser(code);
 				Command cmd = parser.parse();
 				cmd.run();
 			} catch (Exception e) {
 				System.out.println("ERROR:\n");
 				System.out.println(e.getLocalizedMessage());
-				if (verbose)
+				//if (verbose)
 					e.printStackTrace();
 				System.err.flush();
 				if (!useCommandLine)
@@ -54,46 +56,42 @@ public class Main {
 	}
 
 	private static void parseArgs(String[] args) {
-		try {
-			for (int i = 0; i < args.length; i++) {
-				switch (args[i]) {
-					case "--rootdir":
-						rootdir = args[i + 1];
-						File rootdirFile = new File(rootdir);
-						rootdirFile.mkdirs(); // return if the file created, we need to know if the file are exists.
-						if (!rootdirFile.exists()) {
-							System.out.println("failed to load the rootdir");
-							System.exit(-1);
-						}
-						i++;
-						break;
-					case "--run":
-						if (codeReader == null)
-							throw new Exception();
-						codeReader = new Scanner(new File(args[i + 1])).useDelimiter(";");
-						useCommandLine = false;
-						i++;
-						break;
-					case "--verbose":
-						verbose = true;
-						break;
-					default:
-						System.out.println("Usage: " +
-								"csvdb [--verbose] [--run file] [--rootdir dir]");
-						System.exit(1);
+		for (int i = 0; i < args.length; i++) {
+			System.out.println("ARG: " + args[i]);
+			switch (args[i]) {
+				case "--rootdir":
+					rootdir = args[i + 1];
+					File rootdirFile = new File(rootdir);
+					rootdirFile.mkdirs(); // return if the file created, we need to know if the file are exists.
+					if (!rootdirFile.exists()) {
+						System.out.println("failed to load the rootdir");
+						System.exit(-1);
+					}
+					i++;
+					break;
+				case "--run":
+					String filename = args[i+1];
+					try {
+						codeReader = new Scanner(new File(filename)).useDelimiter(";");
+					} catch (FileNotFoundException e) {
+                        throw new RuntimeException("--run: file " + filename + " not found");
+					}
+					useCommandLine = false;
+					i++;
+					break;
+				case "--verbose":
+					verbose = true;
+					break;
+				default:
+					System.out.println("Usage: " +
+							"csvdb [--verbose] [--run file] [--rootdir dir]");
+					System.exit(1);
 
-				}
 			}
-			if (codeReader == null)
-				codeReader = new Scanner(System.in).useDelimiter(";");
-
-		} catch (FileNotFoundException e) {
-			System.out.println("File not found");
-			System.exit(-1);
-		} catch (Exception e) {
-			System.out.println("Args aren't proper"); // proper is the good word?
-			System.exit(-1);
 		}
+		if (codeReader == null)
+			codeReader = new Scanner(System.in).useDelimiter(";");
+
 	}
 
 	/**
