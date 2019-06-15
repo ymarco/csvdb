@@ -34,7 +34,7 @@ public class Load implements Command {
 		if (!Schema.HaveSchema(tableName))
 			throw new RuntimeException("you tried to load a non existing table");
 		Schema schema = Schema.GetSchema(tableName);
-		int linesCount = FilesUtils.countLines(tableName);
+		int linesCount = FilesUtils.countLines(fileName);
 		DBVar[][] table = new DBVar[linesCount][schema.getColumnsCount()];
 		RowReader file = new RowReader(new FileReader(fileName), ',', '"');
 		// read past the lines that should be ignored

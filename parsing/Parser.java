@@ -187,7 +187,7 @@ public class Parser {
 			while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
 				nextToken();
 				expressionsList.add(parseSelectExpression());
-				expressions = (Expression[]) expressionsList.toArray();
+				expressions = expressionsList.toArray(new Expression[expressionsList.size()]);
 			}
 		}
 		//into outfile
