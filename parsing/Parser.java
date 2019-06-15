@@ -28,17 +28,17 @@ public class Parser {
 			throwErr("first token wasnt a keyword");
 
 		switch (currToken.val) {
-			case "create":
-				return parseCreate();
-			case "drop":
-				return parseDrop();
-			case "load":
-				return parseLoad();
-			case "select":
-				return parseSelect();
+		case "create":
+			return parseCreate();
+		case "drop":
+			return parseDrop();
+		case "load":
+			return parseLoad();
+		case "select":
+			return parseSelect();
 			/* unreachable */
-			default:
-				return null;
+		default:
+			return null;
 		}
 
 	}
@@ -254,23 +254,23 @@ public class Parser {
 		AggFuncs aggFunc = AggFuncs.NOTHING;
 		if (currToken.type == Token.Type.KEYWORD) {
 			switch (currToken.val) {
-				case "min":
-					aggFunc = AggFuncs.MIN;
-					break;
-				case "max":
-					aggFunc = AggFuncs.MAX;
-					break;
-				case "avg":
-					aggFunc = AggFuncs.AVG;
-					break;
-				case "sum":
-					aggFunc = AggFuncs.SUM;
-					break;
-				case "count":
-					aggFunc = AggFuncs.COUNT;
-					break;
-				default:
-					throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
+			case "min":
+				aggFunc = AggFuncs.MIN;
+				break;
+			case "max":
+				aggFunc = AggFuncs.MAX;
+				break;
+			case "avg":
+				aggFunc = AggFuncs.AVG;
+				break;
+			case "sum":
+				aggFunc = AggFuncs.SUM;
+				break;
+			case "count":
+				aggFunc = AggFuncs.COUNT;
+				break;
+			default:
+				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
 			}
 			expectNextToken(Token.Type.OPERATOR, "(");
 		}
@@ -295,9 +295,12 @@ public class Parser {
 		expectNextToken(Token.Type.OPERATOR);
 		String operator = currToken.val;
 		nextToken();
-		if (currToken.type != Token.Type.LIT_NUM || currToken.type != Token.Type.LIT_STR)
-			throwErr("unexpected token");
-		String constant = currToken.val;
+		String constant = "";
+		if (currToken.type != Token.Type.LIT_NUM || currToken.type != Token.Type.LIT_STR) {
+			if (!currToken.val.equals("null"))
+				throwErr("unexpected token");
+		} else
+			constant = currToken.val;
 		nextToken();
 		return new Where(schema, schema.getColumnIndex(fieldName), operator, constant);
 	}

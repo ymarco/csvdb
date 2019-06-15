@@ -104,7 +104,7 @@ class Tokenizer {
 			token_val.append(cur());
 			proceedCur();
 		}
-		String token_val_string = token_val.toString().toLowerCase(); 
+		String token_val_string = token_val.toString().toLowerCase();
 		if (Token.keywords.contains(token_val_string))
 			return new Token(Token.Type.KEYWORD, token_val_string);
 		return new Token(Token.Type.IDENTIFIER, token_val_string);
