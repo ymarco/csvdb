@@ -3,7 +3,6 @@ package commands;
 import de.siegmar.fastcsv.reader.CsvParser;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
-import de.siegmar.fastcsv.reader.RowReader;
 import schema.DBVar;
 import schema.Schema;
 import schema.dbvars.DBFloat;
@@ -14,7 +13,6 @@ import schema.dbvars.DBVarchar;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Load implements Command {
@@ -59,37 +57,23 @@ public class Load implements Command {
 			//read
 			try {
 				row = parser.nextRow();
-				if (row == null) throw new IOException();
+				if (row == null) break;
 			} catch (IOException e) {
 				break;
 			}
 			DBVar[] parsedRow = new DBVar[schema.getColumnsCount()];
-			tableList.add(new DBVar[schema.getColumnsCount()]);
+			//tableList.add(new DBVar[schema.getColumnsCount()]);
 			//write
 			for (int colNumber = 0; colNumber < row.getFieldCount(); colNumber++) {
 				String curr = row.getField(colNumber);
-				System.out.println("row[" + colNumber + "] = " + curr);
+				//System.out.println("row[" + colNumber + "] = " + curr);
 				try {
-					switch (schema.getColumnType(colNumber)) {
-						case INT:
-							parsedRow[colNumber] = new DBInt(curr);
-							break;
-						case TS:
-							parsedRow[colNumber] = new DBTS(curr);
-							break;
-						case FLOAT:
-							parsedRow[colNumber] = new DBFloat(curr);
-							break;
-						case VARCHAR:
-							parsedRow[colNumber] = new DBVarchar(curr);
-							break;
-					}
+					parsedRow[colNumber] = parsesVar(schema.getColumnType(colNumber), curr);
 				} catch (NumberFormatException e) {
+					parser.close();
 					throw new RuntimeException("you tried to load an invalid csv;" +
 							" couldnt format it into a valid table." +
-							"[error parsing '" + curr + "' to an " + schema.getColumnType(colNumber));
-				} finally {
-                    parser.close();
+							"[error parsing '" + curr + "' to a " + schema.getColumnType(colNumber));
 				}
 
 			}
@@ -101,10 +85,26 @@ public class Load implements Command {
 		schema.setLineCount(linesCount);
 
 		DBVar[][] table = tableList.toArray(new DBVar[tableList.size()][]);
-		writeTable(table, schema.getTablePath() + "/table.tbl");
+		writeTable(table, schema.getTableFilePath());
+		parser.close();
+	}
+
+	private DBVar parsesVar(DBVar.Type type, String curr) throws NumberFormatException {
+		switch (type) {
+			case INT:
+				return new DBInt(curr);
+			case TS:
+				return new DBTS(curr);
+			case FLOAT:
+				return new DBFloat(curr);
+			case VARCHAR:
+				return new DBVarchar(curr);
+		}
+		return null;
 	}
 
 	public static void writeTable(DBVar[][] table, String path) throws IOException {
+		System.out.println(path);
 		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path));
 		out.writeObject(table);
 	}

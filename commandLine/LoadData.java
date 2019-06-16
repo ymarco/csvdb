@@ -15,14 +15,14 @@ public class LoadData {
 	
 	public static void load() {
 		File rootFolder = new File(Main.rootdir);
-		for (File table : rootFolder.listFiles()) {
-			if (table.getName().startsWith("#"))
+		for (File tableDir : rootFolder.listFiles()) {
+			if (tableDir.getName().startsWith("#"))
 				continue;
-			File dataFile = new File(table.getPath() + "\\table.json");
+			File dataFile = new File(String.join(File.separator,tableDir.getPath() + "table.json"));
 			if (!dataFile.exists())
 				continue;
 			JSONParser jsonParser = new JSONParser();
-			Object data = null;
+			Object data;
 			try {
 				data = jsonParser.parse(new FileReader(dataFile));
 			} catch (Exception e) {
@@ -30,14 +30,14 @@ public class LoadData {
 				e.printStackTrace();
 				continue;
 			}
-			JSONArray schema = (JSONArray) ((JSONObject) data).get("schema");
-			Column2[] columns = new Column2[schema.size()];
+			JSONArray JSONSchema = (JSONArray) ((JSONObject) data).get("schema");
+			Column2[] columns = new Column2[JSONSchema.size()];
 			for (int i = 0; i < columns.length; i++) {
-				JSONObject col = (JSONObject) schema.get(i);
+				JSONObject col = (JSONObject) JSONSchema.get(i);
 				String field = (String) col.get("field");
-				columns[i] = new Column2(DBVar.Type.toVarType((String) col.get("type")), field, Main.rootdir + "\\" + table.getName() + "\\" + field);
+				columns[i] = new Column2(DBVar.Type.toVarType((String) col.get("type")), field, "");
 			}
-			Schema.AddSchema(table.getName(), columns);
+			Schema.AddSchema(new Schema(tableDir.getName(), columns));
 		}
 	}
 }

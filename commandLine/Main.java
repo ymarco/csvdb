@@ -2,6 +2,7 @@ package commandLine;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.StringReader;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -16,6 +17,7 @@ public class Main {
 	private static Scanner codeReader = null;
 
 	public static void main(String[] args) {
+		System.out.println(String.join(" ", args));
 		parseArgs(args);
 		LoadData.load();
 
@@ -26,7 +28,7 @@ public class Main {
 				try {
 					code = readCommand();
 				} catch (NoSuchElementException e) {
-					System.exit(0);
+                    return;
 				}
 
 				// some hacky and quick commands
@@ -38,6 +40,7 @@ public class Main {
 				}
 
 				// standard route
+				System.out.println(code);
 				Parser parser = new Parser(code);
 				Command cmd = parser.parse();
 				cmd.run();
@@ -57,7 +60,6 @@ public class Main {
 
 	private static void parseArgs(String[] args) {
 		for (int i = 0; i < args.length; i++) {
-			System.out.println("ARG: " + args[i]);
 			switch (args[i]) {
 				case "--rootdir":
 					rootdir = args[i + 1];

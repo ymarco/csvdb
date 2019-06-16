@@ -45,7 +45,7 @@ public abstract class DBVar implements Serializable {
 				case "timestamp":
 					return TS;
 			}
-			return null;
+            throw new RuntimeException("invalid type");
 		}
 	}
 }

@@ -1,12 +1,5 @@
 package commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import commands.select.GroupBy;
 import commands.select.OrderBy;
 import commands.select.Statement;
@@ -17,28 +10,35 @@ import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 
 public class Select implements Command {
-	private String newTableName;
+	private String outputName; // this can a file name in case of exporting to csv or a table name in other cases
 	private Schema srcSchema;
 	private Expression[] expressions;
 	private Statement where;
 	private Statement groupBy;
 	private Statement orderBy;
-	private Mode mode; 
+	private Mode mode;
 
 	private static Statement EmptyStatementOrNull(Statement s) {
 		return (s == null ? Statement.emptyStatement : s);
 	}
 
-	public Select(String tableName, String srcTableName, Expression[] expressions,
-			Where where, GroupBy groupBy, OrderBy orderBy) throws Schema.NotFoundException {
-		this(tableName, srcTableName, expressions, where, groupBy, orderBy, Mode.PRINT_TO_SCREEN);
+	public Select(String outputName, String srcTableName, Expression[] expressions,
+	              Where where, GroupBy groupBy, OrderBy orderBy) throws Schema.NotFoundException {
+		this(outputName, srcTableName, expressions, where, groupBy, orderBy, Mode.PRINT_TO_SCREEN);
 	}
 
-	public Select(String tableName, String srcTableName, Expression[] expressions,
-			Where where, GroupBy groupBy, OrderBy orderBy, Mode mode) throws Schema.NotFoundException {
-		this.newTableName = tableName;
+	public Select(String outputName, String srcTableName, Expression[] expressions,
+	              Where where, GroupBy groupBy, OrderBy orderBy, Mode mode) throws Schema.NotFoundException {
+		this.outputName = outputName;
 		this.srcSchema = Schema.GetSchema(srcTableName);
 		this.expressions = expressions;
 		this.where = EmptyStatementOrNull(where);
@@ -47,7 +47,7 @@ public class Select implements Command {
 		this.mode = mode;
 	}
 
-	private static enum Mode {PRINT_TO_SCREEN, EXPORT_TO_CSV, CREATE_NEW_TABLE}
+	public static enum Mode {PRINT_TO_SCREEN, EXPORT_TO_CSV, CREATE_NEW_TABLE}
 
 	private static String[] rowToString(DBVar[] row) {
 		String[] res = new String[row.length];
@@ -57,34 +57,32 @@ public class Select implements Command {
 		return res;
 	}
 
-	public Stream<DBVar[]> getNewTableStream() {
+	Stream<DBVar[]> getNewTableStream() {
 		Stream<DBVar[]> s = srcSchema.getTableStream();
 		s = where.apply(s);
 		s = orderBy.apply(s);
-		if (groupBy == null) { // no group by TODO: there CAN be aggregator functions here
-			// selectedColumns[i] is the index of the source column of column i in the new table
+		if (groupBy == null) { // no group by TODO: there CAN be aggregator functions here, this assumes there cant
 		} else {
 			s = groupBy.apply(s); //TODO
 		}
+		// selectedColumns[i] is the index of the source column of column i in the new table
 		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
-		Stream<DBVar[]> finalStream = s.map(reformatColumns(selectedColumns));
-		return finalStream;
+		return s.map(reformatColumns(selectedColumns));
 	}
 
 	public void run() {
-		Schema newSchema = mode == Mode.EXPORT_TO_CSV ? Schema.GetSchema(newTableName) : createNewSchema();
 		Stream<DBVar[]> finalStream = getNewTableStream();
 		switch (mode) {
-		case PRINT_TO_SCREEN:
-			printToScreen(finalStream);
-			break;
-		case EXPORT_TO_CSV:
-			String outfileName = newTableName + ".csv"; // TODO: get the actual name
-			exportToCSV(outfileName, finalStream);
-			break;
-		case CREATE_NEW_TABLE:
-			createNewTable(newSchema, finalStream);
-			break;
+			case PRINT_TO_SCREEN:
+				printToScreen(finalStream);
+				break;
+			case EXPORT_TO_CSV:
+				System.out.println("select: exporting to file " + outputName);
+				exportToCSV(String.join(File.separator, outputName), finalStream);
+				break;
+			case CREATE_NEW_TABLE:
+				createNewTable(Schema.GetSchema(outputName), finalStream);
+				break;
 		}
 	}
 
@@ -108,23 +106,31 @@ public class Select implements Command {
 		CsvWriter writer = new CsvWriter();
 		CsvAppender appender;
 		try {
+			//appender = writer.append(new File(outfileName), StandardCharsets.UTF_8);
 			appender = writer.append(new File(outfileName), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 		// export to the csv
 		s.map(Select::rowToString)
-		.forEach(a -> {
-			try {
-				appender.appendLine(a);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
+				.forEach(a -> {
+					try {
+						System.out.println("expoting " + Arrays.toString(a));
+						appender.appendLine(a);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				});
+		try {
+			appender.endLine();
+			appender.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
-	public static void printToScreen(Stream<DBVar[]> s) {
-		s.limit(200); //no need to clutter the screen
+	private static void printToScreen(Stream<DBVar[]> s) {
+		s = s.limit(200); //no need to clutter the screen
 		s.forEach(System.out::println);
 	}
 
@@ -140,8 +146,8 @@ public class Select implements Command {
 			Column2 column = srcSchema.getColumn(expressions[i].fieldName);
 			columns[i] = new Column2(column.type, expressions[i].asName, null /*for compile*/);
 		}
-		new Create(newTableName, false, columns).run();
-		return Schema.GetSchema(newTableName);
+		new Create(outputName, false, columns).run();
+		return Schema.GetSchema(outputName);
 	}
 
 

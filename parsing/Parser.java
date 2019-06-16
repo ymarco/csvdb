@@ -23,22 +23,22 @@ public class Parser {
 	public Command parse() {
 		nextToken();
 		if (currToken.type == Token.Type.EOF)
-			return null;
+			return Command.emptyCommand;
 		if (currToken.type != Token.Type.KEYWORD)
 			throwErr("first token wasnt a keyword");
 
 		switch (currToken.val) {
-		case "create":
-			return parseCreate();
-		case "drop":
-			return parseDrop();
-		case "load":
-			return parseLoad();
-		case "select":
-			return parseSelect();
+			case "create":
+				return parseCreate();
+			case "drop":
+				return parseDrop();
+			case "load":
+				return parseLoad();
+			case "select":
+				return parseSelect();
 			/* unreachable */
-		default:
-			return null;
+			default:
+				return null;
 		}
 
 	}
@@ -108,7 +108,7 @@ public class Parser {
 			if (!Token.keywords.contains(currToken.val))
 				throwErr("parse error: invalid database type");
 			DBVar.Type argType = DBVar.Type.toVarType(currToken.val);
-			args.add(new Column2(argType, argName, Main.rootdir + "//" + name + "//" + argName + ".col"));
+			args.add(new Column2(argType, argName, ""));
 			expectNextToken(Token.Type.OPERATOR);
 			if (currToken.val.equals(",")) // more arguments
 				continue;
@@ -141,7 +141,8 @@ public class Parser {
 			expectNextToken(Token.Type.KEYWORD, "ignore");
 			expectNextToken(Token.Type.LIT_NUM);
 			ignore_lines = Integer.parseInt(currToken.val);
-		} else if (currToken.type != Token.Type.EOF) {
+		}
+		if (currToken.type != Token.Type.EOF) {
 			throwErr("unexpected token");
 		}
 		return new Load(src, dst, ignore_lines);
@@ -176,6 +177,9 @@ public class Parser {
 		Where where = null;
 		GroupBy groupBy = null;
 		OrderBy orderBy = null;
+		/* mode can only be PRINT_TO_SCREEN or EXPORT_TO_CSV;
+		 * CREATE_NEW_TABLE is implemented in create as select.*/
+		Select.Mode mode = Select.Mode.PRINT_TO_SCREEN;
 
 
 		//expression
@@ -191,6 +195,7 @@ public class Parser {
 		}
 		//into outfile
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "into"))) {
+			mode = Select.Mode.EXPORT_TO_CSV;
 			expectNextToken(Token.Type.KEYWORD, "outfile");
 			expectNextToken(Token.Type.LIT_STR);
 			intoFile = currToken.val;
@@ -200,8 +205,6 @@ public class Parser {
 		expectThisToken(Token.Type.KEYWORD, "from");
 		expectNextToken(Token.Type.IDENTIFIER);
 		srcTableName = currToken.val;
-		if (!Schema.HaveSchema(srcTableName))
-			throwErr("unexisting table");
 		Schema schema = Schema.GetSchema(srcTableName);
 		//where
 		nextToken();
@@ -247,30 +250,31 @@ public class Parser {
 		//eof
 		expectNextToken(Token.Type.EOF);
 		//return
-		return new Select(intoFile, srcTableName, expressions, where, groupBy, orderBy);
+		return new Select(intoFile, srcTableName, expressions,
+				where, groupBy, orderBy, mode);
 	}
 
 	private Expression parseSelectExpression() {
 		AggFuncs aggFunc = AggFuncs.NOTHING;
 		if (currToken.type == Token.Type.KEYWORD) {
 			switch (currToken.val) {
-			case "min":
-				aggFunc = AggFuncs.MIN;
-				break;
-			case "max":
-				aggFunc = AggFuncs.MAX;
-				break;
-			case "avg":
-				aggFunc = AggFuncs.AVG;
-				break;
-			case "sum":
-				aggFunc = AggFuncs.SUM;
-				break;
-			case "count":
-				aggFunc = AggFuncs.COUNT;
-				break;
-			default:
-				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
+				case "min":
+					aggFunc = AggFuncs.MIN;
+					break;
+				case "max":
+					aggFunc = AggFuncs.MAX;
+					break;
+				case "avg":
+					aggFunc = AggFuncs.AVG;
+					break;
+				case "sum":
+					aggFunc = AggFuncs.SUM;
+					break;
+				case "count":
+					aggFunc = AggFuncs.COUNT;
+					break;
+				default:
+					throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
 			}
 			expectNextToken(Token.Type.OPERATOR, "(");
 		}
@@ -290,13 +294,29 @@ public class Parser {
 	}
 
 	private Where parseCondition(Schema schema) {
-		/*where _field_name_ _operator_ _constant_*/
+		/*COMMAND _field_name_ _operator_ _constant_
+		 *COMMAND _field_name is [not] null */
+		String operator = "";
+		String constant = null; // in an 'is [not] null' case constant stays null; in any other case it is not.
 		expectNextToken(Token.Type.IDENTIFIER);
 		String fieldName = currToken.val;
-		expectNextToken(Token.Type.OPERATOR);
-		String operator = currToken.val;
 		nextToken();
-		String constant = currToken.val;
+		// is [not] null
+		if (currToken.equals(new Token(Token.Type.IDENTIFIER, "is"))) {
+			operator += "is ";
+			nextToken();
+			if (currToken.equals(new Token(Token.Type.IDENTIFIER, "not"))) {
+				operator += "not ";
+				nextToken();
+			}
+			if (currToken.equals(new Token(Token.Type.IDENTIFIER, "null"))) throwErr("is [not] can only accept null");
+			operator += "null";
+			constant = null;
+		} else if (currToken.type == Token.Type.OPERATOR) {
+			operator = currToken.val;
+			nextToken();
+			constant = currToken.val;
+		} else throwErr("invalid condition: " + currToken.val);
 		return new Where(schema, schema.getColumnIndex(fieldName), operator, constant);
 	}
 }

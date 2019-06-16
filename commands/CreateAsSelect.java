@@ -30,7 +30,7 @@ public class CreateAsSelect implements Command {
 		create.run();
 		select.run();
 		try {
-			Load.writeTable(select.getNewTableStream().toArray(DBVar[][]::new), Schema.GetSchema(tableName).getTablePath() + "/table.tbl");
+			Load.writeTable(select.getNewTableStream().toArray(DBVar[][]::new), Schema.GetSchema(tableName).getTableFilePath());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

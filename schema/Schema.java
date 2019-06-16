@@ -12,15 +12,17 @@ public class Schema {
 
 	private String tableName;
 	private String tablePath;
+	private String tableFilePath;
 	private Column2[] columns;
 	private Hashtable<String, Integer> fieldNameToIndex = new Hashtable<String, Integer>();
 	private int lineCount = -1;
 	private DBVar[][] table = null;
 
-	private Schema(String tableName, Column2[] columns) {
+	public Schema(String tableName, Column2[] columns) {
 		this.tableName = tableName;
 		this.columns = columns;
 		this.tablePath = String.join(File.separator, Main.rootdir, tableName);
+		tableFilePath = String.join(File.separator, tablePath, "data.ser");
 
 		for (int i = 0; i < columns.length; i++)
 			fieldNameToIndex.put(columns[i].name, i);
@@ -73,8 +75,8 @@ public class Schema {
 	}
 
 
-	public static void AddSchema(String tableName, Column2[] columns) {
-		schemas.put(tableName, new Schema(tableName, columns));
+	public static void AddSchema(Schema schema) {
+		schemas.put(schema.tableName, schema);
 	}
 
 	public static boolean HaveSchema(String tableName) {
@@ -110,23 +112,26 @@ public class Schema {
 	}
 
 	private void loadTableToMem() {
+		if (table != null) {
+			return;
+		}
 		try {
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream(tablePath));
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(tableFilePath));
 			table = (DBVar[][]) in.readObject();
 		} catch (IOException e) {
-			throw new RuntimeException("table file for table " + tableName + "not found in path " + tablePath);
+			throw new RuntimeException("table file for table " + tableName + " not found in path " + tableFilePath);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
-			throw new RuntimeException("error loading table in path " + tablePath);
+			throw new RuntimeException("error loading table in path " + tableFilePath);
 		}
 	}
 
-	private void unladTableFromMem() {
+	private void unloadTableFromMem() {
 		table = null;
 		/*
 		 table is private and nothing else should have a reference to it
 		 (except for streams using it)
-		 so now it can be garbage collected.
+		 so now it can hopefully be garbage collected.
 		*/
 	}
 
@@ -138,8 +143,12 @@ public class Schema {
 	public Stream<DBVar[]> getTableStream() {
 		loadTableToMemIfNotLoaded();
 		Stream<DBVar[]> res = Arrays.stream(table);
-		unladTableFromMem();
+		unloadTableFromMem();
 		return res;
+	}
+
+	public String getTableFilePath() {
+		return tableFilePath;
 	}
 
 	public static class NotFoundException extends RuntimeException {
