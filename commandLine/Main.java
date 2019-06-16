@@ -47,14 +47,8 @@ public class Main {
 			} catch (Exception e) {
 				System.out.println("ERROR:\n");
 				System.out.println(e.getLocalizedMessage());
-<<<<<<< HEAD
 				if (verbose)
 					e.printStackTrace();
-=======
-				//if (verbose)
-				e.printStackTrace();
->>>>>>> branch 'master' of https://ofek2608@bitbucket.org/csvdb_/csvdb.git
-				System.err.flush();
 				if (!useCommandLine)
 					break;
 			}
