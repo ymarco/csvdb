@@ -3,28 +3,19 @@ package parsing;
 import java.util.ArrayList;
 import java.util.List;
 
-<<<<<<< HEAD
 import commands.Command;
 import commands.Create;
 import commands.CreateAsSelect;
 import commands.Drop;
 import commands.Load;
 import commands.Select;
-=======
-import commands.*;
->>>>>>> branch 'master' of https://ofek2608@bitbucket.org/csvdb_/csvdb.git
 import commands.Select.Expression;
 import commands.Select.Expression.AggFuncs;
-<<<<<<< HEAD
 import commands.select.GroupBy;
 import commands.select.OrderBy;
 import commands.select.Where;
 import parsing.Token.Type;
-import schema.Column2;
-=======
-import commands.select.*;
 import schema.Column;
->>>>>>> branch 'master' of https://ofek2608@bitbucket.org/csvdb_/csvdb.git
 import schema.DBVar;
 import schema.Schema;
 
