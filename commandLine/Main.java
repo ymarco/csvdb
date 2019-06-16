@@ -106,15 +106,14 @@ public class Main {
 	private static String readCommand() throws NoSuchElementException {
 		if (useCommandLine)
 			System.out.print("csvdb>");
-		StringBuilder code = new StringBuilder(codeReader.next() + ";");
+		StringBuilder code = new StringBuilder();
+		code.append(codeReader.next() + ";");
 		code.toString().replaceAll("--.*$", "");
 		while (!code.toString().endsWith(";")) {
 			code.append(codeReader.next()).append(";");
 			code.toString().replaceAll("--.*$", "");
 		}
-		while (code.toString().startsWith("\r") || code.toString().startsWith("\n"))
-			code = new StringBuilder(code.substring(2));
-		return code.toString();
+		return code.toString().trim();
 	}
 
 	private static void test() {
