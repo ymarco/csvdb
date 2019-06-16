@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
 import schema.dbvars.DBInt;
 
 //classes
@@ -93,15 +94,6 @@ public class Where implements Statement {
 
 	@Override
 	public Stream<DBVar[]> apply(Stream<DBVar[]> s) {
-		return s.filter((DBVar[] d) -> {
-			System.out.print("testing " + Arrays.toString(d));
-			boolean passed =  pred.test(d[colNum]);
-			if (passed) {
-				System.out.println(" - passed");
-			} else {
-				System.out.println(" - not passed");
-			}
-			return passed;
-		});
+		return s.filter((DBVar[] d) -> pred.test(d[colNum]));
 	}
 }

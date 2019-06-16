@@ -59,15 +59,16 @@ public class Select implements Command {
 
 	Stream<DBVar[]> getNewTableStream() {
 		Stream<DBVar[]> s = srcSchema.getTableStream();
+		// selectedColumns[i] is the index of the source column of column i in the new table
+		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
 		s = where.apply(s);
 		s = orderBy.apply(s);
 		if (groupBy == null) { // no group by TODO: there CAN be aggregator functions here, this assumes there cant
+			s =  s.map(reformatColumns(selectedColumns));
 		} else {
 			s = groupBy.apply(s); //TODO
 		}
-		// selectedColumns[i] is the index of the source column of column i in the new table
-		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
-		return s.map(reformatColumns(selectedColumns));
+		return s;
 	}
 
 	public void run() {

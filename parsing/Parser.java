@@ -281,15 +281,19 @@ public class Parser {
 	private Expression[] parseAllSelectExpression() {
 		Expression[] expressions = null;
 		nextToken();
-		if (!currToken.equals(new Token(Token.Type.OPERATOR, "*"))) {
-			List<Expression> expressionsList = new ArrayList<>();
-			expressionsList.add(parseSelectExpression());
-			while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
-				nextToken();
-				expressionsList.add(parseSelectExpression());
-				expressions = expressionsList.toArray(new Expression[expressionsList.size()]);
-			}
+		if (currToken.equals(new Token(Type.OPERATOR, "*"))) {
+			return null;
 		}
+
+		List<Expression> expressionsList = new ArrayList<>();
+		// first expression
+		expressionsList.add(parseSelectExpression());
+		// other expressions separated by ,
+		while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
+			nextToken();
+			expressionsList.add(parseSelectExpression());
+		}
+		expressions = expressionsList.toArray(new Expression[expressionsList.size()]);
 		return expressions;
 	}
 
@@ -326,8 +330,9 @@ public class Parser {
 		}
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "as"))) {
 			expectNextToken(Token.Type.IDENTIFIER);
-			nextToken();
-			return new Expression(fieldName, currToken.val);
+			Expression res = new Expression(fieldName, currToken.val);
+            nextToken();
+            return res;
 		}
 		return new Expression(fieldName);
 	}
@@ -348,7 +353,7 @@ public class Parser {
 				operator += "not ";
 				nextToken();
 			}
-			if (currToken.equals(new Token(Token.Type.IDENTIFIER, "null"))) throwErr("is [not] can only accept null");
+            expectThisToken(Type.IDENTIFIER, "null");
 			operator += "null";
 			constant = null;
 		} else if (currToken.type == Token.Type.OPERATOR) {

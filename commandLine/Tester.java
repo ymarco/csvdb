@@ -32,23 +32,20 @@ public class Tester {
 
 	public static void main(String[] args) throws IOException {
 		String testDirName = args[0];
-		File testsDir = new File(testDirName);
-		if (!testsDir.isDirectory()) throw new RuntimeException("test dir is to a directory");
-		for (File testDir : Arrays.stream(testsDir.listFiles()).filter(File::isDirectory).collect(Collectors.toList())) {
-			runTest(testDir);
-			String outname = testDir.getAbsolutePath() + File.separator + "output2.csv";
-			String out = parseFile(outname);
-			String goodname = testDir.getAbsolutePath() + File.separator + "good_output2.csv";
-			String good = parseFile(goodname);
-			System.out.println("aoeu");
-			if (out.equals(good)) {
-				System.out.println("passed test " + testDirName);
-			} else {
-				System.out.println("failed test " + testDirName);
-				System.out.println("good:\n" + good);
-				System.out.println("out:\n" + out);
+		File testDir = new File(testDirName);
+		if (!testDir.isDirectory()) throw new RuntimeException("test dir is to a directory");
+		runTest(testDir);
+		String outname = testDir.getAbsolutePath() + File.separator + "output.csv";
+		String out = parseFile(outname);
+		String goodname = testDir.getAbsolutePath() + File.separator + "good_output.csv";
+		String good = parseFile(goodname);
+		if (out.equals(good)) {
+			System.out.println("passed test " + testDirName);
+		} else {
+			System.out.println("failed test " + testDirName);
+			System.out.println("good:\n" + good);
+			System.out.println("out:\n" + out);
 
-			}
 		}
 	}
 
