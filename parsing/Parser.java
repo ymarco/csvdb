@@ -3,11 +3,18 @@ package parsing;
 import java.util.ArrayList;
 import java.util.List;
 
-import commandLine.Main;
-import commands.*;
+import commands.Command;
+import commands.Create;
+import commands.CreateAsSelect;
+import commands.Drop;
+import commands.Load;
+import commands.Select;
 import commands.Select.Expression;
 import commands.Select.Expression.AggFuncs;
-import commands.select.*;
+import commands.select.GroupBy;
+import commands.select.OrderBy;
+import commands.select.Where;
+import parsing.Token.Type;
 import schema.Column2;
 import schema.DBVar;
 import schema.Schema;
@@ -38,7 +45,7 @@ public class Parser {
 				return parseSelect();
 			/* unreachable */
 			default:
-				return null;
+				return null; //TODO add special Exceptions
 		}
 
 	}
@@ -81,6 +88,11 @@ public class Parser {
 		boolean enable_ifnexists = false;
 		ArrayList<Column2> args = new ArrayList<Column2>();
 		expectNextToken(Token.Type.KEYWORD, "table");
+		// check Create As Select
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "as"))) {
+			return parseCreateAsSelect(name);
+		}
+		
 		// check for [IF NOT EXISTS]
 		nextToken();
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "if"))) {
@@ -183,16 +195,7 @@ public class Parser {
 
 
 		//expression
-		nextToken();
-		if (!currToken.equals(new Token(Token.Type.OPERATOR, "*"))) {
-			List<Expression> expressionsList = new ArrayList<>();
-			expressionsList.add(parseSelectExpression());
-			while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
-				nextToken();
-				expressionsList.add(parseSelectExpression());
-				expressions = expressionsList.toArray(new Expression[expressionsList.size()]);
-			}
-		}
+		expressions = parseAllSelectExpression();
 		//into outfile
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "into"))) {
 			mode = Select.Mode.EXPORT_TO_CSV;
@@ -253,7 +256,41 @@ public class Parser {
 		return new Select(intoFile, srcTableName, expressions,
 				where, groupBy, orderBy, mode);
 	}
-
+	
+	private Command parseCreateAsSelect(String tableName) {
+		String fromTableName = "";
+		Expression[] expressions = null;
+		Where where = null;
+		
+		Schema schema = Schema.GetSchema(tableName); //TODO if there is no schema named tableName 
+		
+		expectNextToken(Type.KEYWORD, "select");
+		expressions = parseAllSelectExpression();
+		expectNextToken(Type.KEYWORD, "from");
+		expectNextToken(Type.IDENTIFIER);
+		fromTableName = currToken.val;
+		nextToken();
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "where")))
+			where = parseCondition(schema);
+		expectThisToken(Type.EOF);
+		return new CreateAsSelect(tableName, fromTableName, expressions, where);
+	}
+	
+	private Expression[] parseAllSelectExpression() {
+		Expression[] expressions = null;
+		nextToken();
+		if (!currToken.equals(new Token(Token.Type.OPERATOR, "*"))) {
+			List<Expression> expressionsList = new ArrayList<>();
+			expressionsList.add(parseSelectExpression());
+			while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
+				nextToken();
+				expressionsList.add(parseSelectExpression());
+				expressions = expressionsList.toArray(new Expression[expressionsList.size()]);
+			}
+		}
+		return expressions;
+	}
+	
 	private Expression parseSelectExpression() {
 		AggFuncs aggFunc = AggFuncs.NOTHING;
 		if (currToken.type == Token.Type.KEYWORD) {
