@@ -2,6 +2,10 @@ package parsing;
 
 import utils.TextUtils;
 
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
+
 
 class Tokenizer {
 	private final String text;
@@ -126,7 +130,7 @@ class Tokenizer {
 					is_dotted = true;
 					token_val.append(cur());
 				}
-			} else if (TextUtils.isSpace(cur())) { // end of number
+			} else if (Token.operators.contains("" + cur()) || cur() == ';') { // end of number
 				return new Token(Token.Type.LIT_NUM, token_val.toString());
 			} else {
 				throw new TokenizingException("Tokenizer: a thing started with a number and than changed into somethng else invalid");
@@ -159,24 +163,20 @@ class Tokenizer {
 	}
 
 	private Token getOperator() {
-		String token_val = "";
-		token_val += cur();
-		proceedCur();
-		if (Token.operators.contains(token_val))
-			return new Token(Token.Type.OPERATOR, token_val);
-		/*
-		 * if we got here it means that it can be a 2-char operator (or an error)
-		 */
-		token_val += cur();
-		proceedCur();
-		if (Token.operators.contains(token_val))
-			return new Token(Token.Type.KEYWORD, token_val);
-		else
+		Optional<String> maybeOperator = Token.operators.stream()
+				.map(op -> TextUtils.getStartWith(op, text.substring(curser)))
+				.filter(Objects::nonNull).max(Comparator.comparing(String::length));
+		if (!maybeOperator.isPresent())
 			throw new TokenizingException("Syntax Error: invalid token");
+
+		String op = maybeOperator.get();
+		for (int i = 0; i < op.length(); i++) proceedCur();
+		return new Token(Token.Type.OPERATOR, op);
 	}
 
 	public class TokenizingException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
+
 		TokenizingException(String message) {
 			super(errInfo() + "\n" + message);
 		}

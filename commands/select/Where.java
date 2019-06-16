@@ -34,22 +34,22 @@ public class Where implements Statement {
 		Comparator<DBVar> comparator = this.constant.comparator();
 		switch (operator) {
 			case "=":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) == 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) == 0;
 				break;
 			case "<":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) < 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) < 0;
 				break;
 			case "<=":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) <= 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) <= 0;
 				break;
 			case ">":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) > 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) > 0;
 				break;
 			case ">=":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) >= 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) >= 0;
 				break;
 			case "<>":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) != 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) != 0;
 				break;
 			case "is null":
 				pred = v -> v.isNull();

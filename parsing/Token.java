@@ -32,7 +32,7 @@ public class Token {
 					"not", "null", "or", "order", "outfile", "select", "sum", "table", "timestamp", "varchar", "where"));
 
 	public static final Set<String> operators = new HashSet<>(
-			Arrays.asList("(", ")", "*", ",", "<", "<=", "<>", "=", ">", /* ";",*/">="));
+			Arrays.asList("(", ")", "*", ",", "<", "<=", "<>", "=", ">", ">="));
 
 	public enum Type {
 	    EOF,
