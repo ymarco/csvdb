@@ -6,7 +6,7 @@ import commands.select.Statement;
 import commands.select.Where;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
-import schema.Column2;
+import schema.Column;
 import schema.DBVar;
 import schema.Schema;
 
@@ -141,10 +141,10 @@ public class Select implements Command {
 				expressions[i] = new Expression(srcSchema.getColumnName(i));
 		}
 
-		Column2[] columns = new Column2[expressions.length];
+		Column[] columns = new Column[expressions.length];
 		for (int i = 0; i < columns.length; i++) {
-			Column2 column = srcSchema.getColumn(expressions[i].fieldName);
-			columns[i] = new Column2(column.type, expressions[i].asName, null /*for compile*/);
+			Column column = srcSchema.getColumn(expressions[i].fieldName);
+			columns[i] = new Column(column.type, expressions[i].asName);
 		}
 		new Create(outputName, false, columns).run();
 		return Schema.GetSchema(outputName);

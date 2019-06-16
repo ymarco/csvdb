@@ -7,7 +7,7 @@ import commands.Select.Expression;
 import commands.select.GroupBy;
 import commands.select.OrderBy;
 import commands.select.Where;
-import schema.Column2;
+import schema.Column;
 import schema.DBVar;
 import schema.Schema;
 
@@ -16,8 +16,13 @@ public class CreateAsSelect implements Command {
 	private Select select;
 	private String tableName;
 
+<<<<<<< HEAD
 	public CreateAsSelect(String tableName, Column2[] columns, String fromTableName, Select.Expression[] expressions, Where where,
 			GroupBy groupBy, OrderBy orderBy) {
+=======
+	public CreateAsSelect(String tableName, Column[] columns, String fromTableName, Select.Expression[] expressions, Where where,
+	                      GroupBy groupBy, OrderBy orderBy) {
+>>>>>>> branch 'master' of https://ofek2608@bitbucket.org/csvdb_/csvdb.git
 		if (Schema.HaveSchema(tableName)) {
 			create = new Create(fromTableName, false, columns);
 			select = new Select(tableName, fromTableName, expressions, where, groupBy, orderBy);

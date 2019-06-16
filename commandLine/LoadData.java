@@ -7,7 +7,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import schema.Column2;
+import schema.Column;
 import schema.DBVar;
 import schema.Schema;
 
@@ -31,11 +31,11 @@ public class LoadData {
 				continue;
 			}
 			JSONArray JSONSchema = (JSONArray) ((JSONObject) data).get("schema");
-			Column2[] columns = new Column2[JSONSchema.size()];
+			Column[] columns = new Column[JSONSchema.size()];
 			for (int i = 0; i < columns.length; i++) {
-				JSONObject col = (JSONObject) JSONSchema.get(i);
-				String field = (String) col.get("field");
-				columns[i] = new Column2(DBVar.Type.toVarType((String) col.get("type")), field, "");
+				JSONObject jsonCol = (JSONObject) JSONSchema.get(i);
+				String field = (String) jsonCol.get("field");
+				columns[i] = new Column(DBVar.Type.toVarType((String) jsonCol.get("type")), field);
 			}
 			Schema.AddSchema(new Schema(tableDir.getName(), columns));
 		}
