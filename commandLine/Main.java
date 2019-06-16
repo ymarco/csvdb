@@ -2,7 +2,6 @@ package commandLine;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.StringReader;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
@@ -20,13 +19,14 @@ public class Main {
 		System.out.println(String.join(" ", args));
 		parseArgs(args);
 		LoadData.load();
+		CommandReader.scanner = new CharScanner(codeReader);
 
 		while (true) {
 			try {
 
 				String code = null;
 				try {
-					code = readCommand();
+					code = readCommand2();
 				} catch (NoSuchElementException e) {
                     return;
 				}
@@ -47,7 +47,7 @@ public class Main {
 			} catch (Exception e) {
 				System.out.println("ERROR:\n");
 				System.out.println(e.getLocalizedMessage());
-				//if (verbose)
+				if (verbose)
 					e.printStackTrace();
 				System.err.flush();
 				if (!useCommandLine)
@@ -116,8 +116,20 @@ public class Main {
 			code = new StringBuilder(code.substring(2));
 		return code.toString();
 	}
+	
+	
+	private static String readCommand2() throws NoSuchElementException {
+		if (useCommandLine)
+			System.out.print("csvdb>");
+		try {
+			return CommandReader.readCommand();
+		} catch (Exception e) {
+			//TODO EOF exception
+			return null;
+		}
+	}
 
 	private static void test() {
-
+		
 	}
 }
