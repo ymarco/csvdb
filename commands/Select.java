@@ -78,17 +78,24 @@ public class Select implements Command {
 				printToScreen(finalStream);
 				break;
 			case EXPORT_TO_CSV:
-				System.out.println("select: exporting to file " + outputName);
 				exportToCSV(String.join(File.separator, outputName), finalStream);
 				break;
 			case CREATE_NEW_TABLE:
-				createNewTable(Schema.GetSchema(outputName), finalStream);
+				createNewTable(outputName, finalStream);
 				break;
 		}
 	}
 
-	private void createNewTable(Schema schema, Stream<DBVar[]> s) {
+	private void createNewTable(String newTableName, Stream<DBVar[]> s) {
 		DBVar[][] newTable = s.toArray(DBVar[][]::new);
+		// createAsSelect should have created a schema for us
+		Schema schema = Schema.GetSchema(newTableName);
+		try {
+			Load.writeTable(newTable, schema.getTableFilePath());
+			schema.setLineCount(newTable.length);
+		} catch (IOException e) {
+            throw new RuntimeException(e);
+		}
 		//TODO: load table into a new schema
 	}
 
@@ -116,7 +123,6 @@ public class Select implements Command {
 		s.map(Select::rowToString)
 				.forEach(a -> {
 					try {
-						System.out.println("expoting " + Arrays.toString(a));
 						appender.appendLine(a);
 					} catch (IOException e) {
 						throw new RuntimeException(e);

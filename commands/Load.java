@@ -14,6 +14,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Load implements Command {
 	private String fileName;
@@ -38,7 +39,7 @@ public class Load implements Command {
 		if (!Schema.HaveSchema(tableName))
 			throw new RuntimeException("you tried to load a non existing table");
 		Schema schema = Schema.GetSchema(tableName);
-		List<DBVar[]> tableList = new ArrayList<>();
+		List<DBVar[]> tableFromCSV = new ArrayList<>();
 		CsvReader csvReader = new CsvReader();
 		CsvParser parser = csvReader.parse(new File(fileName), StandardCharsets.UTF_8);
 		CsvRow row;
@@ -78,14 +79,20 @@ public class Load implements Command {
 
 			}
 			lineNumber++;
-			tableList.add(parsedRow);
+			tableFromCSV.add(parsedRow);
 		}
-		int linesCount = lineNumber + 1;
+		int CSVLinesCount = lineNumber + 1;
 
-		schema.setLineCount(linesCount);
+		schema.setLineCount(schema.getLinesCount() + CSVLinesCount);
 
-		DBVar[][] table = tableList.toArray(new DBVar[tableList.size()][]);
-		writeTable(table, schema.getTableFilePath());
+		Stream<DBVar[]> joined = Stream.concat(schema.getTableStream(), tableFromCSV.stream());
+		DBVar[][] newTable = joined.toArray(DBVar[][]::new);
+		File oldSerialization = new File(schema.getTableFilePath());
+		if (oldSerialization.exists()) {
+			System.out.println("old table " + schema.getTableName() +" exists");
+			oldSerialization.delete();
+		}
+		writeTable(newTable, schema.getTableFilePath());
 		parser.close();
 	}
 
@@ -103,7 +110,7 @@ public class Load implements Command {
 		return null;
 	}
 
-	public static void writeTable(DBVar[][] table, String path) throws IOException {
+	static void writeTable(DBVar[][] table, String path) throws IOException {
 		System.out.println(path);
 		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path));
 		out.writeObject(table);

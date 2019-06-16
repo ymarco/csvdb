@@ -9,23 +9,25 @@ import java.util.Hashtable;
 import java.util.stream.Stream;
 
 import commandLine.Main;
+import utils.FilesUtils;
 
 public class Schema {
-	private static Hashtable<String, Schema> schemas = new Hashtable<String, Schema>();
+	private static Hashtable<String, Schema> schemas = new Hashtable<>();
 
 	private String tableName;
 	private String tablePath;
 	private String tableFilePath;
 	private Column[] columns;
-	private Hashtable<String, Integer> fieldNameToIndex = new Hashtable<String, Integer>();
-	private int lineCount = -1;
-	private DBVar[][] table = null;
+	private Hashtable<String, Integer> fieldNameToIndex = new Hashtable<>();
+	private int lineCount = 0;
+	private DBVar[][] table;
 
 	public Schema(String tableName, Column[] columns) {
 		this.tableName = tableName;
 		this.columns = columns;
 		this.tablePath = String.join(File.separator, Main.rootdir, tableName);
-		tableFilePath = String.join(File.separator, tablePath, "data.ser");
+		this.tableFilePath = String.join(File.separator, tablePath, "data.ser");
+		this.table = null;
 
 		for (int i = 0; i < columns.length; i++)
 			fieldNameToIndex.put(columns[i].name, i);
@@ -101,6 +103,7 @@ public class Schema {
 		return getColumnName(i) + Main.columnFilesExtensios;
 	}
 
+	@Deprecated
 	public String getColumnFileName(String columnName) {
 		return getColumnFileName(getColumnIndex(columnName));
 	}
@@ -116,15 +119,12 @@ public class Schema {
 	}
 
 	private void loadTableToMem() {
-		if (table != null) {
-			return;
-		}
 		try {
 			@SuppressWarnings("resource")
 			ObjectInputStream in = new ObjectInputStream(new FileInputStream(tableFilePath));
 			table = (DBVar[][]) in.readObject();
 		} catch (IOException e) {
-			throw new RuntimeException("table file for table " + tableName + " not found in path " + tableFilePath);
+            table = new DBVar[0][];
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			throw new RuntimeException("error loading table in path " + tableFilePath);
@@ -146,6 +146,11 @@ public class Schema {
 	}
 
 	public Stream<DBVar[]> getTableStream() {
+		File t = new File(tableFilePath);
+		if (! t.exists()) {
+			System.out.println("returning empty stream because didnt find the one for " + tableName);
+			return Stream.empty();
+		}
 		loadTableToMemIfNotLoaded();
 		Stream<DBVar[]> res = Arrays.stream(table);
 		unloadTableFromMem();
@@ -163,4 +168,5 @@ public class Schema {
 			super(msg);
 		}
 	}
+
 }
