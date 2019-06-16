@@ -13,12 +13,12 @@ public class Schema {
 	private String tableName;
 	private String tablePath;
 	private String tableFilePath;
-	private Column2[] columns;
+	private Column[] columns;
 	private Hashtable<String, Integer> fieldNameToIndex = new Hashtable<String, Integer>();
 	private int lineCount = -1;
 	private DBVar[][] table = null;
 
-	public Schema(String tableName, Column2[] columns) {
+	public Schema(String tableName, Column[] columns) {
 		this.tableName = tableName;
 		this.columns = columns;
 		this.tablePath = String.join(File.separator, Main.rootdir, tableName);
@@ -29,7 +29,7 @@ public class Schema {
 	}
 
 
-	public Column2 getColumn(int i) {
+	public Column getColumn(int i) {
 		return columns[i];
 	}
 
@@ -38,7 +38,7 @@ public class Schema {
 		return fieldNameToIndex.get(columnName);
 	}
 
-	public Column2 getColumn(String columnName) {
+	public Column getColumn(String columnName) {
 		return getColumn(getColumnIndex(columnName));
 	}
 
@@ -107,6 +107,7 @@ public class Schema {
 		return getTablePath() + "\\" + getColumnFileName(i);
 	}
 
+	@Deprecated
 	public String getColumnPath(String columnName) {
 		return getColumnPath(getColumnIndex(columnName));
 	}

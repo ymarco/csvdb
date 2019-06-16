@@ -3,12 +3,11 @@ package parsing;
 import java.util.ArrayList;
 import java.util.List;
 
-import commandLine.Main;
 import commands.*;
 import commands.Select.Expression;
 import commands.Select.Expression.AggFuncs;
 import commands.select.*;
-import schema.Column2;
+import schema.Column;
 import schema.DBVar;
 import schema.Schema;
 
@@ -79,7 +78,7 @@ public class Parser {
 	private Command parseCreate() {
 		String name = "";
 		boolean enable_ifnexists = false;
-		ArrayList<Column2> args = new ArrayList<Column2>();
+		ArrayList<Column> args = new ArrayList<Column>();
 		expectNextToken(Token.Type.KEYWORD, "table");
 		// check for [IF NOT EXISTS]
 		nextToken();
@@ -108,7 +107,7 @@ public class Parser {
 			if (!Token.keywords.contains(currToken.val))
 				throwErr("parse error: invalid database type");
 			DBVar.Type argType = DBVar.Type.toVarType(currToken.val);
-			args.add(new Column2(argType, argName, ""));
+			args.add(new Column(argType, argName));
 			expectNextToken(Token.Type.OPERATOR);
 			if (currToken.val.equals(",")) // more arguments
 				continue;
@@ -120,7 +119,7 @@ public class Parser {
 		}
 		/* finished reading arguments */
 		expectNextToken(Token.Type.EOF);
-		return new Create(name, enable_ifnexists, args.toArray(new Column2[0]));
+		return new Create(name, enable_ifnexists, args.toArray(new Column[0]));
 
 	}
 

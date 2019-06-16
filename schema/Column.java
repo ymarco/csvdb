@@ -1,14 +1,12 @@
 package schema;
 
-import schema.dbvars.DBFloat;
-
 public class Column {
 	public final DBVar.Type type;
 	public final String name;
 
 	public Object min;
 	public Object max;
-	public float avg;
+	public double avg;
 	public Object sum;
 	public long count;
 
@@ -16,20 +14,28 @@ public class Column {
 		this.type = type;
 		this.name = name;
 
-		if (type == DBVar.Type.FLOAT) {
-			min = Float.MAX_VALUE;
-			max = Float.MIN_VALUE;
-			sum = 0F;
-		}
-		if (type == DBVar.Type.INT) {
-			min = Long.MAX_VALUE;
-			max = Long.MIN_VALUE;
-			sum = 0L;
-		}
-		if (type == DBVar.Type.TS) {
-			min = -1L;
-			max = 0L;
-			sum = 0L;
+		switch (type) {
+
+			case INT:
+				min = Long.MAX_VALUE;
+				max = Long.MIN_VALUE;
+				sum = 0L;
+				break;
+			case FLOAT:
+				min = Float.MAX_VALUE;
+				max = Float.MIN_VALUE;
+				sum = 0F;
+				break;
+			case VARCHAR:
+				min = null;
+				max = null;
+				sum = null;
+				break;
+			case TS:
+				min = -1L;
+				max = 0L;
+				sum = 0L;
+				break;
 		}
 	}
 }
