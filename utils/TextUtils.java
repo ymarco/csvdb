@@ -31,4 +31,10 @@ public class TextUtils {
 		return sb;
 	}
 
+	public static String getStartWith(String s, String text) {
+		if (!text.startsWith(s))
+			return null;
+		return text.substring(0, s.length());
+	}
+
 }

@@ -59,15 +59,16 @@ public class Select implements Command {
 
 	Stream<DBVar[]> getNewTableStream() {
 		Stream<DBVar[]> s = srcSchema.getTableStream();
+		// selectedColumns[i] is the index of the source column of column i in the new table
+		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
 		s = where.apply(s);
 		s = orderBy.apply(s);
 		if (groupBy == null) { // no group by TODO: there CAN be aggregator functions here, this assumes there cant
+			s =  s.map(reformatColumns(selectedColumns));
 		} else {
 			s = groupBy.apply(s); //TODO
 		}
-		// selectedColumns[i] is the index of the source column of column i in the new table
-		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
-		return s.map(reformatColumns(selectedColumns));
+		return s;
 	}
 
 	public void run() {
@@ -77,17 +78,24 @@ public class Select implements Command {
 				printToScreen(finalStream);
 				break;
 			case EXPORT_TO_CSV:
-				System.out.println("select: exporting to file " + outputName);
 				exportToCSV(String.join(File.separator, outputName), finalStream);
 				break;
 			case CREATE_NEW_TABLE:
-				createNewTable(Schema.GetSchema(outputName), finalStream);
+				createNewTable(outputName, finalStream);
 				break;
 		}
 	}
 
-	private void createNewTable(Schema schema, Stream<DBVar[]> s) {
+	private void createNewTable(String newTableName, Stream<DBVar[]> s) {
 		DBVar[][] newTable = s.toArray(DBVar[][]::new);
+		// createAsSelect should have created a schema for us
+		Schema schema = Schema.GetSchema(newTableName);
+		try {
+			Load.writeTable(newTable, schema.getTableFilePath());
+			schema.setLineCount(newTable.length);
+		} catch (IOException e) {
+            throw new RuntimeException(e);
+		}
 		//TODO: load table into a new schema
 	}
 
@@ -115,7 +123,6 @@ public class Select implements Command {
 		s.map(Select::rowToString)
 				.forEach(a -> {
 					try {
-						System.out.println("expoting " + Arrays.toString(a));
 						appender.appendLine(a);
 					} catch (IOException e) {
 						throw new RuntimeException(e);

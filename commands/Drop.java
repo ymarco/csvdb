@@ -1,10 +1,10 @@
 package commands;
 
-import java.io.File;
-
 import commandLine.Main;
 import schema.Schema;
 import utils.FilesUtils;
+
+import java.io.File;
 
 public class Drop implements Command {
 	final String tableName;
@@ -16,14 +16,19 @@ public class Drop implements Command {
 	}
 	
 	public void run() {
-		if (!Schema.HaveSchema(tableName)) {
-			if (!ie)
-				throw new RuntimeException("you tried to drop a non existing table without the IF EXISTS");
-			return;
+		String tableDirName = String.join(File.separator, Main.rootdir, tableName);
+		File tableFile = new File(tableDirName);
+		if (tableFile.exists()) {
+			FilesUtils.clearFolder(tableFile);
+			tableFile.delete();
 		}
-		Schema.RemoveSchema(tableName);
-		File tableFile = new File(Main.rootdir + "\\" + tableName);
-		FilesUtils.clearFolder(tableFile);
-		tableFile.delete();
+		if (Schema.HaveSchema(tableName)) {
+			Schema.RemoveSchema(tableName);
+		} else {
+			if (!ie) {
+				throw new RuntimeException("you tried to drop a non existing table without the IF EXISTS");
+			}
+		}
 	}
+
 }

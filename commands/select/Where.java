@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
 import schema.dbvars.DBInt;
 
 //classes
@@ -33,22 +34,22 @@ public class Where implements Statement {
 		Comparator<DBVar> comparator = this.constant.comparator();
 		switch (operator) {
 			case "=":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) == 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) == 0;
 				break;
 			case "<":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) < 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) < 0;
 				break;
 			case "<=":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) <= 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) <= 0;
 				break;
 			case ">":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) > 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) > 0;
 				break;
 			case ">=":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) >= 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) >= 0;
 				break;
 			case "<>":
-				pred = v -> !v.isNull() && comparator.compare(constant, v) != 0;
+				pred = v -> !v.isNull() && comparator.compare(v, constant) != 0;
 				break;
 			case "is null":
 				pred = v -> v.isNull();
@@ -93,15 +94,6 @@ public class Where implements Statement {
 
 	@Override
 	public Stream<DBVar[]> apply(Stream<DBVar[]> s) {
-		return s.filter((DBVar[] d) -> {
-			System.out.print("testing " + Arrays.toString(d));
-			boolean passed =  pred.test(d[colNum]);
-			if (passed) {
-				System.out.println(" - passed");
-			} else {
-				System.out.println(" - not passed");
-			}
-			return passed;
-		});
+		return s.filter((DBVar[] d) -> pred.test(d[colNum]));
 	}
 }

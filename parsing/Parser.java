@@ -35,17 +35,17 @@ public class Parser {
 			throwErr("first token wasnt a keyword");
 
 		switch (currToken.val) {
-		case "create":
-			return parseCreate();
-		case "drop":
-			return parseDrop();
-		case "load":
-			return parseLoad();
-		case "select":
-			return parseSelect();
+			case "create":
+				return parseCreate();
+			case "drop":
+				return parseDrop();
+			case "load":
+				return parseLoad();
+			case "select":
+				return parseSelect();
 			/* unreachable */
-		default:
-			return null; //TODO add special Exceptions
+			default:
+				return null; //TODO add special Exceptions
 		}
 
 	}
@@ -102,7 +102,7 @@ public class Parser {
 			name = currToken.val;
 		else
 			throwErr("KEYWORD _table_name not found");
-		
+
 		nextToken();
 		// check Create As Select
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "as"))) {
@@ -214,8 +214,10 @@ public class Parser {
 		Schema schema = Schema.GetSchema(srcTableName);
 		//where
 		nextToken();
-		if (currToken.equals(new Token(Token.Type.KEYWORD, "where")))
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "where"))) {
+			nextToken();
 			where = parseCondition(schema);
+		}
 		//group by
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "group"))) {
 			expectNextToken(Token.Type.KEYWORD, "by");
@@ -229,8 +231,10 @@ public class Parser {
 
 			//having
 			Where having = null;
-			if (currToken.equals(new Token(Token.Type.KEYWORD, "having")))
+			if (currToken.equals(new Token(Token.Type.KEYWORD, "having"))) {
+				nextToken();
 				having = parseCondition(schema);
+			}
 
 			groupBy = new GroupBy(fields.toArray(new String[0]), having);
 		}
@@ -263,7 +267,7 @@ public class Parser {
 	private Command parseCreateAsSelect(String tableName) {
 		String fromTableName = "";
 		Expression[] expressions = null;
-		Where where = null; 
+		Where where = null;
 
 		expectNextToken(Type.KEYWORD, "select");
 		expressions = parseAllSelectExpression();
@@ -281,15 +285,19 @@ public class Parser {
 	private Expression[] parseAllSelectExpression() {
 		Expression[] expressions = null;
 		nextToken();
-		if (!currToken.equals(new Token(Token.Type.OPERATOR, "*"))) {
-			List<Expression> expressionsList = new ArrayList<>();
-			expressionsList.add(parseSelectExpression());
-			while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
-				nextToken();
-				expressionsList.add(parseSelectExpression());
-				expressions = expressionsList.toArray(new Expression[expressionsList.size()]);
-			}
+		if (currToken.equals(new Token(Type.OPERATOR, "*"))) {
+			return null;
 		}
+
+		List<Expression> expressionsList = new ArrayList<>();
+		// first expression
+		expressionsList.add(parseSelectExpression());
+		// other expressions separated by ,
+		while (currToken.equals(new Token(Token.Type.OPERATOR, ","))) {
+			nextToken();
+			expressionsList.add(parseSelectExpression());
+		}
+		expressions = expressionsList.toArray(new Expression[expressionsList.size()]);
 		return expressions;
 	}
 
@@ -297,23 +305,23 @@ public class Parser {
 		AggFuncs aggFunc = AggFuncs.NOTHING;
 		if (currToken.type == Token.Type.KEYWORD) {
 			switch (currToken.val) {
-			case "min":
-				aggFunc = AggFuncs.MIN;
-				break;
-			case "max":
-				aggFunc = AggFuncs.MAX;
-				break;
-			case "avg":
-				aggFunc = AggFuncs.AVG;
-				break;
-			case "sum":
-				aggFunc = AggFuncs.SUM;
-				break;
-			case "count":
-				aggFunc = AggFuncs.COUNT;
-				break;
-			default:
-				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
+				case "min":
+					aggFunc = AggFuncs.MIN;
+					break;
+				case "max":
+					aggFunc = AggFuncs.MAX;
+					break;
+				case "avg":
+					aggFunc = AggFuncs.AVG;
+					break;
+				case "sum":
+					aggFunc = AggFuncs.SUM;
+					break;
+				case "count":
+					aggFunc = AggFuncs.COUNT;
+					break;
+				default:
+					throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
 			}
 			expectNextToken(Token.Type.OPERATOR, "(");
 		}
@@ -326,8 +334,9 @@ public class Parser {
 		}
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "as"))) {
 			expectNextToken(Token.Type.IDENTIFIER);
+			Expression res = new Expression(fieldName, currToken.val);
 			nextToken();
-			return new Expression(fieldName, currToken.val);
+			return res;
 		}
 		return new Expression(fieldName);
 	}
@@ -337,7 +346,7 @@ public class Parser {
 		 *COMMAND _field_name is [not] null */
 		String operator = "";
 		String constant = null; // in an 'is [not] null' case constant stays null; in any other case it is not.
-		expectNextToken(Token.Type.IDENTIFIER);
+		expectThisToken(Token.Type.IDENTIFIER);
 		String fieldName = currToken.val;
 		nextToken();
 		// is [not] null
@@ -348,7 +357,7 @@ public class Parser {
 				operator += "not ";
 				nextToken();
 			}
-			if (currToken.equals(new Token(Token.Type.IDENTIFIER, "null"))) throwErr("is [not] can only accept null");
+			expectThisToken(Type.KEYWORD, "null");
 			operator += "null";
 			constant = null;
 		} else if (currToken.type == Token.Type.OPERATOR) {

@@ -28,7 +28,7 @@ public class Main {
 				try {
 					code = readCommand2();
 				} catch (NoSuchElementException e) {
-                    return;
+					return;
 				}
 
 				// some hacky and quick commands
@@ -47,8 +47,13 @@ public class Main {
 			} catch (Exception e) {
 				System.out.println("ERROR:\n");
 				System.out.println(e.getLocalizedMessage());
+<<<<<<< HEAD
 				if (verbose)
 					e.printStackTrace();
+=======
+				//if (verbose)
+				e.printStackTrace();
+>>>>>>> branch 'master' of https://ofek2608@bitbucket.org/csvdb_/csvdb.git
 				System.err.flush();
 				if (!useCommandLine)
 					break;
@@ -72,11 +77,11 @@ public class Main {
 					i++;
 					break;
 				case "--run":
-					String filename = args[i+1];
+					String filename = args[i + 1];
 					try {
 						codeReader = new Scanner(new File(filename)).useDelimiter(";");
 					} catch (FileNotFoundException e) {
-                        throw new RuntimeException("--run: file " + filename + " not found");
+						throw new RuntimeException("--run: file " + filename + " not found");
 					}
 					useCommandLine = false;
 					i++;
@@ -104,17 +109,15 @@ public class Main {
 	 * if the ';' is in quotes or escaped it doesn't work
 	 */
 	private static String readCommand() throws NoSuchElementException {
-		if (useCommandLine)
+		if (useCommandLine) {
 			System.out.print("csvdb>");
-		StringBuilder code = new StringBuilder(codeReader.next() + ";");
-		code.toString().replaceAll("--.*$", "");
-		while (!code.toString().endsWith(";")) {
-			code.append(codeReader.next()).append(";");
-			code.toString().replaceAll("--.*$", "");
 		}
-		while (code.toString().startsWith("\r") || code.toString().startsWith("\n"))
-			code = new StringBuilder(code.substring(2));
-		return code.toString();
+		StringBuilder code = new StringBuilder();
+		do {
+			code.append(codeReader.next()).append(";");
+			code = new StringBuilder(code.toString().replaceAll("--.*$", ""));
+		} while (!code.toString().endsWith(";"));
+		return code.toString().trim();
 	}
 	
 	
