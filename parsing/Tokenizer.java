@@ -176,6 +176,7 @@ class Tokenizer {
 	}
 
 	public class TokenizingException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
 		TokenizingException(String message) {
 			super(errInfo() + "\n" + message);
 		}

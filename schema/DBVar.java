@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 public abstract class DBVar implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	public abstract DBVar getNull();
 

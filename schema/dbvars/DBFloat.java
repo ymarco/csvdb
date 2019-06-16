@@ -5,6 +5,8 @@ import schema.DBVar;
 import java.util.Comparator;
 
 public class DBFloat extends DBVar {
+	private static final long serialVersionUID = 1L;
+	
 	public double val;
 
 	public DBFloat(String s) throws NumberFormatException {

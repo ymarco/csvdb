@@ -1,6 +1,9 @@
 package schema;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.stream.Stream;
@@ -117,6 +120,7 @@ public class Schema {
 			return;
 		}
 		try {
+			@SuppressWarnings("resource")
 			ObjectInputStream in = new ObjectInputStream(new FileInputStream(tableFilePath));
 			table = (DBVar[][]) in.readObject();
 		} catch (IOException e) {
@@ -153,6 +157,8 @@ public class Schema {
 	}
 
 	public static class NotFoundException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+
 		NotFoundException(String msg) {
 			super(msg);
 		}

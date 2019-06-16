@@ -5,6 +5,8 @@ import schema.DBVar;
 import java.util.Comparator;
 
 public class DBTS extends DBVar {
+	private static final long serialVersionUID = 1L;
+	
 	long val;
 
 	public DBTS(long val) {
