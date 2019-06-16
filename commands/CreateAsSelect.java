@@ -28,7 +28,7 @@ public class CreateAsSelect implements Command {
 	}
 
 	public CreateAsSelect(String tableName, String fromTableName, Select.Expression[] expressions, Where where) {
-		if (Schema.HaveSchema(tableName)) {
+		if (Schema.HaveSchema(fromTableName)) {
 			Schema fromSchema = Schema.GetSchema(fromTableName);
 			Column2[] columns = new Column2[expressions.length];
 			for (int i = 0; i < expressions.length; i++) {
@@ -36,7 +36,7 @@ public class CreateAsSelect implements Command {
 				columns[i] = new Column2(fromSchema.getColumnType(exp.fieldName), exp.asName, null);
 			}
 			
-			create = new Create(fromTableName, false, columns);
+			create = new Create(tableName, false, columns);
 			select = new Select(tableName, fromTableName, expressions, where, null, null);
 		} else {
 			throw new RuntimeException("you tried to 'create as select' an existing table");

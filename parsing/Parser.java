@@ -35,17 +35,17 @@ public class Parser {
 			throwErr("first token wasnt a keyword");
 
 		switch (currToken.val) {
-			case "create":
-				return parseCreate();
-			case "drop":
-				return parseDrop();
-			case "load":
-				return parseLoad();
-			case "select":
-				return parseSelect();
+		case "create":
+			return parseCreate();
+		case "drop":
+			return parseDrop();
+		case "load":
+			return parseLoad();
+		case "select":
+			return parseSelect();
 			/* unreachable */
-			default:
-				return null; //TODO add special Exceptions
+		default:
+			return null; //TODO add special Exceptions
 		}
 
 	}
@@ -88,11 +88,7 @@ public class Parser {
 		boolean enable_ifnexists = false;
 		ArrayList<Column2> args = new ArrayList<Column2>();
 		expectNextToken(Token.Type.KEYWORD, "table");
-		// check Create As Select
-		if (currToken.equals(new Token(Token.Type.KEYWORD, "as"))) {
-			return parseCreateAsSelect(name);
-		}
-		
+
 		// check for [IF NOT EXISTS]
 		nextToken();
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "if"))) {
@@ -106,8 +102,15 @@ public class Parser {
 			name = currToken.val;
 		else
 			throwErr("KEYWORD _table_name not found");
+		
+		nextToken();
+		// check Create As Select
+		if (currToken.equals(new Token(Token.Type.KEYWORD, "as"))) {
+			return parseCreateAsSelect(name);
+		}
+
 		// check for "(" operator
-		expectNextToken(Token.Type.OPERATOR, "(");
+		expectThisToken(Token.Type.OPERATOR, "(");
 
 		/*
 		 * now reading arguments, consisting of IDENTIFIER (name), KEYWORD (type), //
@@ -256,26 +259,25 @@ public class Parser {
 		return new Select(intoFile, srcTableName, expressions,
 				where, groupBy, orderBy, mode);
 	}
-	
+
 	private Command parseCreateAsSelect(String tableName) {
 		String fromTableName = "";
 		Expression[] expressions = null;
-		Where where = null;
-		
-		Schema schema = Schema.GetSchema(tableName); //TODO if there is no schema named tableName 
-		
+		Where where = null; 
+
 		expectNextToken(Type.KEYWORD, "select");
 		expressions = parseAllSelectExpression();
-		expectNextToken(Type.KEYWORD, "from");
+		expectThisToken(Type.KEYWORD, "from");
 		expectNextToken(Type.IDENTIFIER);
 		fromTableName = currToken.val;
+		Schema schema = Schema.GetSchema(fromTableName); //TODO if there is no schema named tableName
 		nextToken();
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "where")))
 			where = parseCondition(schema);
 		expectThisToken(Type.EOF);
 		return new CreateAsSelect(tableName, fromTableName, expressions, where);
 	}
-	
+
 	private Expression[] parseAllSelectExpression() {
 		Expression[] expressions = null;
 		nextToken();
@@ -290,28 +292,28 @@ public class Parser {
 		}
 		return expressions;
 	}
-	
+
 	private Expression parseSelectExpression() {
 		AggFuncs aggFunc = AggFuncs.NOTHING;
 		if (currToken.type == Token.Type.KEYWORD) {
 			switch (currToken.val) {
-				case "min":
-					aggFunc = AggFuncs.MIN;
-					break;
-				case "max":
-					aggFunc = AggFuncs.MAX;
-					break;
-				case "avg":
-					aggFunc = AggFuncs.AVG;
-					break;
-				case "sum":
-					aggFunc = AggFuncs.SUM;
-					break;
-				case "count":
-					aggFunc = AggFuncs.COUNT;
-					break;
-				default:
-					throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
+			case "min":
+				aggFunc = AggFuncs.MIN;
+				break;
+			case "max":
+				aggFunc = AggFuncs.MAX;
+				break;
+			case "avg":
+				aggFunc = AggFuncs.AVG;
+				break;
+			case "sum":
+				aggFunc = AggFuncs.SUM;
+				break;
+			case "count":
+				aggFunc = AggFuncs.COUNT;
+				break;
+			default:
+				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
 			}
 			expectNextToken(Token.Type.OPERATOR, "(");
 		}
