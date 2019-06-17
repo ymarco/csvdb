@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class Tester {
 	private static void runTest(File testDir) {
-		String[] args = {"--rootdir", testDir.getAbsolutePath(),
+		String[] args = {"--verbose", "--rootdir", testDir.getAbsolutePath(),
 				"--run", testDir.getAbsolutePath() + File.separator + "test.sql"};
 		Main.main(args);
 	}
@@ -59,9 +59,9 @@ public class Tester {
 		String good = parseFile(goodname);
 		boolean res = out.equals(good);
 		if (res) {
-			System.out.println("passed  " + (new File(outname)).getName() + "," +(new File(goodname)).getName() );
+			System.out.println("passed  " + (new File(outname)).getName() + "," + (new File(goodname)).getName());
 		} else {
-			System.out.println("failed  " + (new File(outname)).getName() + "," +(new File(goodname)).getName() );
+			System.out.println("failed  " + (new File(outname)).getName() + "," + (new File(goodname)).getName());
 			System.out.println("good:\n" + good);
 			System.out.println("out:\n" + out);
 		}

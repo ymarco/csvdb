@@ -13,12 +13,13 @@ import schema.Schema;
 
 public class LoadData {
 
+	// loads the data from previous runs
 	public static void load() {
 		File rootFolder = new File(Main.rootdir);
 		for (File tableDir : rootFolder.listFiles()) {
 			if (tableDir.getName().startsWith("#"))
 				continue;
-			File dataFile = new File(String.join(File.separator, tableDir.getPath() + "table.json"));
+			File dataFile = new File(String.join(File.separator, tableDir.getPath(), "table.json"));
 			if (!dataFile.exists())
 				continue;
 			JSONParser jsonParser = new JSONParser();

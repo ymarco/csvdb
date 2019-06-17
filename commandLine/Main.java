@@ -27,6 +27,7 @@ public class Main {
 				String code = null;
 				try {
 					code = readCommand2();
+					if (code == null) return;
 				} catch (NoSuchElementException e) {
 					return;
 				}

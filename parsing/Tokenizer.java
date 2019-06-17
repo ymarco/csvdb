@@ -165,7 +165,7 @@ class Tokenizer {
 	private Token getOperator() {
 		Optional<String> maybeOperator = Token.operators.stream()
 				.map(op -> TextUtils.getStartWith(op, text.substring(curser)))
-				.filter(Objects::nonNull).max(Comparator.comparing(String::length));
+				.filter(Objects::nonNull).max(Comparator.comparingInt(String::length));
 		if (!maybeOperator.isPresent())
 			throw new TokenizingException("Syntax Error: invalid token");
 
