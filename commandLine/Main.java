@@ -14,7 +14,9 @@ public class Main {
 	private static boolean verbose;
 	private static boolean useCommandLine = true;
 	private static Scanner codeReader = null;
-
+	/* 
+	 * //this is a comment in a comment
+	 */
 	public static void main(String[] args) {
 		System.out.println(String.join(" ", args));
 		parseArgs(args);
@@ -98,10 +100,6 @@ public class Main {
 
 	/**
 	 * @return if continue to run
-	 */
-	/*
-	 * TODO:
-	 * if the ';' is in quotes or escaped it doesn't work
 	 */
 	private static String readCommand() throws NoSuchElementException {
 		if (useCommandLine) {

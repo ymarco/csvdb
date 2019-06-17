@@ -1,14 +1,12 @@
 package commands;
 
 
-import java.io.IOException;
-
 import commands.Select.Expression;
 import commands.select.Where;
 import schema.Column;
-import schema.DBVar;
 import schema.Schema;
 
+//TODO change create as select to what that is was before (if is better)
 public class CreateAsSelect implements Command {
 	private Command create;
 	private Command drop;

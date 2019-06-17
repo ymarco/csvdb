@@ -63,7 +63,7 @@ public class Select implements Command {
 		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
 		s = where.apply(s);
 		s = orderBy.apply(s);
-		if (groupBy == null) { // no group by TODO: there CAN be aggregator functions here, this assumes there cant
+		if (groupBy == null) { // no group by TODO: there CAN be aggregator functions here, this assumes there cant (Ofek:we did this, no?)
 			s =  s.map(reformatColumns(selectedColumns));
 		} else {
 			s = groupBy.apply(s); //TODO
@@ -156,9 +156,11 @@ public class Select implements Command {
 		new Create(outputName, false, columns).run();
 		return Schema.GetSchema(outputName);
 	}
-
-
-	// what is this? needs comments TODO
+	
+	/* 
+	 * this class save information about a single expression
+	 * (save the field name, the new name and the aggregate function
+	 */
 	public static class Expression {
 		public enum AggFuncs {NOTHING, MIN, MAX, AVG, SUM, COUNT}
 

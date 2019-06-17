@@ -292,7 +292,9 @@ public class Parser {
 		expectThisToken(Type.KEYWORD, "from");
 		expectNextToken(Type.IDENTIFIER);
 		fromTableName = currToken.val;
-		Schema schema = Schema.GetSchema(fromTableName); //TODO if there is no schema named tableName
+		if (!Schema.HaveSchema(fromTableName))
+			throw new RuntimeException("you tried to 'create as select' from unexisting table");
+		Schema schema = Schema.GetSchema(fromTableName);
 		nextToken();
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "where")))
 			where = parseCondition(schema);
