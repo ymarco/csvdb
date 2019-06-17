@@ -3,11 +3,12 @@ package schema.dbvars;
 import schema.DBVar;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 public class DBInt extends DBVar {
 	private static final long serialVersionUID = 1L;
 	
-	long val;
+	public final long val;
 
 	public DBInt(long val) {
 		this.val = val;
@@ -54,5 +55,18 @@ public class DBInt extends DBVar {
 	@Override
 	public String toString() {
 		return (isNull() ? "" : Long.toString(val));
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof DBInt)) return false;
+		DBInt dbInt = (DBInt) o;
+		return val == dbInt.val;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(val);
 	}
 }

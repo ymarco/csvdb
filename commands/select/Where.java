@@ -13,11 +13,15 @@ import schema.dbvars.DBInt;
 
 //classes
 public class Where implements Statement {
-	public final int colNum;
+	private final int colNum;
 	private DBVar constant;
 	private Schema schema;
 
 	public Predicate<DBVar> pred;
+
+	public boolean testRow(DBVar[] row) {
+		return pred.test(row[colNum]);
+	}
 
 	public Where(Schema schema, int colNum, String operator, String constant_) {
 		this.colNum = colNum;
@@ -94,6 +98,6 @@ public class Where implements Statement {
 
 	@Override
 	public Stream<DBVar[]> apply(Stream<DBVar[]> s) {
-		return s.filter((DBVar[] d) -> pred.test(d[colNum]));
+		return s.filter(this::testRow);
 	}
 }

@@ -1,23 +1,22 @@
 package commands;
 
 
-import commands.Select.Expression;
+import commands.select.SelectExpression;
 import commands.select.Where;
 import schema.Column;
 import schema.Schema;
 
-//TODO change create as select to what that is was before (if is better)
 public class CreateAsSelect implements Command {
 	private Command create;
 	private Command drop;
 	private Select select;
 	private String tableName;
 
-	public CreateAsSelect(String tableName, String srcTableName, Select.Expression[] expressions, Where where) {
+	public CreateAsSelect(String tableName, String srcTableName, SelectExpression[] expressions, Where where) {
 		Schema srcSchema = Schema.GetSchema(srcTableName);
 		Column[] columns = new Column[expressions.length];
 		for (int i = 0; i < expressions.length; i++) {
-			Expression exp = expressions[i];
+			SelectExpression exp = expressions[i];
 			columns[i] = new Column(srcSchema.getColumnType(exp.fieldName), exp.asName);
 		}
 

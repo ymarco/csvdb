@@ -3,11 +3,12 @@ package schema.dbvars;
 import schema.DBVar;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 public class DBTS extends DBVar {
 	private static final long serialVersionUID = 1L;
 	
-	long val;
+	public final long val;
 
 	public DBTS(long val) {
 		this.val = val;
@@ -53,5 +54,18 @@ public class DBTS extends DBVar {
 	@Override
 	public String toString() {
 		return (isNull() ? "" : Long.toUnsignedString(val));
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof DBTS)) return false;
+		DBTS dbts = (DBTS) o;
+		return val == dbts.val;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(val);
 	}
 }

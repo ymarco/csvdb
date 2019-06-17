@@ -3,20 +3,95 @@ package commands.select;
 import schema.DBVar;
 import schema.Schema;
 
+import java.util.*;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public class GroupBy implements Statement {
-	public String[] fieldsToGroupBy;
-	public Where having;
+public class GroupBy implements Statement, Iterator<DBVar[]>{
+	private int[] colmnnToGroupBy;
+	private Where having;
 	public Schema schema;
+	private SelectExpression[] expressions;
+	private String tableName;
+	private Stream<DBVar[]> originalOrdered;
+	private Aggregator[] aggs;
+	private Iterator<DBVar[]> it;
+	private DBVar[] key;
 
-	public GroupBy(String[] fieldsToGroupBy, Where having) {
-		this.fieldsToGroupBy = fieldsToGroupBy;
+	private DBVar[] getKey(DBVar[] row) {
+		DBVar[] res = new DBVar[colmnnToGroupBy.length];
+		for (int i = 0; i < colmnnToGroupBy.length; i++) {
+			res[i] = row[colmnnToGroupBy[i]];
+		}
+		return res;
+	}
+
+	public GroupBy(String tableName, int[] colmnnToGroupBy,
+	               SelectExpression[] expressions, Where having) {
+		this.colmnnToGroupBy = colmnnToGroupBy;
 		this.having = having;
+		this.expressions = expressions;
+		this.tableName = tableName;
+
+		aggs =  Arrays.stream(expressions).map(e -> e.agg).toArray(Aggregator[]::new);
 	}
 
 	@Override
 	public Stream<DBVar[]> apply(Stream<DBVar[]> s) {
-        return s; //TODO
+		OrderBy order = new OrderBy(tableName, colmnnToGroupBy);// TODO: until orderBy supports multiple columns
+		originalOrdered = order.apply(s);
+		it = originalOrdered.iterator();
+		DBVar[] row = it.next();
+        key = getKey(row);
+        aggregateRow(row);
+		return StreamSupport.stream(
+				Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED),
+				false
+		);
+	}
+
+
+
+	@Override
+	public boolean hasNext() {
+		return it.hasNext();
+	}
+
+	@Override
+	public DBVar[] next() {
+		DBVar[] res = new DBVar[expressions.length];
+		while (it.hasNext()) {
+			DBVar[] row = it.next();
+			DBVar[] thisKey = getKey(row);
+			if (!Arrays.deepEquals(key, thisKey)) { // finished with key
+				for (int i = 0; i < aggs.length; i++) {
+					res[i] = aggs[i].getVal();
+					aggs[i].reset();
+				}
+				aggregateRow(row);
+				if (having != null && !having.testRow(res)) {
+					continue;
+				}
+				key = thisKey; // setting key for next time
+				return res;
+			} else { // still aggregating the same key
+				aggregateRow(row);
+			}
+		}
+		// if we got here it means that the table ended
+		// lets return all we have aggregated
+		for (int i = 0; i < aggs.length; i++) {
+			Aggregator agg = aggs[i];
+			res[i] = agg.getVal();
+		}
+		return res;
+	}
+
+	private void aggregateRow(DBVar[] row) {
+		System.out.println(Arrays.toString(row));
+		for (int i = 0; i < aggs.length; i++) {
+			Aggregator agg = aggs[i];
+			agg.aggregate(row[i]);
+		}
 	}
 }

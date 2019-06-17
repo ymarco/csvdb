@@ -1,9 +1,6 @@
 package commands;
 
-import commands.select.GroupBy;
-import commands.select.OrderBy;
-import commands.select.Statement;
-import commands.select.Where;
+import commands.select.*;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import schema.Column;
@@ -21,7 +18,7 @@ import java.util.stream.Stream;
 public class Select implements Command {
 	private String outputName; // this can a file name in case of exporting to csv or a table name in other cases
 	private Schema srcSchema;
-	private Expression[] expressions;
+	private SelectExpression[] expressions;
 	private Statement where;
 	private Statement groupBy;
 	private Statement orderBy;
@@ -31,12 +28,12 @@ public class Select implements Command {
 		return (s == null ? Statement.emptyStatement : s);
 	}
 
-	public Select(String outputName, String srcTableName, Expression[] expressions,
+	public Select(String outputName, String srcTableName, SelectExpression[] expressions,
 	              Where where, GroupBy groupBy, OrderBy orderBy) throws Schema.NotFoundException {
 		this(outputName, srcTableName, expressions, where, groupBy, orderBy, Mode.PRINT_TO_SCREEN);
 	}
 
-	public Select(String outputName, String srcTableName, Expression[] expressions,
+	public Select(String outputName, String srcTableName, SelectExpression[] expressions,
 	              Where where, GroupBy groupBy, OrderBy orderBy, Mode mode) throws Schema.NotFoundException {
 		this.outputName = outputName;
 		this.srcSchema = Schema.GetSchema(srcTableName);
@@ -62,12 +59,12 @@ public class Select implements Command {
 		// selectedColumns[i] is the index of the source column of column i in the new table
 		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
 		s = where.apply(s);
-		s = orderBy.apply(s);
-		if (groupBy == null) { // no group by TODO: there CAN be aggregator functions here, this assumes there cant (Ofek:we did this, no?)
+		if (groupBy == null) {
 			s =  s.map(reformatColumns(selectedColumns));
 		} else {
 			s = groupBy.apply(s); //TODO
 		}
+		s = orderBy.apply(s);
 		return s;
 	}
 
@@ -94,7 +91,7 @@ public class Select implements Command {
 			Load.writeTable(newTable, schema.getTableFilePath());
 			schema.setLineCount(newTable.length);
 		} catch (IOException e) {
-            throw new RuntimeException(e);
+			throw new RuntimeException(e);
 		}
 		//TODO: load table into a new schema
 	}
@@ -143,9 +140,9 @@ public class Select implements Command {
 
 	private Schema createNewSchema() {
 		if (expressions == null) {
-			expressions = new Expression[srcSchema.getLinesCount()];
+			expressions = new SelectExpression[srcSchema.getLinesCount()];
 			for (int i = 0; i < expressions.length; i++)
-				expressions[i] = new Expression(srcSchema.getColumnName(i));
+				expressions[i] = new SelectExpression(srcSchema.getColumnName(i));
 		}
 
 		Column[] columns = new Column[expressions.length];
@@ -155,36 +152,6 @@ public class Select implements Command {
 		}
 		new Create(outputName, false, columns).run();
 		return Schema.GetSchema(outputName);
-	}
-	
-	/* 
-	 * this class save information about a single expression
-	 * (save the field name, the new name and the aggregate function
-	 */
-	public static class Expression {
-		public enum AggFuncs {NOTHING, MIN, MAX, AVG, SUM, COUNT}
-
-		public String fieldName;
-		public String asName;
-		public AggFuncs aggFunc;
-
-		public Expression(String fieldName) {
-			this(fieldName, AggFuncs.NOTHING);
-		}
-
-		public Expression(String fieldName, AggFuncs aggFunc) {
-			this(fieldName, fieldName, aggFunc);
-		}
-
-		public Expression(String fieldName, String asName) {
-			this(fieldName, asName, AggFuncs.NOTHING);
-		}
-
-		public Expression(String fieldName, String asName, AggFuncs aggFunc) {
-			this.fieldName = fieldName;
-			this.asName = asName;
-			this.aggFunc = aggFunc;
-		}
 	}
 
 

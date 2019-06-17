@@ -1,5 +1,10 @@
 package schema;
 
+import schema.dbvars.DBFloat;
+import schema.dbvars.DBInt;
+import schema.dbvars.DBTS;
+import schema.dbvars.DBVarchar;
+
 import java.io.Serializable;
 import java.util.Comparator;
 
@@ -18,6 +23,9 @@ public abstract class DBVar implements Serializable {
 
 	@Override
 	public abstract String toString();
+
+	@Override
+	public abstract boolean equals(Object obj);
 
 	public enum Type {
 		INT("int"),
@@ -46,7 +54,7 @@ public abstract class DBVar implements Serializable {
 				case "timestamp":
 					return TS;
 			}
-            throw new RuntimeException("invalid type");
+			throw new RuntimeException("invalid type");
 		}
 	}
 }

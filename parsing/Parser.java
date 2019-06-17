@@ -1,6 +1,7 @@
 package parsing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import commands.Command;
@@ -9,11 +10,7 @@ import commands.CreateAsSelect;
 import commands.Drop;
 import commands.Load;
 import commands.Select;
-import commands.Select.Expression;
-import commands.Select.Expression.AggFuncs;
-import commands.select.GroupBy;
-import commands.select.OrderBy;
-import commands.select.Where;
+import commands.select.*;
 import parsing.Token.Type;
 import schema.Column;
 import schema.DBVar;
@@ -35,17 +32,17 @@ public class Parser {
 			throwErr("first token wasnt a keyword");
 
 		switch (currToken.val) {
-		case "create":
-			return parseCreate();
-		case "drop":
-			return parseDrop();
-		case "load":
-			return parseLoad();
-		case "select":
-			return parseSelect();
+			case "create":
+				return parseCreate();
+			case "drop":
+				return parseDrop();
+			case "load":
+				return parseLoad();
+			case "select":
+				return parseSelect();
 			/* unreachable */
-		default:
-			return null; //TODO add special Exceptions
+			default:
+				return null; //TODO add special Exceptions
 		}
 
 	}
@@ -188,7 +185,7 @@ public class Parser {
 	private Command parseSelect() {
 		String intoFile = null;
 		String srcTableName;
-		Expression[] expressions = null;
+		SelectExpression[] expressions = null;
 		Where where = null;
 		GroupBy groupBy = null;
 		OrderBy orderBy = null;
@@ -218,42 +215,38 @@ public class Parser {
 			nextToken();
 			where = parseCondition(schema);
 		}
+		List<String> fieldsToGroupBy = new ArrayList<>();
 		//group by
-		{
-			List<String> fields = new ArrayList<>();
-			boolean haveGroupBy = false;
-			if (currToken.equals(new Token(Token.Type.KEYWORD, "group"))) {
-				//groupBy (declared)
-				expectNextToken(Token.Type.KEYWORD, "by");
-
-				do {
-					expectNextToken(Token.Type.IDENTIFIER);
-					fields.add(currToken.val);
-					nextToken();
-				}
-				while (currToken.equals(new Token(Token.Type.OPERATOR, ",")));
-				haveGroupBy = true;
-			} else {
-				//groupBy (not declared)
-				for (int i = 0; i < expressions.length; i++)
-					if (expressions[i].aggFunc == AggFuncs.NOTHING)
-						fields.add(expressions[i].asName);
-				if (0 < fields.size() && fields.size() < expressions.length)
-					haveGroupBy = true;
+		boolean groupingBy = false;
+		if (currToken.equals(new Token(Type.KEYWORD, "group"))) {
+			//groupBy (declared)
+			expectNextToken(Type.KEYWORD, "by");
+			groupingBy = true;
+			do {
+				expectNextToken(Type.IDENTIFIER);
+				fieldsToGroupBy.add(currToken.val);
+				nextToken();
+			} while (currToken.equals(new Token(Type.OPERATOR, ",")));
+		} else {
+			//groupBy (not declared)
+			if (Arrays.stream(expressions).map(e -> e.agg).filter(Aggregator::isEmpty).count() == 0) { // all expressions have aggregators
+				groupingBy = true;
 			}
-			if (haveGroupBy) {
-				//having
-				Where having = null;
-				if (currToken.equals(new Token(Token.Type.KEYWORD, "having"))) {
-					nextToken();
-					having = parseCondition(schema);
-				}
-				
-				groupBy = new GroupBy(fields.toArray(new String[fields.size()]), having);
-			}
-
 
 		}
+		if (groupingBy) {
+			//having
+			Where having = null;
+			if (currToken.equals(new Token(Type.KEYWORD, "having"))) {
+				nextToken();
+				having = parseCondition(schema);
+			}
+			int[] colNumsToGroupBy = fieldsToGroupBy.stream().mapToInt(schema::getColumnIndex).toArray();
+
+			groupBy = new GroupBy(srcTableName, colNumsToGroupBy, expressions, having);
+		}
+
+
 		//order by
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "order"))) {
 			//TODO parse order by to more than one column
@@ -271,12 +264,11 @@ public class Parser {
 				else
 					throwErr("sort type can only be ASC or DESC");
 			}
-			orderBy = new OrderBy(schema.getTableName(), new int[] {schema.getColumnIndex(outputField)}, isDesc);
+			orderBy = new OrderBy(schema.getTableName(), new int[]{schema.getColumnIndex(outputField)}, isDesc);
 			nextToken();
 		}
 		//eof
 		expectNextToken(Token.Type.EOF);
-
 		//return
 		return new Select(intoFile, srcTableName, expressions,
 				where, groupBy, orderBy, mode);
@@ -284,7 +276,7 @@ public class Parser {
 
 	private Command parseCreateAsSelect(String tableName) {
 		String fromTableName = "";
-		Expression[] expressions = null;
+		SelectExpression[] expressions = null;
 		Where where = null;
 
 		expectNextToken(Type.KEYWORD, "select");
@@ -292,9 +284,7 @@ public class Parser {
 		expectThisToken(Type.KEYWORD, "from");
 		expectNextToken(Type.IDENTIFIER);
 		fromTableName = currToken.val;
-		if (!Schema.HaveSchema(fromTableName))
-			throw new RuntimeException("you tried to 'create as select' from unexisting table");
-		Schema schema = Schema.GetSchema(fromTableName);
+		Schema schema = Schema.GetSchema(fromTableName); //TODO if there is no schema named tableName
 		nextToken();
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "where")))
 			where = parseCondition(schema);
@@ -302,14 +292,14 @@ public class Parser {
 		return new CreateAsSelect(tableName, fromTableName, expressions, where);
 	}
 
-	private Expression[] parseAllSelectExpression() {
-		Expression[] expressions = null;
+	private SelectExpression[] parseAllSelectExpression() {
+		SelectExpression[] expressions = null;
 		nextToken();
 		if (currToken.equals(new Token(Type.OPERATOR, "*"))) {
 			return null;
 		}
 
-		List<Expression> expressionsList = new ArrayList<>();
+		List<SelectExpression> expressionsList = new ArrayList<>();
 		// first expression
 		expressionsList.add(parseSelectExpression());
 		// other expressions separated by ,
@@ -317,48 +307,54 @@ public class Parser {
 			nextToken();
 			expressionsList.add(parseSelectExpression());
 		}
-		expressions = expressionsList.toArray(new Expression[expressionsList.size()]);
+		expressions = expressionsList.toArray(new SelectExpression[expressionsList.size()]);
 		return expressions;
 	}
 
-	private Expression parseSelectExpression() {
-		AggFuncs aggFunc = AggFuncs.NOTHING;
+	private SelectExpression parseSelectExpression() {
+		String fieldName;
+		String asName;
+		Aggregator agg = new Aggregator.EmptyAgg();
+		boolean hasAgg = false;
 		if (currToken.type == Token.Type.KEYWORD) {
+			hasAgg = true;
 			switch (currToken.val) {
-			case "min":
-				aggFunc = AggFuncs.MIN;
-				break;
-			case "max":
-				aggFunc = AggFuncs.MAX;
-				break;
-			case "avg":
-				aggFunc = AggFuncs.AVG;
-				break;
-			case "sum":
-				aggFunc = AggFuncs.SUM;
-				break;
-			case "count":
-				aggFunc = AggFuncs.COUNT;
-				break;
-			default:
-				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
+				case "min":
+					agg = new Aggregator.Min();
+					break;
+				case "max":
+					agg = new Aggregator.Max();
+					break;
+				case "avg":
+					agg = new Aggregator.Avg();
+					break;
+				case "sum":
+					agg = new Aggregator.Sum();
+					break;
+				case "count":
+					agg = new Aggregator.Count();
+					break;
+				default:
+					throwErr("agg func can only be min,max,avg,sum,count");
 			}
 			expectNextToken(Token.Type.OPERATOR, "(");
+			nextToken();
 		}
 		expectThisToken(Token.Type.IDENTIFIER);
-		String fieldName = currToken.val;
+		fieldName = currToken.val;
 		nextToken();
-		if (aggFunc != AggFuncs.NOTHING) {
+		if (hasAgg) {
 			expectThisToken(Token.Type.OPERATOR, ")");
 			nextToken();
 		}
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "as"))) {
 			expectNextToken(Token.Type.IDENTIFIER);
-			Expression res = new Expression(fieldName, currToken.val);
+			asName = currToken.val;
 			nextToken();
-			return res;
+		} else {
+			asName = fieldName;
 		}
-		return new Expression(fieldName);
+		return new SelectExpression(fieldName, asName, agg);
 	}
 
 	private Where parseCondition(Schema schema) {

@@ -3,6 +3,7 @@ package schema.dbvars;
 import schema.DBVar;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 public class DBVarchar extends DBVar {
 	private static final long serialVersionUID = 1L;
@@ -45,6 +46,19 @@ public class DBVarchar extends DBVar {
 	}
 
 	public static final DBVar.Type type = Type.VARCHAR;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof DBVarchar)) return false;
+		DBVarchar dbVarchar = (DBVarchar) o;
+		return val.equals(dbVarchar.val);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(val);
+	}
 
 	@Override
 	public String toString() {
