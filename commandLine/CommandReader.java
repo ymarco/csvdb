@@ -15,8 +15,11 @@ public class CommandReader {
 				if (preC == '-') {
 					skipComment();
 					preC = '\n';
-					continue;
+					code.append('\n');
+				} else {
+					preC = '-';
 				}
+				continue;
 			} else if (preC == '-') {
 				code.append('-');
 			}
@@ -28,7 +31,7 @@ public class CommandReader {
 				code.append(c);
 			//Update preC
 			preC = c;
-		} while (c != '"');
+		} while (c != ';');
 		//if ... (i don't know to say this in English)
 		if (preC == '-')
 			code.append(preC);
