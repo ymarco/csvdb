@@ -35,17 +35,17 @@ public class Parser {
 			throwErr("first token wasnt a keyword");
 
 		switch (currToken.val) {
-			case "create":
-				return parseCreate();
-			case "drop":
-				return parseDrop();
-			case "load":
-				return parseLoad();
-			case "select":
-				return parseSelect();
+		case "create":
+			return parseCreate();
+		case "drop":
+			return parseDrop();
+		case "load":
+			return parseLoad();
+		case "select":
+			return parseSelect();
 			/* unreachable */
-			default:
-				return null; //TODO add special Exceptions
+		default:
+			return null; //TODO add special Exceptions
 		}
 
 	}
@@ -219,24 +219,40 @@ public class Parser {
 			where = parseCondition(schema);
 		}
 		//group by
-		if (currToken.equals(new Token(Token.Type.KEYWORD, "group"))) {
-			expectNextToken(Token.Type.KEYWORD, "by");
+		{
 			List<String> fields = new ArrayList<>();
-			do {
-				expectNextToken(Token.Type.IDENTIFIER);
-				fields.add(currToken.val);
-				nextToken();
-			}
-			while (currToken.equals(new Token(Token.Type.OPERATOR, ",")));
+			boolean haveGroupBy = false;
+			if (currToken.equals(new Token(Token.Type.KEYWORD, "group"))) {
+				//groupBy (declared)
+				expectNextToken(Token.Type.KEYWORD, "by");
 
-			//having
-			Where having = null;
-			if (currToken.equals(new Token(Token.Type.KEYWORD, "having"))) {
-				nextToken();
-				having = parseCondition(schema);
+				do {
+					expectNextToken(Token.Type.IDENTIFIER);
+					fields.add(currToken.val);
+					nextToken();
+				}
+				while (currToken.equals(new Token(Token.Type.OPERATOR, ",")));
+				haveGroupBy = true;
+			} else {
+				//groupBy (not declared)
+				for (int i = 0; i < expressions.length; i++)
+					if (expressions[i].aggFunc == AggFuncs.NOTHING)
+						fields.add(expressions[i].asName);
+				if (0 < fields.size() && fields.size() < expressions.length)
+					haveGroupBy = true;
+			}
+			if (haveGroupBy) {
+				//having
+				Where having = null;
+				if (currToken.equals(new Token(Token.Type.KEYWORD, "having"))) {
+					nextToken();
+					having = parseCondition(schema);
+				}
+				
+				groupBy = new GroupBy(fields.toArray(new String[fields.size()]), having);
 			}
 
-			groupBy = new GroupBy(fields.toArray(new String[0]), having);
+
 		}
 		//order by
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "order"))) {
@@ -259,6 +275,7 @@ public class Parser {
 		}
 		//eof
 		expectNextToken(Token.Type.EOF);
+
 		//return
 		return new Select(intoFile, srcTableName, expressions,
 				where, groupBy, orderBy, mode);
@@ -305,23 +322,23 @@ public class Parser {
 		AggFuncs aggFunc = AggFuncs.NOTHING;
 		if (currToken.type == Token.Type.KEYWORD) {
 			switch (currToken.val) {
-				case "min":
-					aggFunc = AggFuncs.MIN;
-					break;
-				case "max":
-					aggFunc = AggFuncs.MAX;
-					break;
-				case "avg":
-					aggFunc = AggFuncs.AVG;
-					break;
-				case "sum":
-					aggFunc = AggFuncs.SUM;
-					break;
-				case "count":
-					aggFunc = AggFuncs.COUNT;
-					break;
-				default:
-					throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
+			case "min":
+				aggFunc = AggFuncs.MIN;
+				break;
+			case "max":
+				aggFunc = AggFuncs.MAX;
+				break;
+			case "avg":
+				aggFunc = AggFuncs.AVG;
+				break;
+			case "sum":
+				aggFunc = AggFuncs.SUM;
+				break;
+			case "count":
+				aggFunc = AggFuncs.COUNT;
+				break;
+			default:
+				throwErr("agg func need to be: MIN or MAX or AVG or SUM or COUNT");
 			}
 			expectNextToken(Token.Type.OPERATOR, "(");
 		}
