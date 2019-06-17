@@ -256,6 +256,7 @@ public class Parser {
 		}
 		//order by
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "order"))) {
+			//TODO parse order by to more than one column
 			expectNextToken(Token.Type.KEYWORD, "by");
 			expectNextToken(Token.Type.IDENTIFIER);
 			String outputField = currToken.val;
@@ -270,7 +271,7 @@ public class Parser {
 				else
 					throwErr("sort type can only be ASC or DESC");
 			}
-			orderBy = new OrderBy(schema.getTableName(), schema.getColumnIndex(outputField), isDesc);
+			orderBy = new OrderBy(schema.getTableName(), new int[] {schema.getColumnIndex(outputField)}, isDesc);
 			nextToken();
 		}
 		//eof
