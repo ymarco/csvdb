@@ -33,8 +33,6 @@ public class CommandReader {
 			preC = c;
 		} while (c != ';');
 		//if ... (i don't know to say this in English)
-		if (preC == '-')
-			code.append(preC);
 		return code.toString();
 	}
 	

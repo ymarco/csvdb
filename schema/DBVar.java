@@ -1,10 +1,5 @@
 package schema;
 
-import schema.dbvars.DBFloat;
-import schema.dbvars.DBInt;
-import schema.dbvars.DBTS;
-import schema.dbvars.DBVarchar;
-
 import java.io.Serializable;
 import java.util.Comparator;
 

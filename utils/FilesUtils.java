@@ -50,8 +50,7 @@ public class FilesUtils {
 	}
 
 	public static int countLines(String filename) throws IOException {
-		InputStream is = new BufferedInputStream(new FileInputStream(filename));
-		try {
+		try (InputStream is = new BufferedInputStream(new FileInputStream(filename))) {
 			byte[] c = new byte[1024];
 
 			int readChars = is.read(c);
@@ -83,8 +82,6 @@ public class FilesUtils {
 			}
 
 			return count == 0 ? 1 : count;
-		} finally {
-			is.close();
 		}
 	}
 }

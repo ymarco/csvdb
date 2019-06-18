@@ -1,15 +1,11 @@
 package commands.select;
 
 import schema.DBVar;
-import schema.Schema;
+import schema.dbvars.DBInt;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import schema.dbvars.DBInt;
 
 //classes
 public class Where implements Statement {

@@ -14,16 +14,12 @@ public class OrderBy implements Statement {
 	}
 
 	private final Comparator<DBVar[]> comparator;
-	private final int[] colNums;
-	private final boolean[] isDesc;
 
 	public OrderBy(int[] colNum) {
 		this(colNum, new boolean[colNum.length]);
 	}
 
 	public OrderBy(int[] colNums, boolean[] isDesc) {
-		this.isDesc = isDesc;
-		this.colNums = colNums;
 
 		List<Comparator<DBVar>> basicComparators = new ArrayList<>(colNums.length);
 		for (int i = 0; i < colNums.length; i++) {

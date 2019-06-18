@@ -5,8 +5,6 @@ import schema.dbvars.DBFloat;
 import schema.dbvars.DBInt;
 import schema.dbvars.DBTS;
 
-import java.util.Comparator;
-
 public interface Aggregator {
 	void aggregate(DBVar var);
 

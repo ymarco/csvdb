@@ -12,8 +12,6 @@ public class GroupBy implements Statement, Iterator<DBVar[]> {
 	private Where having;
 	public Schema schema;
 	private SelectExpression[] expressions;
-	private String tableName;
-	private Stream<DBVar[]> originalOrdered;
 	private Aggregator[] aggs;
 	private Iterator<DBVar[]> it;
 	private DBVar[] key = null;
@@ -32,7 +30,6 @@ public class GroupBy implements Statement, Iterator<DBVar[]> {
 		this.colmnnToGroupBy = colmnnToGroupBy;
 		this.having = having;
 		this.expressions = expressions;
-		this.tableName = tableName;
 		this.schema = Schema.GetSchema(tableName);
 
 		aggs = Arrays.stream(expressions).map(e -> e.agg).toArray(Aggregator[]::new);
@@ -42,7 +39,7 @@ public class GroupBy implements Statement, Iterator<DBVar[]> {
 	@Override
 	public Stream<DBVar[]> apply(Stream<DBVar[]> s) {
 		OrderBy order = new OrderBy(colmnnToGroupBy);
-		originalOrdered = order.apply(s);
+		Stream<DBVar[]> originalOrdered = order.apply(s);
 		it = originalOrdered.iterator();
 		DBVar[] row = it.next();
 		key = getKey(row);

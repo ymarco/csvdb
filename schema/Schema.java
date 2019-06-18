@@ -1,5 +1,7 @@
 package schema;
 
+import commandLine.Main;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,9 +9,6 @@ import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.stream.Stream;
-
-import commandLine.Main;
-import utils.FilesUtils;
 
 public class Schema {
 	private static Hashtable<String, Schema> schemas = new Hashtable<>();

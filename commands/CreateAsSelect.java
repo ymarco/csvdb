@@ -10,7 +10,6 @@ public class CreateAsSelect implements Command {
 	private Command create;
 	private Command drop;
 	private Select select;
-	private String tableName;
 
 	public CreateAsSelect(String tableName, String srcTableName, SelectExpression[] expressions, Where where) {
 		Schema srcSchema = Schema.GetSchema(srcTableName);
@@ -23,7 +22,6 @@ public class CreateAsSelect implements Command {
 		drop = new Drop(tableName, true);
 		create = new Create(tableName, false, columns);
 		select = new Select(tableName, srcTableName, expressions, where, null, null, Select.Mode.CREATE_NEW_TABLE);
-		this.tableName = tableName;
 	}
 
 	public void run() {

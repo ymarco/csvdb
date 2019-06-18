@@ -1,22 +1,16 @@
 package parsing;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.IntStream;
-
-import commands.Command;
-import commands.Create;
-import commands.CreateAsSelect;
-import commands.Drop;
-import commands.Load;
-import commands.Select;
+import commands.*;
 import commands.select.*;
 import parsing.Token.Type;
 import schema.Column;
 import schema.DBVar;
 import schema.Schema;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.IntStream;
 
 public class Parser {
 	private final Tokenizer tkzr;
@@ -85,7 +79,7 @@ public class Parser {
 	private Command parseCreate() {
 		String name = "";
 		boolean enable_ifnexists = false;
-		ArrayList<Column> args = new ArrayList<Column>();
+		ArrayList<Column> args = new ArrayList<>();
 		expectNextToken(Token.Type.KEYWORD, "table");
 
 		// check for [IF NOT EXISTS]
