@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class DBTS extends DBVar {
 	private static final long serialVersionUID = 1L;
-	
+
 	public final long val;
 
 	public DBTS(long val) {
@@ -67,5 +67,10 @@ public class DBTS extends DBVar {
 	@Override
 	public int hashCode() {
 		return Objects.hash(val);
+	}
+
+	@Override
+	public int compareTo(DBVar dbVar) {
+		return comparator.compare(this, dbVar);
 	}
 }

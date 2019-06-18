@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class DBFloat extends DBVar {
 	private static final long serialVersionUID = 1L;
-	
+
 	public final double val;
 
 	public DBFloat(String s) throws NumberFormatException {
@@ -67,5 +67,10 @@ public class DBFloat extends DBVar {
 	@Override
 	public int hashCode() {
 		return Objects.hash(val);
+	}
+
+	@Override
+	public int compareTo(DBVar dbVar) {
+		return comparator.compare(this, dbVar);
 	}
 }

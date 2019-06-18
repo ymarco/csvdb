@@ -26,4 +26,12 @@ public class SelectExpression {
 		this.agg = agg;
 	}
 
+	@Override
+	public String toString() {
+		return "SelectExpression{" +
+				"fieldName='" + fieldName + '\'' +
+				", asName='" + asName + '\'' +
+				", agg=" + agg +
+				'}';
+	}
 }

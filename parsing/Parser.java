@@ -1,8 +1,10 @@
 package parsing;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import commands.Command;
 import commands.Create;
@@ -215,20 +217,17 @@ public class Parser {
 			nextToken();
 			where = parseCondition(schema);
 		}
-		List<String> fieldsToGroupBy = new ArrayList<>();
+		List<String> fieldsToGroupBy;
 		//group by
 		boolean groupingBy = false;
 		if (currToken.equals(new Token(Type.KEYWORD, "group"))) {
 			//groupBy (declared)
 			expectNextToken(Type.KEYWORD, "by");
 			groupingBy = true;
-			do {
-				expectNextToken(Type.IDENTIFIER);
-				fieldsToGroupBy.add(currToken.val);
-				nextToken();
-			} while (currToken.equals(new Token(Type.OPERATOR, ",")));
+			fieldsToGroupBy = parseIdentifierList();
 		} else {
 			//groupBy (not declared)
+			fieldsToGroupBy = new ArrayList<>();
 			if (Arrays.stream(expressions).map(e -> e.agg).filter(Aggregator::isEmpty).count() == 0) { // all expressions have aggregators
 				groupingBy = true;
 			}
@@ -239,7 +238,7 @@ public class Parser {
 			Where having = null;
 			if (currToken.equals(new Token(Type.KEYWORD, "having"))) {
 				nextToken();
-				having = parseCondition(schema);
+				having = parseHavingCondition(schema, expressions);
 			}
 			int[] colNumsToGroupBy = fieldsToGroupBy.stream().mapToInt(schema::getColumnIndex).toArray();
 
@@ -251,27 +250,74 @@ public class Parser {
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "order"))) {
 			//TODO parse order by to more than one column
 			expectNextToken(Token.Type.KEYWORD, "by");
-			expectNextToken(Token.Type.IDENTIFIER);
-			String outputField = currToken.val;
-			nextToken();
 
-			boolean isDesc = false;
-			if (currToken.type == Token.Type.KEYWORD) {
-				if (currToken.val.equals("asc")) {
-					isDesc = false;
-				} else if (currToken.val.equals("desc"))
-					isDesc = true;
-				else
-					throwErr("sort type can only be ASC or DESC");
+			List<String> orderByColNames = new ArrayList<>();
+			List<Boolean> isDesc = new ArrayList<>();
+			do {
+				expectNextToken(Type.IDENTIFIER);
+				orderByColNames.add(currToken.val);
+				nextToken();
+				if (currToken.type == Type.KEYWORD) { // asc or desc
+					if (currToken.val.equals("asc")) {
+						isDesc.add(false);
+						nextToken();
+					} else if (currToken.val.equals("desc")) {
+						isDesc.add(true);
+						nextToken();
+					} else throwErr("sorting type must be asc or desc");
+				} else {
+					isDesc.add(false); // default is asc
+				}
+			} while (currToken.equals(new Token(Type.OPERATOR, ",")));
+
+			int[] orderByColNums;
+			if (groupingBy) {
+				orderByColNums = getColNumsFromExpressions(expressions, orderByColNames);
+			} else {
+				orderByColNums = orderByColNames.stream().mapToInt(schema::getColumnIndex).toArray();
 			}
-			orderBy = new OrderBy(schema.getTableName(), new int[]{schema.getColumnIndex(outputField)}, isDesc);
+			boolean[] isDescArray = new boolean[isDesc.size()];
+			IntStream.range(0, isDesc.size()).forEach(i -> isDescArray[i] = isDesc.get(i));
+			orderBy = new OrderBy(orderByColNums, isDescArray);
 			nextToken();
 		}
+
 		//eof
 		expectNextToken(Token.Type.EOF);
 		//return
-		return new Select(intoFile, srcTableName, expressions,
+		return new
+
+				Select(intoFile, srcTableName, expressions,
 				where, groupBy, orderBy, mode);
+
+	}
+
+	private int[] getColNumsFromExpressions(SelectExpression[] expressions, List<String> orderByColNames) {
+		int[] orderByColNums;
+		orderByColNums = new int[orderByColNames.size()];
+		for (int i = 0; i < orderByColNames.size(); i++) {
+			//find expression with the same name as orderByColNames.get(i)
+			boolean hasFound = false;
+			for (int j = 0; j < expressions.length; j++) {
+				if (orderByColNames.get(i).equals(expressions[j].asName)) {
+					orderByColNums[i] = j;
+					hasFound = true;
+					break;
+				}
+			}
+			if (!hasFound) throwErr("column " + orderByColNames.get(i) + " was not found");
+		}
+		return orderByColNums;
+	}
+
+	private List<String> parseIdentifierList() {
+		List<String> res = new ArrayList<>();
+		do {
+			expectNextToken(Type.IDENTIFIER);
+			res.add(currToken.val);
+			nextToken();
+		} while (currToken.equals(new Token(Type.OPERATOR, ",")));
+		return res;
 	}
 
 	private Command parseCreateAsSelect(String tableName) {
@@ -357,6 +403,58 @@ public class Parser {
 		return new SelectExpression(fieldName, asName, agg);
 	}
 
+	private Where parseHavingCondition(Schema schema, SelectExpression[] expressions) {
+		/*COMMAND _field_name_ _operator_ _constant_
+		 *COMMAND _field_name is [not] null */
+		String operator = "";
+		String constant = null; // in an 'is [not] null' case constant stays null; in any other case it is not.
+		expectThisToken(Token.Type.IDENTIFIER);
+		String fieldName = currToken.val;
+		nextToken();
+		// is [not] null
+		if (currToken.equals(new Token(Token.Type.IDENTIFIER, "is"))) {
+			operator += "is ";
+			nextToken();
+			if (currToken.equals(new Token(Token.Type.IDENTIFIER, "not"))) {
+				operator += "not ";
+				nextToken();
+			}
+			expectThisToken(Type.KEYWORD, "null");
+			operator += "null";
+			constant = null;
+		} else if (currToken.type == Token.Type.OPERATOR) {
+			operator = currToken.val;
+			nextToken();
+			constant = currToken.val;
+		} else throwErr("invalid condition: " + currToken.val);
+		SelectExpression havingExpression = null;
+		int colNum = 0;
+		// find the column num where col.asName = fieldName
+		for (int i = 0; i < expressions.length; i++) {
+			if (expressions[i].asName.equals(fieldName)) {
+				havingExpression = expressions[i];
+				colNum = i;
+			}
+		}
+		if (havingExpression == null) throwErr("having: didnt find the selected column");
+		DBVar.Type type;
+		switch (havingExpression.agg.getClass().getSimpleName()) {
+			case "Min":
+			case "Max":
+				type = schema.getColumnType(havingExpression.fieldName);
+				break;
+			case "Sum":
+			case "Count":
+				type = DBVar.Type.INT;
+				break;
+			case "Avg":
+				type = DBVar.Type.FLOAT;
+				break;
+			default:
+				throw new IllegalStateException("Unexpected value: " + havingExpression.agg.getClass().getSimpleName());
+		}
+		return new Where(type, colNum, operator, constant);
+	}
 	private Where parseCondition(Schema schema) {
 		/*COMMAND _field_name_ _operator_ _constant_
 		 *COMMAND _field_name is [not] null */
@@ -381,6 +479,6 @@ public class Parser {
 			nextToken();
 			constant = currToken.val;
 		} else throwErr("invalid condition: " + currToken.val);
-		return new Where(schema, schema.getColumnIndex(fieldName), operator, constant);
+		return new Where(schema.getColumnType(fieldName), schema.getColumnIndex(fieldName), operator, constant);
 	}
 }

@@ -8,7 +8,7 @@ import schema.dbvars.DBVarchar;
 import java.io.Serializable;
 import java.util.Comparator;
 
-public abstract class DBVar implements Serializable {
+public abstract class DBVar implements Serializable, Comparable<DBVar> {
 	private static final long serialVersionUID = 1L;
 
 	public abstract DBVar getNull();
@@ -26,6 +26,8 @@ public abstract class DBVar implements Serializable {
 
 	@Override
 	public abstract boolean equals(Object obj);
+
+
 
 	public enum Type {
 		INT("int"),

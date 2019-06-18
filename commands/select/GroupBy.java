@@ -38,7 +38,7 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 
 	@Override
 	public Stream<DBVar[]> apply(Stream<DBVar[]> s) {
-		OrderBy order = new OrderBy(tableName, colmnnToGroupBy);// TODO: until orderBy supports multiple columns
+		OrderBy order = new OrderBy(colmnnToGroupBy);
 		originalOrdered = order.apply(s);
 		it = originalOrdered.iterator();
 		DBVar[] row = it.next();
@@ -49,7 +49,6 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 				false
 		);
 	}
-
 
 
 	@Override
@@ -63,19 +62,18 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 		while (it.hasNext()) {
 			DBVar[] row = it.next();
 			DBVar[] thisKey = getKey(row);
-			if (!Arrays.deepEquals(key, thisKey)) { // finished with key
+			if (Arrays.deepEquals(key, thisKey)) { // still aggregating the same key
+				aggregateRow(row);
+			} else { // finished with key
 				for (int i = 0; i < aggs.length; i++) {
 					res[i] = aggs[i].getVal();
 					aggs[i].reset();
 				}
 				aggregateRow(row);
-				if (having != null && !having.testRow(res)) {
-					continue;
-				}
 				key = thisKey; // setting key for next time
-				return res;
-			} else { // still aggregating the same key
-				aggregateRow(row);
+				if (having == null || having.testRow(res)) {
+					return res;
+				}
 			}
 		}
 		// if we got here it means that the table ended

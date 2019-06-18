@@ -60,11 +60,12 @@ public class Select implements Command {
 		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
 		s = where.apply(s);
 		if (groupBy == null) {
+			s = orderBy.apply(s);
 			s =  s.map(reformatColumns(selectedColumns));
 		} else {
 			s = groupBy.apply(s); //TODO
+			s = orderBy.apply(s);
 		}
-		s = orderBy.apply(s);
 		return s;
 	}
 
@@ -136,22 +137,6 @@ public class Select implements Command {
 	private static void printToScreen(Stream<DBVar[]> s) {
 		s = s.limit(200); //no need to clutter the screen
 		s.forEach(System.out::println);
-	}
-
-	private Schema createNewSchema() {
-		if (expressions == null) {
-			expressions = new SelectExpression[srcSchema.getLinesCount()];
-			for (int i = 0; i < expressions.length; i++)
-				expressions[i] = new SelectExpression(srcSchema.getColumnName(i));
-		}
-
-		Column[] columns = new Column[expressions.length];
-		for (int i = 0; i < columns.length; i++) {
-			Column column = srcSchema.getColumn(expressions[i].fieldName);
-			columns[i] = new Column(column.type, expressions[i].asName);
-		}
-		new Create(outputName, false, columns).run();
-		return Schema.GetSchema(outputName);
 	}
 
 

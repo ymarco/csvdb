@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class DBVarchar extends DBVar {
 	private static final long serialVersionUID = 1L;
-	
+
 	String val;
 
 	public DBVarchar(String val) {
@@ -63,5 +63,10 @@ public class DBVarchar extends DBVar {
 	@Override
 	public String toString() {
 		return val;
+	}
+
+	@Override
+	public int compareTo(DBVar dbVar) {
+		return comparator.compare(this, dbVar);
 	}
 }

@@ -15,7 +15,7 @@ import schema.dbvars.DBInt;
 public class Where implements Statement {
 	private final int colNum;
 	private DBVar constant;
-	private Schema schema;
+    private DBVar.Type type;
 
 	public Predicate<DBVar> pred;
 
@@ -23,9 +23,9 @@ public class Where implements Statement {
 		return pred.test(row[colNum]);
 	}
 
-	public Where(Schema schema, int colNum, String operator, String constant_) {
+	public Where(DBVar.Type type, int colNum, String operator, String constant_) {
 		this.colNum = colNum;
-		this.schema = schema;
+        this.type = type;
 		parseConstant(constant_);
 		createPred(operator);
 	}
@@ -68,16 +68,15 @@ public class Where implements Statement {
 	}
 
 	private void parseConstant(String constant_) {
-		DBVar.Type vt = schema.getColumnType(colNum);
 		if (constant_ == null) {
 			this.constant = new DBInt(0);
 			return;
-		} else if (constant_.equals("null") && vt != DBVar.Type.VARCHAR) {
+		} else if (constant_.equals("null") && type != DBVar.Type.VARCHAR) {
 			this.constant = null;
 			return;
 		}
 		try {
-			switch (vt) {
+			switch (type) {
 				case INT:
 					this.constant = new schema.dbvars.DBInt(constant_);
 					break;
