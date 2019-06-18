@@ -16,7 +16,7 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 	private Stream<DBVar[]> originalOrdered;
 	private Aggregator[] aggs;
 	private Iterator<DBVar[]> it;
-	private DBVar[] key;
+	private DBVar[] key = null;
 
 	private DBVar[] getKey(DBVar[] row) {
 		DBVar[] res = new DBVar[colmnnToGroupBy.length];
@@ -53,7 +53,7 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 
 	@Override
 	public boolean hasNext() {
-		return it.hasNext();
+		return it.hasNext() || key != null;
 	}
 
 	@Override
@@ -64,6 +64,7 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 			DBVar[] thisKey = getKey(row);
 			if (Arrays.deepEquals(key, thisKey)) { // still aggregating the same key
 				aggregateRow(row);
+				// key doesnt change so there is no need to update it
 			} else { // finished with key
 				for (int i = 0; i < aggs.length; i++) {
 					res[i] = aggs[i].getVal();
@@ -78,6 +79,7 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 		}
 		// if we got here it means that the table ended
 		// lets return all we have aggregated
+		key = null;
 		for (int i = 0; i < aggs.length; i++) {
 			Aggregator agg = aggs[i];
 			res[i] = agg.getVal();
@@ -86,7 +88,6 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 	}
 
 	private void aggregateRow(DBVar[] row) {
-		System.out.println(Arrays.toString(row));
 		for (int i = 0; i < aggs.length; i++) {
 			Aggregator agg = aggs[i];
 			agg.aggregate(row[i]);

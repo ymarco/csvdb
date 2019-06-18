@@ -111,7 +111,6 @@ public class Load implements Command {
 	}
 
 	static void writeTable(DBVar[][] table, String path) throws IOException {
-		System.out.println(path);
 		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path));
 		out.writeObject(table);
 	}

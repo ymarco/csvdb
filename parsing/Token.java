@@ -27,7 +27,7 @@ public class Token {
 	}
 
 	public static final Set<String> keywords = new HashSet<>(
-			Arrays.asList("and", "as", "asc", "avg", "by", "create", "data", "desc", "drop", "exists", "float", "from",
+			Arrays.asList("and", "as", "asc", "avg", "by", "count", "create", "data", "desc", "drop", "exists", "float", "from",
 					"group", "having", "if", "ignore", "infile", "int", "into", "lines", "load", "max", "min",
 					"not", "null", "or", "order", "outfile", "select", "sum", "table", "timestamp", "varchar", "where"));
 

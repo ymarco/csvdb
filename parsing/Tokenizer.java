@@ -130,7 +130,9 @@ class Tokenizer {
 					is_dotted = true;
 					token_val.append(cur());
 				}
-			} else if (Token.operators.contains("" + cur()) || cur() == ';') { // end of number
+			} else if (Token.operators.contains("" + cur())
+					|| cur() == ';'
+					|| TextUtils.isSpace(cur())) { // end of number
 				return new Token(Token.Type.LIT_NUM, token_val.toString());
 			} else {
 				throw new TokenizingException("Tokenizer: a thing started with a number and than changed into somethng else invalid");

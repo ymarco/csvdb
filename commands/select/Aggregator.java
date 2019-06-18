@@ -65,13 +65,17 @@ public interface Aggregator {
 
 		@Override
 		public void aggregate(DBVar var) {
-			switch (var.getType()) {
+			DBVar.Type type = var.getType();
+			switch (type) {
 				case INT:
 					sum += ((DBInt) var).val;
+					break;
 				case TS:
 					sum += ((DBTS) var).val;
+					break;
 				case FLOAT:
 					sum += ((DBFloat) var).val;
+					break;
 			}
 		}
 

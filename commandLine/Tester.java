@@ -5,9 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Tester {
 	private static void runTest(File testDir) {
@@ -29,7 +27,7 @@ public class Tester {
 
 	private static String parseFile(String filename) throws IOException {
 
-		return readAllFile(filename).replaceAll("\\s+", "");
+		return readAllFile(filename).replaceAll(" ", "").trim();
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -50,20 +48,20 @@ public class Tester {
 		assert outs.size() == goods.size() : "amount of good outputs doesnt match amount of outputs";
 		for (int i = 0; i < outs.size(); i++) {
 			System.out.println("testing " + testDirName);
-			boolean passed = testOutput(testDirName, outs.get(i), goods.get(i));
+			boolean passed = testOutput(outs.get(i), goods.get(i));
 		}
 	}
 
-	private static boolean testOutput(String testDirName, String outname, String goodname) throws IOException {
+	private static boolean testOutput(String outname, String goodname) throws IOException {
 		String out = parseFile(outname);
 		String good = parseFile(goodname);
 		boolean res = out.equals(good);
 		if (res) {
-			System.out.println("passed  " + (new File(outname)).getName() + "," + (new File(goodname)).getName());
+			System.out.println("---passed  " + (new File(outname)).getName() + "," + (new File(goodname)).getName());
 		} else {
-			System.out.println("failed  " + (new File(outname)).getName() + "," + (new File(goodname)).getName());
-			System.out.println("good:\n" + good);
-			System.out.println("out:\n" + out);
+			System.out.println("---failed  " + (new File(outname)).getName() + "," + (new File(goodname)).getName());
+			System.out.println("---good:\n" + good);
+			System.out.println("---out:\n" + out);
 		}
 		return res;
 	}

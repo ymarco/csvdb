@@ -443,16 +443,17 @@ public class Parser {
 			case "Max":
 				type = schema.getColumnType(havingExpression.fieldName);
 				break;
-			case "Sum":
 			case "Count":
 				type = DBVar.Type.INT;
 				break;
+			case "Sum":
 			case "Avg":
 				type = DBVar.Type.FLOAT;
 				break;
 			default:
 				throw new IllegalStateException("Unexpected value: " + havingExpression.agg.getClass().getSimpleName());
 		}
+		nextToken();
 		return new Where(type, colNum, operator, constant);
 	}
 	private Where parseCondition(Schema schema) {
@@ -479,6 +480,7 @@ public class Parser {
 			nextToken();
 			constant = currToken.val;
 		} else throwErr("invalid condition: " + currToken.val);
+		nextToken();
 		return new Where(schema.getColumnType(fieldName), schema.getColumnIndex(fieldName), operator, constant);
 	}
 }
