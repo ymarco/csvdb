@@ -1,0 +1,12 @@
+{
+  "schema": [
+	{
+	  "field": "name",
+	  "type": "varchar"
+	},
+	{
+	  "field": "value",
+	  "type": "int"
+	}
+  ]
+}
