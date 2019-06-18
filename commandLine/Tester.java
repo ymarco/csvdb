@@ -27,7 +27,7 @@ public class Tester {
 
 	private static String parseFile(String filename) throws IOException {
 
-		return readAllFile(filename).replaceAll(" ", "").trim();
+		return readAllFile(filename).replaceAll("\r\n", "\n").replaceAll(" ", "").trim();
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -47,7 +47,7 @@ public class Tester {
 		goods.sort(String::compareTo);
 		assert outs.size() == goods.size() : "amount of good outputs doesnt match amount of outputs";
 		for (int i = 0; i < outs.size(); i++) {
-			System.out.println("testing " + testDirName);
+			System.out.println("--testing " + testDirName);
 			boolean passed = testOutput(outs.get(i), goods.get(i));
 		}
 	}

@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class GroupBy implements Statement, Iterator<DBVar[]>{
+public class GroupBy implements Statement, Iterator<DBVar[]> {
 	private int[] colmnnToGroupBy;
 	private Where having;
 	public Schema schema;
@@ -17,6 +17,7 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 	private Aggregator[] aggs;
 	private Iterator<DBVar[]> it;
 	private DBVar[] key = null;
+	private int[] selectedCols;
 
 	private DBVar[] getKey(DBVar[] row) {
 		DBVar[] res = new DBVar[colmnnToGroupBy.length];
@@ -32,8 +33,10 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 		this.having = having;
 		this.expressions = expressions;
 		this.tableName = tableName;
+		this.schema = Schema.GetSchema(tableName);
 
-		aggs =  Arrays.stream(expressions).map(e -> e.agg).toArray(Aggregator[]::new);
+		aggs = Arrays.stream(expressions).map(e -> e.agg).toArray(Aggregator[]::new);
+		selectedCols = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(schema::getColumnIndex).toArray();
 	}
 
 	@Override
@@ -42,8 +45,8 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 		originalOrdered = order.apply(s);
 		it = originalOrdered.iterator();
 		DBVar[] row = it.next();
-        key = getKey(row);
-        aggregateRow(row);
+		key = getKey(row);
+		aggregateRow(row);
 		return StreamSupport.stream(
 				Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED),
 				false
@@ -90,7 +93,7 @@ public class GroupBy implements Statement, Iterator<DBVar[]>{
 	private void aggregateRow(DBVar[] row) {
 		for (int i = 0; i < aggs.length; i++) {
 			Aggregator agg = aggs[i];
-			agg.aggregate(row[i]);
+			agg.aggregate(row[selectedCols[i]]);
 		}
 	}
 }

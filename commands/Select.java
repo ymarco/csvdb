@@ -60,11 +60,15 @@ public class Select implements Command {
 		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
 		s = where.apply(s);
 		if (groupBy == null) {
-			s = orderBy.apply(s);
+			if (orderBy != Statement.emptyStatement) {
+				s = orderBy.apply(s.parallel());
+			}
 			s =  s.map(reformatColumns(selectedColumns));
 		} else {
-			s = groupBy.apply(s); //TODO
-			s = orderBy.apply(s);
+				s = groupBy.apply(s);
+			if (orderBy != Statement.emptyStatement) {
+				s = orderBy.apply(s);
+			}
 		}
 		return s;
 	}
