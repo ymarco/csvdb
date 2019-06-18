@@ -9,5 +9,5 @@ import os
 
 project_scope = os.path.dirname(os.path.realpath(__file__))
 
-new_argv = ["java", "-cp", project_scope + "/bin", '-ea', "commandLine.Main"] + sys.argv[1:]
+new_argv = ["java", "-cp", os.pathsep.join(project_scope , "bin"), '-ea', "commandLine.Main"] + sys.argv[1:]
 subprocess.run(new_argv)
