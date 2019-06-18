@@ -46,8 +46,12 @@ public class Main {
 				// standard route
 				System.out.println(code);
 				Parser parser = new Parser(code);
+				long start = System.nanoTime();
 				Command cmd = parser.parse();
 				cmd.run();
+				long finish = System.nanoTime();
+				long timeElapsed = finish - start;
+				System.out.println("-time for command: " + timeElapsed/Math.pow(10,9));
 			} catch (Exception e) {
 				System.out.println("ERROR:\n");
 				System.out.println(e.getLocalizedMessage());
@@ -97,21 +101,6 @@ public class Main {
 		if (codeReader == null)
 			codeReader = new Scanner(System.in).useDelimiter(";");
 
-	}
-
-	/**
-	 * @return if continue to run
-	 */
-	private static String readCommand() throws NoSuchElementException {
-		if (useCommandLine) {
-			System.out.print("csvdb>");
-		}
-		StringBuilder code = new StringBuilder();
-		do {
-			code.append(codeReader.next()).append(";");
-			code = new StringBuilder(code.toString().replaceAll("--.*$", ""));
-		} while (!code.toString().endsWith(";"));
-		return code.toString().trim();
 	}
 
 

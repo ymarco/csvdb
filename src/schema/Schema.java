@@ -16,6 +16,11 @@ public class Schema {
 	private String tableName;
 	private String tablePath;
 	private String tableFilePath;
+
+	public Column[] getColumns() {
+		return columns;
+	}
+
 	private Column[] columns;
 	private Hashtable<String, Integer> fieldNameToIndex = new Hashtable<>();
 	private int lineCount = 0;

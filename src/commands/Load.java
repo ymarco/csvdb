@@ -36,8 +36,6 @@ public class Load implements Command {
 	}
 
 	private void loadToSerializedArray(String fileName, String tableName, int ignoreLines) throws IOException {
-		if (!Schema.HaveSchema(tableName))
-			throw new RuntimeException("you tried to load a non existing table");
 		Schema schema = Schema.GetSchema(tableName);
 		List<DBVar[]> tableFromCSV = new ArrayList<>();
 		CsvReader csvReader = new CsvReader();

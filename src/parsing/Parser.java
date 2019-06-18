@@ -205,6 +205,11 @@ public class Parser {
 		expectNextToken(Token.Type.IDENTIFIER);
 		srcTableName = currToken.val;
 		Schema schema = Schema.GetSchema(srcTableName);
+		if (expressions == null) {
+			expressions = Arrays.stream(schema.getColumns())
+					.map(c -> new SelectExpression(c.name))
+					.toArray(SelectExpression[]::new);
+		}
 		//where
 		nextToken();
 		if (currToken.equals(new Token(Token.Type.KEYWORD, "where"))) {
@@ -335,6 +340,8 @@ public class Parser {
 		SelectExpression[] expressions = null;
 		nextToken();
 		if (currToken.equals(new Token(Type.OPERATOR, "*"))) {
+			System.out.println("*****");
+			nextToken();
 			return null;
 		}
 

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -55,7 +56,7 @@ public class Select implements Command {
 	}
 
 	Stream<DBVar[]> getNewTableStream() {
-		Stream<DBVar[]> s = srcSchema.getTableStream();
+		Stream<DBVar[]> s = srcSchema.getTableStream().parallel();
 		// selectedColumns[i] is the index of the source column of column i in the new table
 		int[] selectedColumns = Arrays.stream(expressions).map(e -> e.fieldName).mapToInt(srcSchema::getColumnIndex).toArray();
 		s = where.apply(s);
@@ -64,7 +65,7 @@ public class Select implements Command {
 			s = s.map(reformatColumns(selectedColumns));
 		} else {
 			s = groupBy.apply(s);
-			s = orderBy.apply(s);
+			s = orderBy.apply(s.parallel());
 		}
 		return s;
 	}
@@ -117,15 +118,12 @@ public class Select implements Command {
 			throw new RuntimeException(e);
 		}
 		// export to the csv
-		s.map(Select::rowToString)
-				.forEach(a -> {
-					try {
-						appender.appendLine(a);
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				});
+		Stream<String[]> ss = s.map(Select::rowToString);
+		Iterable<String[]> iterable = streamToIterable(ss);
 		try {
+			for (String[] a : iterable) {
+				appender.appendLine(a);
+			}
 			appender.endLine();
 			appender.close();
 		} catch (IOException e) {
@@ -133,9 +131,16 @@ public class Select implements Command {
 		}
 	}
 
+	private static <T> Iterable<T> streamToIterable(Stream<T> s) {
+		Iterator<T> it = s.iterator();
+		return () -> it;
+	}
+
 	private static void printToScreen(Stream<DBVar[]> s) {
 		s = s.limit(200); //no need to clutter the screen
-		s.forEach(System.out::println);
+		for (DBVar[] va : streamToIterable(s)) {
+			System.out.println(Arrays.deepToString(va));
+		}
 	}
 
 
