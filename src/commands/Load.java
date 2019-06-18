@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 
 public class Load implements Command {
 	private String fileName;
@@ -83,6 +84,7 @@ public class Load implements Command {
 
 		schema.setLineCount(schema.getLinesCount() + CSVLinesCount);
 
+		// concat current table with the one read from the csv
 		Stream<DBVar[]> joined = Stream.concat(schema.getTableStream(), tableFromCSV.stream());
 		DBVar[][] newTable = joined.toArray(DBVar[][]::new);
 		File oldSerialization = new File(schema.getTableFilePath());
@@ -109,7 +111,11 @@ public class Load implements Command {
 	}
 
 	static void writeTable(DBVar[][] table, String path) throws IOException {
-		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(path));
-		out.writeObject(table);
+		try(ObjectOutputStream out =
+				    new ObjectOutputStream(
+				    		new GZIPOutputStream(
+				    				new FileOutputStream(path)))) {
+			out.writeObject(table);
+		}
 	}
 }

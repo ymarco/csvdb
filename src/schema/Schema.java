@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
 public class Schema {
 	private static Hashtable<String, Schema> schemas = new Hashtable<>();
@@ -30,7 +31,7 @@ public class Schema {
 		this.tableName = tableName;
 		this.columns = columns;
 		this.tablePath = String.join(File.separator, Main.rootdir, tableName);
-		this.tableFilePath = String.join(File.separator, tablePath, "data.ser");
+		this.tableFilePath = String.join(File.separator, tablePath, "data.ser.gz");
 		this.table = null;
 
 		for (int i = 0; i < columns.length; i++)
@@ -123,9 +124,10 @@ public class Schema {
 	}
 
 	private void loadTableToMem() {
-		try {
-			@SuppressWarnings("resource")
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream(tableFilePath));
+		try (ObjectInputStream in =
+				     new ObjectInputStream(
+				     		new GZIPInputStream(
+				     				new FileInputStream(tableFilePath)))) {
 			table = (DBVar[][]) in.readObject();
 		} catch (IOException e) {
 			table = new DBVar[0][];
