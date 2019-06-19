@@ -12,9 +12,13 @@ Design
 
 ### Table Organization
 All database variable types are classes extending the abstract class DBVar: 
+
 * DBInt 
+
 * DBFloat
+
 * DBVarchar
+
 * DBInt
 
 these types have a comparator and a toString function for queries.
