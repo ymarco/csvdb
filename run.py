@@ -4,14 +4,12 @@ import subprocess
 import sys
 import os
 
-# this assumes that all of the .class files are in a 'bin' directory
-# relative to this file
+# this assumes that the executable jar file is in out/artifacts/master_jar/master.jar
+# relative to this file's path
 
 project_scope = os.path.dirname(os.path.realpath(__file__))
-classpath = os.path.join(project_scope, "bin")
-heapsize = "-Xmx6g"
+jarpath = os.path.join(project_scope, "out", "artifacts", "master_jar", "master.jar")
+heapsize = "-Xmx8g"
 
-print(project_scope)
-print(classpath)
-new_argv = ["java", "-cp", classpath, '-ea', heapsize, "commandLine.Main"] + sys.argv[1:]
+new_argv = ["java", "-jar", '-ea', heapsize, jarpath, ] + sys.argv[1:]
 subprocess.run(new_argv)

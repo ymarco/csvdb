@@ -15,11 +15,9 @@ public class Main {
 	private static boolean useCommandLine = true;
 	private static Scanner codeReader = null;
 
-	/*
-	 * //this is a comment in a comment
-	 */
 	public static void main(String[] args) {
 		System.out.println(String.join(" ", args));
+		disableWarning();
 		parseArgs(args);
 		LoadData.load();
 		CommandReader.scanner = new CharScanner(codeReader);
@@ -36,10 +34,7 @@ public class Main {
 				}
 
 				// some hacky and quick commands
-				if (code.equals("exit();") || code.equals("exit;"))
-					break;
-				if (code.equals("pred();") || code.equals("pred;")) {
-					test();
+				if (code.equals("exit();") || code.equals("exit;")) {
 					break;
 				}
 
@@ -51,7 +46,7 @@ public class Main {
 				cmd.run();
 				long finish = System.nanoTime();
 				long timeElapsed = finish - start;
-				System.out.println("-time for command: " + timeElapsed/Math.pow(10,9));
+				System.out.println("-time for command: " + timeElapsed / Math.pow(10, 9));
 			} catch (Exception e) {
 				System.out.println("ERROR:\n");
 				System.out.println(e.getLocalizedMessage());
@@ -116,5 +111,10 @@ public class Main {
 
 	private static void test() {
 
+	}
+
+	public static void disableWarning() {
+		System.err.close();
+		System.setErr(System.out);
 	}
 }
