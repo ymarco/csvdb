@@ -9,8 +9,9 @@ import os
 
 project_scope = os.path.dirname(os.path.realpath(__file__))
 classpath = os.path.join(project_scope, "bin")
+heapsize = "-Xmx6g"
 
 print(project_scope)
 print(classpath)
-new_argv = ["java", "-cp", classpath, '-ea', "commandLine.Main"] + sys.argv[1:]
+new_argv = ["java", "-cp", classpath, '-ea', heapsize, "commandLine.Main"] + sys.argv[1:]
 subprocess.run(new_argv)

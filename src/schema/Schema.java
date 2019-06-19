@@ -1,11 +1,11 @@
 package schema;
 
 import commandLine.Main;
+import org.nustaq.serialization.FSTObjectInput;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.stream.Stream;
@@ -124,8 +124,8 @@ public class Schema {
 	}
 
 	private void loadTableToMem() {
-		try (ObjectInputStream in =
-				     new ObjectInputStream(
+		try (FSTObjectInput in =
+				     new FSTObjectInput(
 				     		new GZIPInputStream(
 				     				new FileInputStream(tableFilePath)))) {
 			table = (DBVar[][]) in.readObject();

@@ -3,6 +3,8 @@ package commands;
 import de.siegmar.fastcsv.reader.CsvParser;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.CsvRow;
+import org.nustaq.serialization.FSTObjectInput;
+import org.nustaq.serialization.FSTObjectOutput;
 import schema.DBVar;
 import schema.Schema;
 import schema.dbvars.DBFloat;
@@ -111,8 +113,8 @@ public class Load implements Command {
 	}
 
 	static void writeTable(DBVar[][] table, String path) throws IOException {
-		try(ObjectOutputStream out =
-				    new ObjectOutputStream(
+		try(FSTObjectOutput out =
+				    new FSTObjectOutput(
 				    		new GZIPOutputStream(
 				    				new FileOutputStream(path)))) {
 			out.writeObject(table);
