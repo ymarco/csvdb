@@ -45,11 +45,12 @@ having is just where after a group by.
 Optimization process and benchmarks
 -------
 
-Command from clicks | Built in serialization | Seri through GZIPStream | Fast Seri through GZIPStream
+comparison _from clicks test_ | Built in serialization | Seri through GZIPStream | Fast Seri through GZIPStream
 ---|---|---|---
-load file #1 | 27s | 25s | 18s
-load file #2 | 83s | 55s | 36s
-select  | 66s | 24s | 10.5s
+load file #1  | 27s | 25s | 18s
+load file #2  | 83s | 55s | 36s
+select        | 66s | 24s | 10.5s
+inner table file size     | 322MB | 62MB | 56MB
 
 Using a profiler we know that the (constant) the calculation of the select command takes approximately 2 seconds, 
 and the rest is spent loading the date from disk. Thus we tried to optimize that, and succeeded.
