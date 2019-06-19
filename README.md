@@ -5,7 +5,7 @@ Running
 -----
 The project was written in java.
 
-There is a jar file in out/artifacts/master_jar/master.jar. It requires java version 12.
+There is a jar file in out/artifacts/master_jar/master.jar. It requires **java version 12**.
 
 Design
 ------
@@ -19,16 +19,16 @@ All database variable types are classes extending the abstract class DBVar:
 
 * DBVarchar
 
-* DBInt
+* DBTS
 
 these types have a comparator and a toString function for queries.
 
-A table is a multidimensional DBVar array.
+A table is just a **2D DBVar array**.
 
 ### Inner Table File Format
-Tables are stored with [this](https://github.com/RuedigerMoeller/fast-serialization).
+Tables are stored with [this](https://github.com/RuedigerMoeller/fast-serialization) serialization.
 We originally used [java's built in serialization](https://docs.oracle.com/javase/10/docs/api/java/io/ObjectOutputStream.html) 
-but this one on github is much much faster.
+but the current one we use on github is much much faster. It takes roughly half the time to load tables to RAM with this one.
 
 Serialized table files are compressed with [GZIP](https://docs.oracle.com/javase/7/docs/api/java/util/zip/GZIPOutputStream.html).
 GZIPping the files reduces their size about 12 times, 
