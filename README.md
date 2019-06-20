@@ -49,8 +49,7 @@ Optimization process and benchmarks
 
 
 comparison _from clicks test_ | Built in serialization | Seri through GZIPStream | Fast Seri through GZIPStream
----|---|---|---
-
+----|----|----|----
 load file #1  | 27s | 25s | 18s
 load file #2  | 83s | 55s | 36s
 select        | 66s | 24s | 10.5s
