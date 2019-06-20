@@ -47,8 +47,6 @@ having is just where after a group by.
 Optimization process and benchmarks
 -------
 
-Note: these benchmarck were taken on my 4-core Intel i5 8250U lenovo laptop.
-
 
 comparison _from clicks test_ | Built in serialization | Seri through GZIPStream | Fast Seri through GZIPStream
 ---|---|---|---
@@ -57,6 +55,9 @@ load file #1  | 27s | 25s | 18s
 load file #2  | 83s | 55s | 36s
 select        | 66s | 24s | 10.5s
 inner table file size     | 322MB | 62MB | 56MB
+
+
+Note: these benchmarck were taken on my 4-core Intel i5 8250U lenovo laptop.
 
 
 Using a profiler we discovered that the (constant) calculation of the select command takes approximately 2 seconds, 
