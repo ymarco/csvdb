@@ -49,6 +49,7 @@ Optimization process and benchmarks
 
 Note: these benchmarck were taken on my 4-core Intel i5 8250U lenovo laptop.
 
+
 comparison _from clicks test_ | Built in serialization | Seri through GZIPStream | Fast Seri through GZIPStream
 ---|---|---|---
 
