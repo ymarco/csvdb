@@ -48,12 +48,12 @@ Optimization process and benchmarks
 -------
 
 
-comparison _from clicks test_ | Built in serialization | Seri through GZIPStream | Fast Seri through GZIPStream
-----|----|----|----
-load file #1  | 27s | 25s | 18s
-load file #2  | 83s | 55s | 36s
-select        | 66s | 24s | 10.5s
-inner table file size     | 322MB | 62MB | 56MB
+comparison _from clicks test_ | Built in serialization | Seri through GZIPStream | Fast Seri | Fast Seri through GZIPStream |
+----|----|----|----|---
+load file #1  | 27s | 25s | 14s | 18s
+load file #2  | 83s | 55s | 24s | 36s
+select        | 66s | 24s | 10s |10.5s
+inner table file size     | 322MB | 62MB | 256MB | 56MB
 
 
 Note: these benchmarck were taken on my 4-core Intel i5 8250U lenovo laptop.

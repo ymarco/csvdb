@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class Load implements Command {
@@ -30,16 +31,36 @@ public class Load implements Command {
 		this.ignoreLines = ignoreLines;
 	}
 
+	public static DBVar[][] loadTable(String path) {
+		try (FSTObjectInput in =
+				     new FSTObjectInput(
+						     new GZIPInputStream(
+								     new FileInputStream(path)))) {
+			return  (DBVar[][]) in.readObject();
+		} catch (IOException e) {
+			return new DBVar[0][];
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			throw new RuntimeException("error loading table in path " + path);
+		}
+	}
+
 	public void run() {
 		try {
-			loadToSerializedArray(fileName, tableName, ignoreLines);
+			Schema schema = Schema.GetSchema(tableName);
+			DBVar[][] newTable = loadCSVToTable(schema, ignoreLines);
+			File oldSerialization = new File(schema.getTableFilePath());
+			if (oldSerialization.exists()) {
+				System.out.println("old table " + schema.getTableName() + " exists");
+				oldSerialization.delete();
+			}
+			writeTable(newTable, schema.getTableFilePath());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void loadToSerializedArray(String fileName, String tableName, int ignoreLines) throws IOException {
-		Schema schema = Schema.GetSchema(tableName);
+	private DBVar[][] loadCSVToTable(Schema schema, int ignoreLines) throws IOException {
 		List<DBVar[]> tableFromCSV = new ArrayList<>();
 		CsvReader csvReader = new CsvReader();
 		CsvParser parser = csvReader.parse(new File(fileName), StandardCharsets.UTF_8);
@@ -82,20 +103,14 @@ public class Load implements Command {
 			lineNumber++;
 			tableFromCSV.add(parsedRow);
 		}
+		parser.close();
 		int CSVLinesCount = lineNumber + 1;
 
 		schema.setLineCount(schema.getLinesCount() + CSVLinesCount);
 
 		// concat current table with the one read from the csv
 		Stream<DBVar[]> joined = Stream.concat(schema.getTableStream(), tableFromCSV.stream());
-		DBVar[][] newTable = joined.toArray(DBVar[][]::new);
-		File oldSerialization = new File(schema.getTableFilePath());
-		if (oldSerialization.exists()) {
-			System.out.println("old table " + schema.getTableName() + " exists");
-			oldSerialization.delete();
-		}
-		writeTable(newTable, schema.getTableFilePath());
-		parser.close();
+		return joined.toArray(DBVar[][]::new);
 	}
 
 	private DBVar parsesVar(DBVar.Type type, String curr) throws NumberFormatException {
@@ -115,8 +130,8 @@ public class Load implements Command {
 	static void writeTable(DBVar[][] table, String path) throws IOException {
 		try(FSTObjectOutput out =
 				    new FSTObjectOutput(
-				    		new GZIPOutputStream(
-				    				new FileOutputStream(path)))) {
+						    new GZIPOutputStream(
+								    new FileOutputStream(path)))) {
 			out.writeObject(table);
 		}
 	}

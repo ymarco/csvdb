@@ -1,15 +1,12 @@
 package schema;
 
 import commandLine.Main;
-import org.nustaq.serialization.FSTObjectInput;
+import commands.Load;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
 
 public class Schema {
 	private static Hashtable<String, Schema> schemas = new Hashtable<>();
@@ -123,20 +120,6 @@ public class Schema {
 		return getColumnPath(getColumnIndex(columnName));
 	}
 
-	private void loadTableToMem() {
-		try (FSTObjectInput in =
-				     new FSTObjectInput(
-				     		new GZIPInputStream(
-				     				new FileInputStream(tableFilePath)))) {
-			table = (DBVar[][]) in.readObject();
-		} catch (IOException e) {
-			table = new DBVar[0][];
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			throw new RuntimeException("error loading table in path " + tableFilePath);
-		}
-	}
-
 	private void unloadTableFromMem() {
 		table = null;
 		/*
@@ -147,8 +130,9 @@ public class Schema {
 	}
 
 	private void loadTableToMemIfNotLoaded() {
-		if (table == null)
-			loadTableToMem();
+		if (table == null) {
+			table = Load.loadTable(tableFilePath);
+		}
 	}
 
 	public Stream<DBVar[]> getTableStream() {
