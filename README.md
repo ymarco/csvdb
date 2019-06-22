@@ -1,6 +1,9 @@
-% CSVDB
-% Yoav Marco; Ofek Nariski
-% 19.6.19
+---
+title: CSVDB
+author: Yoav Marco and Ofek Nariski
+date: 19.6.19
+...
+
 
 Running
 -----
