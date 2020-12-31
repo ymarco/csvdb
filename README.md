@@ -3,15 +3,13 @@ CSVDB
 ### Yoav Marco and Ofek Nariski
 
 
-Running
------
+# Running
 The project was written in java.
 
-There is a jar file in out/artifacts/master_jar/master.jar. It requires **java version 12**.
+A jar is supplied at out/artifacts/master_jar/master.jar.
 
 
-Design
-------
+# Design
 
 ### Table Organization
 All database variable types are classes extending the abstract class DBVar: 
@@ -39,16 +37,14 @@ and since we write straight to a GZIP stream the compression doesnt slow things 
 
 ### Queries
 Queries are done with [java8's streams](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html). 
-Where is a [stream filter](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#filter-java.util.function.Predicate), 
-order by is [sorting](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#sorted-java.util.Comparator), 
-and group by is implemented by us by using the [stream iterator](https://docs.oracle.com/javase/8/docs/api/java/util/stream/BaseStream.html#iterator--).
-having is just where after a group by.
+`where` is a [stream filter](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#filter-java.util.function.Predicate), 
+`order by` is [sorting](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#sorted-java.util.Comparator), 
+and `group by` uses the [stream iterator](https://docs.oracle.com/javase/8/docs/api/java/util/stream/BaseStream.html#iterator--).
+`having` is just where after a group by.
 
 
 
-Optimization process and benchmarks
--------
-
+# Optimization process and benchmarks
 
 comparison _from clicks test_ | Built in serialization | Seri through GZIPStream | Fast Seri | Fast Seri through GZIPStream |
 ----|----|----|----|---
@@ -57,10 +53,8 @@ load file #2  | 83s | 55s | 24s | 36s
 select        | 66s | 24s | 10s |10.5s
 inner table file size     | 322MB | 62MB | 256MB | 56MB
 
+(Benchmarks taken on my 4-core Intel i5 8250U lenovo laptop)
 
-Note: these benchmarck were taken on my 4-core Intel i5 8250U lenovo laptop.
-
-
-Using a profiler we discovered that the (constant) calculation of the select command takes approximately 2 seconds, 
-and the rest is spent loading the date from disk. Thus we tried to optimize table loading time, and succeeded.
+With a profiler we discovered that the (constant) calculation of the select command takes only ~2 seconds, 
+and the rest is spent *loading the date from disk*. So we optimized table loading time.
 
